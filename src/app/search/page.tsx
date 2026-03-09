@@ -22,59 +22,103 @@ function youtubeAnimeSearchUrl(query: string): string {
   return `https://www.youtube.com/results?search_query=${q}`;
 }
 
+type SearchResult = AnimeSeries | Movie;
+
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
   const [genre, setGenre] = React.useState<string | null>(null);
-  const [apiResults, setApiResults] = React.useState<
-    (AnimeSeries | Movie)[] | null
-  >(null);
+  const [apiResults, setApiResults] = React.useState<SearchResult[] | null>(
+    null
+  );
   const [searching, setSearching] = React.useState(false);
+  const [searchSource, setSearchSource] = React.useState<'local' | 'jikan'>(
+    'local'
+  );
 
-  // Debounced API search — fires 400 ms after the user stops typing
+  // Debounced search — fires 500 ms after the user stops typing
   React.useEffect(() => {
     if (!query && !genre) {
       setApiResults(null);
+      setSearchSource('local');
       return;
     }
 
     const timer = setTimeout(async () => {
       setSearching(true);
       try {
+        // Try Jikan (real anime search) first when there's a text query
+        if (query) {
+          const jikanRes = await fetch(
+            `/api/jikan/search?q=${encodeURIComponent(query)}`
+          );
+          if (jikanRes.ok) {
+            const body = await jikanRes.json();
+            const jikanItems = (body.data ?? []) as SearchResult[];
+
+            // Also search in-memory mock data
+            const q = query.toLowerCase();
+            const localItems = (allContent as SearchResult[]).filter(
+              (item) =>
+                item.title.toLowerCase().includes(q) ||
+                item.description.toLowerCase().includes(q) ||
+                item.genres.some((g) => g.toLowerCase().includes(q))
+            );
+
+            // Deduplicate: if a local item title matches a Jikan item, keep Jikan
+            const jikanTitles = new Set(
+              jikanItems.map((i) => i.title.toLowerCase())
+            );
+            const uniqueLocal = localItems.filter(
+              (i) => !jikanTitles.has(i.title.toLowerCase())
+            );
+
+            // Apply genre filter if set
+            const combined: SearchResult[] = [...jikanItems, ...uniqueLocal];
+            const filtered = genre
+              ? combined.filter((i) => i.genres.includes(genre))
+              : combined;
+
+            setApiResults(filtered);
+            setSearchSource('jikan');
+            return;
+          }
+        }
+
+        // Fallback to backend search API
         const params = new URLSearchParams();
         if (query) params.set('q', query);
         if (genre) params.set('genre', genre);
         const res = await fetch(`/api/search?${params.toString()}`);
         if (res.ok) {
           const body = await res.json();
-          setApiResults(body.data as (AnimeSeries | Movie)[]);
+          setApiResults(body.data as SearchResult[]);
+          setSearchSource('local');
         } else {
-          // Non-OK response: fall back to in-memory
           setApiResults(null);
+          setSearchSource('local');
         }
       } catch {
-        // Network error or backend down: fall back to in-memory
         setApiResults(null);
+        setSearchSource('local');
       } finally {
         setSearching(false);
       }
-    }, 400);
+    }, 500);
 
     return () => clearTimeout(timer);
   }, [query, genre]);
 
   // In-memory fallback when API is unavailable
-  const inMemoryResults = (allContent as (AnimeSeries | Movie)[]).filter(
-    (item) => {
-      const q = query.toLowerCase();
-      const matchesQuery =
-        !query ||
-        item.title.toLowerCase().includes(q) ||
-        item.description.toLowerCase().includes(q) ||
-        item.genres.some((g) => g.toLowerCase().includes(q));
-      const matchesGenre = !genre || item.genres.includes(genre);
-      return matchesQuery && matchesGenre;
-    }
-  );
+  const inMemoryResults = (allContent as SearchResult[]).filter((item) => {
+    const q = query.toLowerCase();
+    const matchesQuery =
+      !query ||
+      item.title.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q) ||
+      item.genres.some((g) => g.toLowerCase().includes(q));
+    const matchesGenre = !genre || item.genres.includes(genre);
+    return matchesQuery && matchesGenre;
+  });
 
   const results = apiResults ?? inMemoryResults;
   const hasFilters = !!(query || genre);
@@ -93,7 +137,7 @@ export default function SearchPage() {
           Search
         </h1>
         <p className='text-sm text-slate-500'>
-          Search across all officially licensed free anime
+          Search across official free anime + the full MyAnimeList database
         </p>
       </div>
 
@@ -171,9 +215,16 @@ export default function SearchPage() {
         ) : (
           <>
             <div className='mb-4 flex flex-wrap items-center justify-between gap-3'>
-              <p className='text-sm text-slate-500' aria-live='polite'>
-                {results.length} result{results.length !== 1 ? 's' : ''}
-              </p>
+              <div className='flex items-center gap-2'>
+                <p className='text-sm text-slate-500' aria-live='polite'>
+                  {results.length} result{results.length !== 1 ? 's' : ''}
+                </p>
+                {searchSource === 'jikan' && (
+                  <span className='rounded-md bg-violet-900/40 px-2 py-0.5 text-xs font-medium text-violet-300 ring-1 ring-violet-700/50'>
+                    via MyAnimeList
+                  </span>
+                )}
+              </div>
               {query && (
                 <a
                   href={youtubeAnimeSearchUrl(query)}
@@ -200,11 +251,9 @@ export default function SearchPage() {
               Popular picks to get you started
             </p>
             <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
-              {(allContent as (AnimeSeries | Movie)[])
-                .slice(0, 12)
-                .map((item) => (
-                  <MediaCard key={item.id} item={item} />
-                ))}
+              {(allContent as SearchResult[]).slice(0, 12).map((item) => (
+                <MediaCard key={item.id} item={item} />
+              ))}
             </div>
           </div>
         </div>

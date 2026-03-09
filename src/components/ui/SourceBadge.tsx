@@ -12,6 +12,7 @@ const styles: Record<SourceType, string> = {
   retrocrush: 'bg-pink-600/20 text-pink-400 border-pink-600/30',
   crunchyroll: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30',
   consumet: 'bg-sky-600/20 text-sky-400 border-sky-600/30',
+  jikan: 'bg-violet-600/20 text-violet-400 border-violet-600/30',
 };
 
 const icons: Record<SourceType, string> = {
@@ -24,6 +25,7 @@ const icons: Record<SourceType, string> = {
   retrocrush: '🌸',
   crunchyroll: '🍊',
   consumet: '🎞',
+  jikan: '📋',
 };
 
 const names: Record<SourceType, string> = {
@@ -36,6 +38,7 @@ const names: Record<SourceType, string> = {
   retrocrush: 'RetroCrush',
   crunchyroll: 'Crunchyroll',
   consumet: 'Streaming',
+  jikan: 'MyAnimeList',
 };
 
 export default function SourceBadge({
@@ -49,12 +52,12 @@ export default function SourceBadge({
     <span
       className={cn(
         'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        styles[sourceType],
+        styles[sourceType] ?? styles.jikan,
         className
       )}
     >
-      <span aria-hidden='true'>{icons[sourceType]}</span>
-      {names[sourceType]}
+      <span aria-hidden='true'>{icons[sourceType] ?? '📋'}</span>
+      {names[sourceType] ?? sourceType}
     </span>
   );
 }

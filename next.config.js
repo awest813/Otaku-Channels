@@ -8,10 +8,15 @@ const nextConfig = {
 
   images: {
     remotePatterns: [
-      {
-        protocol: 'https',
-        hostname: 'images.unsplash.com',
-      },
+      { protocol: 'https', hostname: 'images.unsplash.com' },
+      // MyAnimeList / Jikan
+      { protocol: 'https', hostname: 'cdn.myanimelist.net' },
+      // AniList
+      { protocol: 'https', hostname: 's4.anilist.co' },
+      // Kitsu
+      { protocol: 'https', hostname: 'media.kitsu.io' },
+      // Waifu.pics
+      { protocol: 'https', hostname: 'i.waifu.pics' },
     ],
   },
 
