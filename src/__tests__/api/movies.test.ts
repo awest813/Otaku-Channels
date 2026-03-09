@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+jest.mock('@/lib/backend');
+
 import { mockMovies } from '@/data/mockData';
 
 import { GET } from '@/app/api/movies/route';

@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { listAllowedDomains, BackendError } from '@/lib/backend';
+
+import { BackendError, listAllowedDomains } from '@/lib/backend';
 
 /**
  * GET /api/providers
@@ -14,6 +15,9 @@ export async function GET() {
     if (err instanceof BackendError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
-    return NextResponse.json({ error: 'Failed to fetch providers' }, { status: 502 });
+    return NextResponse.json(
+      { error: 'Failed to fetch providers' },
+      { status: 502 }
+    );
   }
 }

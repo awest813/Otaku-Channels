@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+jest.mock('@/lib/backend');
+
 import { GET } from '@/app/api/series/[slug]/episodes/route';
 
 function makeRequest(): Request {

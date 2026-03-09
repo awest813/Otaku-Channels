@@ -11,6 +11,7 @@ const styles: Record<SourceType, string> = {
   pluto: 'bg-purple-600/20 text-purple-400 border-purple-600/30',
   retrocrush: 'bg-pink-600/20 text-pink-400 border-pink-600/30',
   crunchyroll: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30',
+  consumet: 'bg-sky-600/20 text-sky-400 border-sky-600/30',
 };
 
 const icons: Record<SourceType, string> = {
@@ -22,6 +23,7 @@ const icons: Record<SourceType, string> = {
   pluto: '📡',
   retrocrush: '🌸',
   crunchyroll: '🍊',
+  consumet: '🎞',
 };
 
 const names: Record<SourceType, string> = {
@@ -33,6 +35,7 @@ const names: Record<SourceType, string> = {
   pluto: 'Pluto TV',
   retrocrush: 'RetroCrush',
   crunchyroll: 'Crunchyroll',
+  consumet: 'Streaming',
 };
 
 export default function SourceBadge({

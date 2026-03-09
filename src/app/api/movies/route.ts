@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { listAnime, BackendError } from '@/lib/backend';
+
+import { BackendError, listAnime } from '@/lib/backend';
 
 /**
  * GET /api/movies
@@ -16,9 +17,13 @@ export async function GET(request: Request) {
       genre: searchParams.get('genre') ?? undefined,
       source: searchParams.get('source') ?? undefined,
       language: searchParams.get('language') ?? undefined,
-      sort: (searchParams.get('sort') as any) ?? undefined,
-      page: searchParams.get('page') ? Number(searchParams.get('page')) : undefined,
-      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined,
+      sort: searchParams.get('sort') ?? undefined,
+      page: searchParams.get('page')
+        ? Number(searchParams.get('page'))
+        : undefined,
+      limit: searchParams.get('limit')
+        ? Number(searchParams.get('limit'))
+        : undefined,
     });
 
     return NextResponse.json(result);
@@ -26,6 +31,9 @@ export async function GET(request: Request) {
     if (err instanceof BackendError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
-    return NextResponse.json({ error: 'Failed to fetch movies' }, { status: 502 });
+    return NextResponse.json(
+      { error: 'Failed to fetch movies' },
+      { status: 502 }
+    );
   }
 }
