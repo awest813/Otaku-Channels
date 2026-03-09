@@ -21,8 +21,9 @@ export interface AnimeQuote {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
 
+  const rawCount = Number(searchParams.get('count') ?? '5');
   const count = Math.min(
-    Math.max(1, Number(searchParams.get('count') ?? 5)),
+    Math.max(1, Number.isNaN(rawCount) ? 5 : rawCount),
     10
   );
   const anime = searchParams.get('anime');
