@@ -129,3 +129,30 @@ export function getChannelNowPlaying(slug: string) {
 export function listAllowedDomains() {
   return apiFetch<{ data: unknown[]; total: number }>('/sources/domains');
 }
+
+// ─── Streaming (Consumet) ─────────────────────────────────────────────────────
+
+export type ConsumetProvider = 'gogoanime' | 'zoro' | 'animepahe';
+
+export function listStreamingProviders() {
+  return apiFetch<{ data: ConsumetProvider[] }>('/streaming/providers');
+}
+
+export function searchStreaming(params: { q: string; provider?: ConsumetProvider; page?: number }) {
+  const qs = new URLSearchParams({ q: params.q });
+  if (params.provider) qs.set('provider', params.provider);
+  if (params.page) qs.set('page', String(params.page));
+  return apiFetch<{ data: unknown }>(`/streaming/search?${qs.toString()}`);
+}
+
+export function getStreamingInfo(animeId: string, provider?: ConsumetProvider) {
+  const qs = new URLSearchParams({ id: animeId });
+  if (provider) qs.set('provider', provider);
+  return apiFetch<{ data: unknown }>(`/streaming/info?${qs.toString()}`);
+}
+
+export function getStreamingSources(episodeId: string, provider?: ConsumetProvider) {
+  const qs = new URLSearchParams({ episodeId });
+  if (provider) qs.set('provider', provider);
+  return apiFetch<{ data: unknown }>(`/streaming/sources?${qs.toString()}`);
+}

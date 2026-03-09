@@ -8,7 +8,8 @@ export type SourceType =
   | 'tubi'
   | 'pluto'
   | 'retrocrush'
-  | 'crunchyroll';
+  | 'crunchyroll'
+  | 'consumet';
 
 export interface Genre {
   id: string;
