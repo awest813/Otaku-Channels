@@ -1,13 +1,26 @@
 import { Radio } from 'lucide-react';
 import type { Metadata } from 'next';
 
+import { listChannels } from '@/lib/backend';
+
 import { mockLiveChannels } from '@/data/mockData';
 
 import LiveChannelCard from '@/components/media/LiveChannelCard';
 
+import type { LiveChannel } from '@/types';
+
 export const metadata: Metadata = { title: 'Live Channels' };
 
-export default function LivePage() {
+export default async function LivePage() {
+  let channels: LiveChannel[] = mockLiveChannels;
+
+  try {
+    const result = await listChannels();
+    if (result.data.length > 0) channels = result.data as LiveChannel[];
+  } catch {
+    // Backend unavailable — mock data used as fallback
+  }
+
   return (
     <div className='mx-auto max-w-screen-xl px-4 py-8'>
       <div className='mb-6 flex items-center gap-3'>
@@ -26,7 +39,7 @@ export default function LivePage() {
       </p>
 
       <div className='grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'>
-        {mockLiveChannels.map((ch) => (
+        {channels.map((ch) => (
           <LiveChannelCard key={ch.id} channel={ch} />
         ))}
       </div>
@@ -41,7 +54,7 @@ export default function LivePage() {
             <div className='px-3 py-2'>UP NEXT</div>
             <div className='px-3 py-2 text-right'>SOURCE</div>
           </div>
-          {mockLiveChannels.map((ch) => (
+          {channels.map((ch) => (
             <div
               key={ch.id}
               className='grid grid-cols-[80px_1fr_1fr_1fr] border-b border-slate-800/50 text-sm transition-colors last:border-0 hover:bg-slate-800/30'
