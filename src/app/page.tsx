@@ -15,7 +15,11 @@ export default function HomePage() {
   const hero = mockSeries[0];
   const trending = mockSeries.filter((s) => s.tags.includes('Trending'));
   const youtube = mockSeries.filter((s) => s.sourceType === 'youtube');
-  const retro = mockSeries.filter((s) => s.sourceType === 'retro');
+  const retro = mockSeries.filter(
+    (s) => s.sourceType === 'retro' || s.sourceType === 'retrocrush'
+  );
+  const tubi = mockSeries.filter((s) => s.sourceType === 'tubi');
+  const crunchyroll = mockSeries.filter((s) => s.sourceType === 'crunchyroll');
   const dubbed = mockSeries.filter(
     (s) => s.language === 'dub' || s.language === 'both'
   );
@@ -35,11 +39,27 @@ export default function HomePage() {
           items={youtube}
           seeAllHref='/browse?source=youtube'
         />
-        <MediaRail
-          title='Retro Anime'
-          items={retro}
-          seeAllHref='/browse?source=retro'
-        />
+        {tubi.length > 0 && (
+          <MediaRail
+            title='Free on Tubi'
+            items={tubi}
+            seeAllHref='/browse?source=tubi'
+          />
+        )}
+        {crunchyroll.length > 0 && (
+          <MediaRail
+            title='Free on Crunchyroll'
+            items={crunchyroll}
+            seeAllHref='/browse?source=crunchyroll'
+          />
+        )}
+        {retro.length > 0 && (
+          <MediaRail
+            title='Retro & RetroCrush Anime'
+            items={retro}
+            seeAllHref='/browse'
+          />
+        )}
         <MediaRail
           title='Dubbed Picks'
           items={dubbed.slice(0, 6)}

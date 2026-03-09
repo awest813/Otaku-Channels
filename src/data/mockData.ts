@@ -1,4 +1,56 @@
-import type { AnimeSeries, Episode, LiveChannel, Movie } from '@/types';
+import type {
+  AnimeSeries,
+  Episode,
+  LiveChannel,
+  Movie,
+  SourceProvider,
+} from '@/types';
+
+/** All legal free anime streaming sources supported by the app. */
+export const sourceProviders: SourceProvider[] = [
+  {
+    id: 'youtube',
+    name: 'YouTube Official',
+    type: 'youtube',
+    baseUrl: 'https://www.youtube.com',
+  },
+  {
+    id: 'tubi',
+    name: 'Tubi',
+    type: 'tubi',
+    baseUrl: 'https://tubitv.com/category/anime',
+  },
+  {
+    id: 'pluto',
+    name: 'Pluto TV',
+    type: 'pluto',
+    baseUrl: 'https://pluto.tv/live-tv/pluto-tv-anime',
+  },
+  {
+    id: 'retrocrush',
+    name: 'RetroCrush',
+    type: 'retrocrush',
+    baseUrl: 'https://www.retrocrush.tv',
+  },
+  {
+    id: 'crunchyroll',
+    name: 'Crunchyroll',
+    type: 'crunchyroll',
+    baseUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+  },
+  {
+    id: 'retro',
+    name: 'Retro Channel',
+    type: 'retro',
+    baseUrl: 'https://example.com/retro',
+  },
+  {
+    id: 'freestream',
+    name: 'FreeStream Anime',
+    type: 'freestream',
+    baseUrl: 'https://example.com/freestream',
+  },
+];
 
 export const mockSeries: AnimeSeries[] = [
   {
@@ -316,6 +368,178 @@ export const mockSeries: AnimeSeries[] = [
     episodeCount: 24,
     tags: ['Mystery', 'Supernatural'],
   },
+  // ── Tubi ──────────────────────────────────────────────────────────────
+  {
+    id: 's16',
+    slug: 'wolf-warrior',
+    title: 'Wolf Warrior',
+    description:
+      'A lone wolf-human hybrid hunts supernatural threats lurking in a sprawling feudal city.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Supernatural', 'Adventure'],
+    language: 'dub',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    releaseYear: 2018,
+    episodeCount: 26,
+    tags: ['Trending', 'Dubbed', 'Action'],
+  },
+  {
+    id: 's17',
+    slug: 'harbor-mages',
+    title: 'Harbor Mages',
+    description:
+      'Young mages defending a coastal city discover their magic is tied to ancient sea gods.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Fantasy', 'Magic', 'Adventure'],
+    language: 'sub',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    releaseYear: 2020,
+    episodeCount: 13,
+    tags: ['Fantasy', 'Magic'],
+  },
+  // ── Pluto TV ───────────────────────────────────────────────────────────
+  {
+    id: 's18',
+    slug: 'crimson-battalion',
+    title: 'Crimson Battalion',
+    description:
+      'A squadron of misfit soldiers discovers a government cover-up while fighting on the front lines.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Military', 'Drama'],
+    language: 'dub',
+    sourceName: 'Pluto TV',
+    sourceType: 'pluto',
+    isEmbeddable: false,
+    watchUrl: 'https://pluto.tv/live-tv/pluto-tv-anime',
+    releaseYear: 2016,
+    episodeCount: 24,
+    tags: ['Dubbed', 'Action', 'Trending'],
+  },
+  {
+    id: 's19',
+    slug: 'sky-pirates',
+    title: 'Sky Pirates',
+    description:
+      'A ragtag crew of airship pirates seeks a legendary treasure hidden above the clouds.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1464618663641-bbdd760ae84a?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1464618663641-bbdd760ae84a?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Adventure', 'Comedy', 'Fantasy'],
+    language: 'both',
+    sourceName: 'Pluto TV',
+    sourceType: 'pluto',
+    isEmbeddable: false,
+    watchUrl: 'https://pluto.tv/live-tv/pluto-tv-anime',
+    releaseYear: 2014,
+    episodeCount: 52,
+    tags: ['Comedy', 'Adventure'],
+  },
+  // ── RetroCrush ─────────────────────────────────────────────────────────
+  {
+    id: 's20',
+    slug: 'star-blazer-x',
+    title: 'Star Blazer X',
+    description:
+      'The heroic crew of a converted battleship races across the galaxy to save a dying Earth.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1451187580459-43490279c0fa?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Sci-Fi', 'Action', 'Drama'],
+    language: 'dub',
+    sourceName: 'RetroCrush',
+    sourceType: 'retrocrush',
+    isEmbeddable: false,
+    watchUrl: 'https://www.retrocrush.tv',
+    releaseYear: 1975,
+    episodeCount: 26,
+    tags: ['Retro', 'Classic', 'Dubbed'],
+  },
+  {
+    id: 's21',
+    slug: 'ninja-scrolls',
+    title: 'Ninja Scrolls',
+    description:
+      'A wandering ninja for hire unravels a deadly conspiracy deep in feudal Japan.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Samurai', 'Historical'],
+    language: 'sub',
+    sourceName: 'RetroCrush',
+    sourceType: 'retrocrush',
+    isEmbeddable: false,
+    watchUrl: 'https://www.retrocrush.tv',
+    releaseYear: 1993,
+    episodeCount: 13,
+    tags: ['Retro', 'Samurai', 'Classic'],
+  },
+  // ── Crunchyroll (free tier) ────────────────────────────────────────────
+  {
+    id: 's22',
+    slug: 'dragon-path',
+    title: 'Dragon Path',
+    description:
+      'A boy with the blood of a fire dragon trains to become the strongest martial artist in the land.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1559181567-c3190ca9d5d4?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1559181567-c3190ca9d5d4?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Martial Arts', 'Adventure'],
+    language: 'sub',
+    sourceName: 'Crunchyroll',
+    sourceType: 'crunchyroll',
+    isEmbeddable: false,
+    watchUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+    releaseYear: 2023,
+    episodeCount: 24,
+    tags: ['Trending', 'Action'],
+  },
+  {
+    id: 's23',
+    slug: 'alchemy-academy',
+    title: 'Alchemy Academy',
+    description:
+      'Rival alchemists compete and cooperate at a prestigious school where every experiment can change the world.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1532187863486-abf9dbad1b69?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Fantasy', 'School', 'Comedy'],
+    language: 'sub',
+    sourceName: 'Crunchyroll',
+    sourceType: 'crunchyroll',
+    isEmbeddable: false,
+    watchUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+    releaseYear: 2022,
+    episodeCount: 12,
+    tags: ['School', 'Comedy'],
+  },
 ];
 
 export const mockMovies: Movie[] = [
@@ -378,6 +602,66 @@ export const mockMovies: Movie[] = [
     watchUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
     releaseYear: 2020,
     tags: ['Movie', 'Drama', 'Family'],
+  },
+  {
+    id: 'm4',
+    slug: 'shadow-temple',
+    title: 'Shadow Temple',
+    description:
+      'A priest and his unlikely allies raid a cursed temple to retrieve a stolen artifact before it dooms the kingdom.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1509822929063-6b6cfc9b42f2?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1509822929063-6b6cfc9b42f2?w=1200&h=600&fit=crop',
+    type: 'movie',
+    genres: ['Action', 'Fantasy', 'Adventure'],
+    language: 'dub',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    releaseYear: 2021,
+    tags: ['Movie', 'Action', 'Dubbed'],
+  },
+  {
+    id: 'm5',
+    slug: 'celestial-voyage',
+    title: 'Celestial Voyage',
+    description:
+      'An astronomer and a spirit guide travel through the cosmos to mend a rift in the stars.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=1200&h=600&fit=crop',
+    type: 'movie',
+    genres: ['Sci-Fi', 'Fantasy', 'Drama'],
+    language: 'sub',
+    sourceName: 'RetroCrush',
+    sourceType: 'retrocrush',
+    isEmbeddable: false,
+    watchUrl: 'https://www.retrocrush.tv',
+    releaseYear: 1988,
+    tags: ['Movie', 'Retro', 'Classic'],
+  },
+  {
+    id: 'm6',
+    slug: 'battle-arena-zero',
+    title: 'Battle Arena Zero',
+    description:
+      'Champions from across the world converge in an underground arena to prove who is truly the strongest.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1547347298-4074fc3086f0?w=1200&h=600&fit=crop',
+    type: 'movie',
+    genres: ['Action', 'Martial Arts', 'Sports'],
+    language: 'dub',
+    sourceName: 'Crunchyroll',
+    sourceType: 'crunchyroll',
+    isEmbeddable: false,
+    watchUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+    releaseYear: 2022,
+    tags: ['Movie', 'Action', 'Dubbed'],
   },
 ];
 
@@ -449,6 +733,57 @@ export const mockLiveChannels: LiveChannel[] = [
     tags: ['YouTube', 'Official', 'Live'],
     nowPlaying: 'Sakura Storm – Ep 1',
     nextUp: 'Cafe Tengu – Ep 3',
+  },
+  {
+    id: 'l5',
+    slug: 'tubi-anime',
+    name: 'Tubi Anime',
+    description:
+      'Free, ad-supported anime from the Tubi catalog — no subscription required.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1474511320723-9a56873867b5?w=400&h=225&fit=crop',
+    channelNumber: '105',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    tags: ['Tubi', 'Free', 'Live'],
+    nowPlaying: 'Wolf Warrior – Ep 4',
+    nextUp: 'Harbor Mages – Ep 2',
+  },
+  {
+    id: 'l6',
+    slug: 'pluto-anime',
+    name: 'Pluto TV Anime',
+    description:
+      '24/7 free anime streaming on Pluto TV — watch anytime with no sign-up.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?w=400&h=225&fit=crop',
+    channelNumber: '106',
+    sourceName: 'Pluto TV',
+    sourceType: 'pluto',
+    isEmbeddable: false,
+    watchUrl: 'https://pluto.tv/live-tv/pluto-tv-anime',
+    tags: ['Pluto', 'Free', 'Live'],
+    nowPlaying: 'Crimson Battalion – Ep 9',
+    nextUp: 'Sky Pirates – Ep 12',
+  },
+  {
+    id: 'l7',
+    slug: 'retrocrush-classics',
+    name: 'RetroCrush Classics',
+    description:
+      'Classic retro anime from the RetroCrush vault — free and officially licensed.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1545569341-9eb8b30979d9?w=400&h=225&fit=crop',
+    channelNumber: '107',
+    sourceName: 'RetroCrush',
+    sourceType: 'retrocrush',
+    isEmbeddable: false,
+    watchUrl: 'https://www.retrocrush.tv',
+    tags: ['RetroCrush', 'Retro', 'Classic', 'Live'],
+    nowPlaying: 'Ninja Scrolls – Ep 5',
+    nextUp: 'Star Blazer X – Ep 3',
   },
 ];
 
