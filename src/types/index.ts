@@ -9,7 +9,8 @@ export type SourceType =
   | 'pluto'
   | 'retrocrush'
   | 'crunchyroll'
-  | 'consumet';
+  | 'consumet'
+  | 'jikan';
 
 export interface Genre {
   id: string;
@@ -41,6 +42,12 @@ export interface AnimeSeries {
   releaseYear: number;
   episodeCount: number;
   tags: string[];
+  /** Optional trailer embed URL (YouTube) from Jikan / external sources */
+  trailerEmbedUrl?: string;
+  /** Optional streaming service links */
+  streamingLinks?: Array<{ name: string; url: string }>;
+  /** MAL ID for Jikan-sourced content */
+  malId?: number;
 }
 
 export interface Movie {
@@ -59,6 +66,12 @@ export interface Movie {
   watchUrl: string;
   releaseYear: number;
   tags: string[];
+  /** Optional trailer embed URL (YouTube) from Jikan / external sources */
+  trailerEmbedUrl?: string;
+  /** Optional streaming service links */
+  streamingLinks?: Array<{ name: string; url: string }>;
+  /** MAL ID for Jikan-sourced content */
+  malId?: number;
 }
 
 export interface Episode {
@@ -92,3 +105,50 @@ export interface LiveChannel {
 }
 
 export type ContentCardItem = AnimeSeries | Movie | LiveChannel;
+
+/** Raw Jikan v4 anime object returned by the API */
+export interface JikanAnime {
+  mal_id: number;
+  url: string;
+  images: {
+    jpg: {
+      image_url: string;
+      small_image_url: string;
+      large_image_url: string;
+    };
+    webp?: {
+      image_url: string;
+      small_image_url: string;
+      large_image_url: string;
+    };
+  };
+  trailer: {
+    youtube_id: string | null;
+    url: string | null;
+    embed_url: string | null;
+  };
+  title: string;
+  title_english: string | null;
+  title_japanese: string | null;
+  type: 'TV' | 'Movie' | 'OVA' | 'ONA' | 'Special' | 'Music' | null;
+  episodes: number | null;
+  status: string;
+  airing: boolean;
+  synopsis: string | null;
+  year: number | null;
+  season: string | null;
+  genres: Array<{ mal_id: number; type: string; name: string; url: string }>;
+  themes: Array<{ mal_id: number; type: string; name: string; url: string }>;
+  demographics: Array<{
+    mal_id: number;
+    type: string;
+    name: string;
+    url: string;
+  }>;
+  streaming: Array<{ name: string; url: string }>;
+  external: Array<{ name: string; url: string }>;
+  score: number | null;
+  rank: number | null;
+  popularity: number | null;
+  members: number | null;
+}
