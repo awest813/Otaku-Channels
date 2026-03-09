@@ -1,5 +1,7 @@
 import * as React from 'react';
 
+import BackToTop from '@/components/ui/BackToTop';
+
 import Footer from './Footer';
 import TopNav from './TopNav';
 
@@ -9,6 +11,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <TopNav />
       <main className='flex-1'>{children}</main>
       <Footer />
+      <BackToTop />
     </div>
   );
 }

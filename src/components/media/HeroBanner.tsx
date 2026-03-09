@@ -38,7 +38,11 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
             </p>
             <div className='flex flex-wrap gap-2'>
               {series.genres.map((g) => (
-                <GenrePill key={g} genre={g} />
+                <GenrePill
+                  key={g}
+                  genre={g}
+                  href={`/browse?genre=${encodeURIComponent(g)}`}
+                />
               ))}
             </div>
             <div className='flex flex-wrap gap-3 pt-2'>

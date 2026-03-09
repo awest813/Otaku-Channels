@@ -1,4 +1,11 @@
-import { Calendar, ExternalLink, Languages, Play, Tv2 } from 'lucide-react';
+import {
+  ArrowLeft,
+  Calendar,
+  ExternalLink,
+  Languages,
+  Play,
+  Tv2,
+} from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -51,6 +58,15 @@ export default async function SeriesPage({ params }: Props) {
       </div>
 
       <div className='mx-auto max-w-screen-xl px-4 py-8'>
+        {/* Back navigation */}
+        <Link
+          href='/browse'
+          className='mb-6 inline-flex items-center gap-1.5 text-sm text-slate-400 transition-colors hover:text-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+        >
+          <ArrowLeft className='h-4 w-4' />
+          Back to Browse
+        </Link>
+
         {/* Main info */}
         <div className='flex flex-col gap-6 md:flex-row md:items-start'>
           <div className='flex-1 space-y-4'>
@@ -80,7 +96,11 @@ export default async function SeriesPage({ params }: Props) {
 
             <div className='flex flex-wrap gap-2'>
               {series.genres.map((g) => (
-                <GenrePill key={g} genre={g} />
+                <GenrePill
+                  key={g}
+                  genre={g}
+                  href={`/browse?genre=${encodeURIComponent(g)}`}
+                />
               ))}
             </div>
 

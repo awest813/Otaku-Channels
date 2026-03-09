@@ -31,8 +31,11 @@ function BrowseContent() {
   const langParam = searchParams.get('language');
   const initialLang =
     langParam && languages.includes(langParam) ? langParam : 'All';
+  const genreParam = searchParams.get('genre');
+  const initialGenre =
+    genreParam && allGenres.includes(genreParam) ? genreParam : null;
 
-  const [genre, setGenre] = React.useState<string | null>(null);
+  const [genre, setGenre] = React.useState<string | null>(initialGenre);
   const [source, setSource] = React.useState(initialSource);
   const [lang, setLang] = React.useState(initialLang);
 
@@ -108,11 +111,20 @@ function BrowseContent() {
       {filtered.length === 0 ? (
         <EmptyState message='No anime matches these filters.' />
       ) : (
-        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
-          {filtered.map((item) => (
-            <MediaCard key={item.id} item={item} />
-          ))}
-        </div>
+        <>
+          <p
+            className='mb-3 text-sm text-slate-400'
+            aria-live='polite'
+            aria-atomic='true'
+          >
+            Showing {filtered.length} title{filtered.length !== 1 ? 's' : ''}
+          </p>
+          <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+            {filtered.map((item) => (
+              <MediaCard key={item.id} item={item} />
+            ))}
+          </div>
+        </>
       )}
     </div>
   );
