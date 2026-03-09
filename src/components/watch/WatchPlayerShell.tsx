@@ -1,4 +1,22 @@
-import { ExternalLink, Play } from 'lucide-react';
+import { ExternalLink } from 'lucide-react';
+
+/** Extract a YouTube embed URL from a watch URL, or return null. */
+function getYouTubeEmbedUrl(watchUrl: string): string | null {
+  try {
+    const url = new URL(watchUrl);
+    if (url.hostname === 'www.youtube.com' || url.hostname === 'youtube.com') {
+      const videoId = url.searchParams.get('v');
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+    if (url.hostname === 'youtu.be') {
+      const videoId = url.pathname.slice(1);
+      if (videoId) return `https://www.youtube.com/embed/${videoId}`;
+    }
+  } catch {
+    // invalid URL — fall through
+  }
+  return null;
+}
 
 interface Props {
   isEmbeddable: boolean;
@@ -11,15 +29,21 @@ export default function WatchPlayerShell({
   watchUrl,
   sourceName,
 }: Props) {
+  const embedUrl = isEmbeddable ? getYouTubeEmbedUrl(watchUrl) : null;
+
   return (
     <div className='overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-800'>
       <div className='relative aspect-video w-full bg-slate-950'>
-        {isEmbeddable ? (
+        {embedUrl ? (
+          <iframe
+            src={embedUrl}
+            title={`Watch on ${sourceName}`}
+            allow='accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share'
+            allowFullScreen
+            className='absolute inset-0 h-full w-full border-0'
+          />
+        ) : isEmbeddable ? (
           <div className='absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-400'>
-            <div className='flex h-16 w-16 items-center justify-center rounded-full bg-slate-800 ring-1 ring-slate-700'>
-              <Play className='h-7 w-7 text-cyan-400' />
-            </div>
-            <p className='text-sm'>Embedded player placeholder</p>
             <a
               href={watchUrl}
               target='_blank'

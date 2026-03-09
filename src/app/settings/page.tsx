@@ -50,8 +50,8 @@ export default function SettingsPage() {
         <h1 className='text-2xl font-bold text-white md:text-3xl'>Settings</h1>
       </div>
       <p className='mb-8 text-slate-400'>
-        Phase 1 — settings are informational only. Full preferences coming in
-        Phase 2.
+        Preferences shown below reflect current defaults. Interactive controls
+        are coming in a future update.
       </p>
 
       <div className='space-y-4'>
