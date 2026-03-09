@@ -540,6 +540,70 @@ export const mockSeries: AnimeSeries[] = [
     episodeCount: 12,
     tags: ['School', 'Comedy'],
   },
+  // ── Additional series for 40+ entry milestone ─────────────────────────
+  {
+    id: 's24',
+    slug: 'iron-tide',
+    title: 'Iron Tide',
+    description:
+      'A submarine crew of rogue soldiers fights a shadow navy threatening global shipping lanes from the deep.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Military', 'Thriller'],
+    language: 'dub',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    releaseYear: 2019,
+    episodeCount: 26,
+    tags: ['Dubbed', 'Action', 'Military'],
+  },
+  {
+    id: 's25',
+    slug: 'spirit-compass',
+    title: 'Spirit Compass',
+    description:
+      'A wandering shrine maiden follows an enchanted compass that leads her to troubled spirits needing peace.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Supernatural', 'Drama', 'Slice of Life'],
+    language: 'sub',
+    sourceName: 'YouTube Official',
+    sourceType: 'youtube',
+    isEmbeddable: true,
+    watchUrl: 'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+    releaseYear: 2021,
+    episodeCount: 13,
+    tags: ['Supernatural', 'Peaceful'],
+  },
+  {
+    id: 's26',
+    slug: 'hex-league',
+    title: 'Hex League',
+    description:
+      'Teenage spellcasters compete in a worldwide esports tournament where magical abilities meet digital arenas.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1511512578047-dfb367046420?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Fantasy', 'Sports', 'School'],
+    language: 'sub',
+    sourceName: 'Crunchyroll',
+    sourceType: 'crunchyroll',
+    isEmbeddable: false,
+    watchUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+    releaseYear: 2024,
+    episodeCount: 13,
+    tags: ['Trending', 'Fantasy', 'Sports'],
+  },
 ];
 
 export const mockMovies: Movie[] = [
@@ -663,6 +727,46 @@ export const mockMovies: Movie[] = [
     releaseYear: 2022,
     tags: ['Movie', 'Action', 'Dubbed'],
   },
+  {
+    id: 'm7',
+    slug: 'frozen-horizon',
+    title: 'Frozen Horizon',
+    description:
+      'A lone explorer ventures into an ice-locked continent to uncover a civilization preserved beneath the glacier.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1517299321609-52687d1bc55a?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1517299321609-52687d1bc55a?w=1200&h=600&fit=crop',
+    type: 'movie',
+    genres: ['Adventure', 'Mystery', 'Drama'],
+    language: 'sub',
+    sourceName: 'Pluto TV',
+    sourceType: 'pluto',
+    isEmbeddable: false,
+    watchUrl: 'https://pluto.tv/live-tv/pluto-tv-anime',
+    releaseYear: 2020,
+    tags: ['Movie', 'Adventure', 'Mystery'],
+  },
+  {
+    id: 'm8',
+    slug: 'echo-of-the-void',
+    title: 'Echo of the Void',
+    description:
+      'When a space station intercepts a signal from a dead star, its crew must decide whether to answer before reality unravels.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1446776877081-d282a0f896e2?w=1200&h=600&fit=crop',
+    type: 'movie',
+    genres: ['Sci-Fi', 'Horror', 'Thriller'],
+    language: 'dub',
+    sourceName: 'Tubi',
+    sourceType: 'tubi',
+    isEmbeddable: false,
+    watchUrl: 'https://tubitv.com/category/anime',
+    releaseYear: 2021,
+    tags: ['Movie', 'Sci-Fi', 'Dubbed'],
+  },
 ];
 
 export const mockLiveChannels: LiveChannel[] = [
@@ -784,6 +888,23 @@ export const mockLiveChannels: LiveChannel[] = [
     tags: ['RetroCrush', 'Retro', 'Classic', 'Live'],
     nowPlaying: 'Ninja Scrolls – Ep 5',
     nextUp: 'Star Blazer X – Ep 3',
+  },
+  {
+    id: 'l8',
+    slug: 'crunchyroll-simulcast',
+    name: 'Crunchyroll Simulcast',
+    description:
+      'Latest simulcast episodes from Crunchyroll — new episodes drop within hours of Japan broadcast.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1559181567-c3190ca9d5d4?w=400&h=225&fit=crop',
+    channelNumber: '108',
+    sourceName: 'Crunchyroll',
+    sourceType: 'crunchyroll',
+    isEmbeddable: false,
+    watchUrl: 'https://www.crunchyroll.com/videos/anime/popular',
+    tags: ['Crunchyroll', 'Simulcast', 'New', 'Live'],
+    nowPlaying: 'Dragon Path – Ep 18',
+    nextUp: 'Hex League – Ep 7',
   },
 ];
 
