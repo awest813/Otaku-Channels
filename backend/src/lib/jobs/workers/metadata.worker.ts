@@ -18,13 +18,14 @@ import { logger } from '../../logger';
 import { cacheDelPattern } from '../../redis';
 import * as Jikan from '../../jikan/client';
 import * as AniList from '../../anilist/client';
+import * as Kitsu from '../../kitsu/client';
 
 const connection = { url: config.REDIS_URL };
 
 // How old metadata has to be before we re-sync (24 hours)
 const STALE_THRESHOLD_MS = 24 * 60 * 60 * 1000;
 
-interface MetadataJobData {
+export interface MetadataJobData {
   animeId?: string;
   malId?: number;
 }
@@ -33,7 +34,13 @@ interface MetadataJobData {
 async function syncTitle(animeId: string): Promise<void> {
   const anime = await db.animeTitle.findUnique({
     where: { id: animeId },
-    select: { id: true, malId: true, anilistId: true, title: true, updatedAt: true },
+    select: {
+      id: true,
+      malId: true,
+      anilistId: true,
+      title: true,
+      updatedAt: true,
+    },
   });
 
   if (!anime) {
@@ -64,11 +71,13 @@ async function syncTitle(animeId: string): Promise<void> {
     updates.type = Jikan.mapJikanType(jikanData.type) as any;
     updates.status = Jikan.mapJikanStatus(jikanData.status) as any;
     updates.episodeCount = jikanData.episodes ?? undefined;
-    updates.episodeDuration = Jikan.parseDurationMinutes(jikanData.duration) ?? undefined;
+    updates.episodeDuration =
+      Jikan.parseDurationMinutes(jikanData.duration) ?? undefined;
     updates.rating = jikanData.score ?? undefined;
     updates.popularityRank = jikanData.popularity ?? undefined;
     updates.releaseYear = jikanData.year ?? undefined;
-    updates.releaseSeason = (Jikan.mapJikanSeason(jikanData.season) ?? undefined) as any;
+    updates.releaseSeason = (Jikan.mapJikanSeason(jikanData.season) ??
+      undefined) as any;
     updates.isAdultContent = Jikan.isAdult(jikanData.rating);
     updates.posterUrl =
       jikanData.images?.webp?.large_image_url ??
@@ -93,9 +102,11 @@ async function syncTitle(animeId: string): Promise<void> {
     // Prefer AniList banner as backdrop
     if (alData.bannerImage) updates.backdropUrl = alData.bannerImage;
     // AniList has better release data sometimes
-    if (!updates.releaseYear && alData.seasonYear) updates.releaseYear = alData.seasonYear;
+    if (!updates.releaseYear && alData.seasonYear)
+      updates.releaseYear = alData.seasonYear;
     if (!updates.releaseSeason && alData.season) {
-      updates.releaseSeason = (AniList.mapAniListSeason(alData.season) ?? undefined) as any;
+      updates.releaseSeason = (AniList.mapAniListSeason(alData.season) ??
+        undefined) as any;
     }
     if (!updates.synopsis && alData.description) {
       updates.synopsis = AniList.stripHtml(alData.description) ?? undefined;
@@ -123,6 +134,36 @@ async function syncTitle(animeId: string): Promise<void> {
     }
   }
 
+  // ── Kitsu (supplementary metadata & streaming links) ─────────────────────────
+  // Search by title as a fallback when Jikan/AniList data is sparse.
+  if (!updates.synopsis || !updates.posterUrl) {
+    const title = updates.title ?? anime.title;
+    const kitsuResults = await Kitsu.searchAnime(String(title), 1);
+    const kitsuData = kitsuResults[0] ?? null;
+
+    if (kitsuData) {
+      if (!updates.synopsis && kitsuData.attributes.synopsis) {
+        updates.synopsis = kitsuData.attributes.synopsis;
+      }
+      if (!updates.posterUrl && kitsuData.attributes.posterImage?.large) {
+        updates.posterUrl = kitsuData.attributes.posterImage.large;
+      }
+      if (!updates.backdropUrl && kitsuData.attributes.coverImage?.large) {
+        updates.backdropUrl = kitsuData.attributes.coverImage.large;
+      }
+      if (!updates.releaseYear && kitsuData.attributes.startDate) {
+        const year = new Date(kitsuData.attributes.startDate).getFullYear();
+        if (!isNaN(year)) updates.releaseYear = year;
+      }
+      if (!updates.rating) {
+        const kitsuRating = Kitsu.parseKitsuRating(
+          kitsuData.attributes.averageRating
+        );
+        if (kitsuRating != null) updates.rating = kitsuRating;
+      }
+    }
+  }
+
   if (Object.keys(updates).length > 0) {
     await db.animeTitle.update({ where: { id: animeId }, data: updates });
     await cacheDelPattern(`anime:slug:*`);
@@ -140,7 +181,10 @@ async function importByMalId(malId: number): Promise<void> {
 
   const existing = await db.animeTitle.findUnique({ where: { malId } });
   if (existing) {
-    logger.info({ malId, id: existing.id }, 'Anime already exists, syncing instead');
+    logger.info(
+      { malId, id: existing.id },
+      'Anime already exists, syncing instead'
+    );
     return syncTitle(existing.id);
   }
 
@@ -153,9 +197,10 @@ async function importByMalId(malId: number): Promise<void> {
 
   const alData = await AniList.getMediaByMalId(malId);
 
-  const rating = alData?.averageScore != null
-    ? alData.averageScore / 10
-    : (jikan.score ?? undefined);
+  const rating =
+    alData?.averageScore != null
+      ? alData.averageScore / 10
+      : jikan.score ?? undefined;
 
   const anime = await db.animeTitle.create({
     data: {
@@ -163,13 +208,19 @@ async function importByMalId(malId: number): Promise<void> {
       title: jikan.title,
       titleEnglish: jikan.title_english ?? undefined,
       titleJapanese: jikan.title_japanese ?? undefined,
-      synopsis: AniList.stripHtml(alData?.description ?? null) ?? jikan.synopsis ?? undefined,
+      synopsis:
+        AniList.stripHtml(alData?.description ?? null) ??
+        jikan.synopsis ??
+        undefined,
       type: Jikan.mapJikanType(jikan.type) as any,
       status: Jikan.mapJikanStatus(jikan.status) as any,
       releaseYear: jikan.year ?? alData?.seasonYear ?? undefined,
       releaseSeason: (Jikan.mapJikanSeason(jikan.season) ?? undefined) as any,
       episodeCount: jikan.episodes ?? alData?.episodes ?? undefined,
-      episodeDuration: Jikan.parseDurationMinutes(jikan.duration) ?? alData?.duration ?? undefined,
+      episodeDuration:
+        Jikan.parseDurationMinutes(jikan.duration) ??
+        alData?.duration ??
+        undefined,
       malId,
       anilistId: alData?.id ?? undefined,
       rating,
@@ -194,13 +245,18 @@ async function importByMalId(malId: number): Promise<void> {
     .map((t: any) => (typeof t === 'string' ? t : t.name));
   if (tagNames.length > 0) await upsertTags(anime.id, tagNames);
 
-  const studioNames = alData?.studios.nodes.map((s) => s.name) ?? jikan.studios.map((s) => s.name);
+  const studioNames =
+    alData?.studios.nodes.map((s) => s.name) ??
+    jikan.studios.map((s) => s.name);
   if (studioNames.length > 0) await upsertStudios(anime.id, studioNames);
 
   const synonyms = [...jikan.title_synonyms, ...(alData?.synonyms ?? [])];
   if (synonyms.length > 0) await upsertAliases(anime.id, synonyms);
 
-  logger.info({ malId, id: anime.id, slug: finalSlug }, 'Anime imported from MAL');
+  logger.info(
+    { malId, id: anime.id, slug: finalSlug },
+    'Anime imported from MAL'
+  );
 }
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
@@ -316,7 +372,7 @@ export function createMetadataWorker() {
       connection,
       concurrency: 1, // serial to respect API rate limits
       limiter: { max: 1, duration: 1000 }, // 1 job/sec max
-    },
+    }
   );
 
   worker.on('completed', (job, result) => {
