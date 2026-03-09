@@ -27,6 +27,7 @@ This document tracks the planned features and milestones for Otaku Channels.
 - [x] Component tests (MediaCard, HeroBanner, SearchBar, SourceBadge, GenrePill, WatchPlayerShell)
 - [x] Page tests (HomePage)
 - [x] Jest manual mock for backend (`src/lib/__mocks__/backend.ts`)
+- [x] Jest mock for `next/image` that strips Next.js-only DOM props (no React warnings)
 - [x] ESLint strict (`--max-warnings=0`) — zero warnings
 - [x] TypeScript strict mode — zero errors
 - [x] Prettier formatting — enforced in CI
@@ -36,15 +37,18 @@ This document tracks the planned features and milestones for Otaku Channels.
 
 ## Milestone 3 — Backend Integration 🚧 (in progress)
 
-- [ ] Fastify REST API server (`backend/`)
-- [ ] PostgreSQL schema via Prisma
-- [ ] Seed script with real anime data
-- [ ] `/api/v1/anime` — list + filter + pagination
-- [ ] `/api/v1/anime/:slug` — series detail
-- [ ] `/api/v1/anime/:slug/episodes` — episode list
-- [ ] `/api/v1/search` — full-text search
-- [ ] `/api/v1/channels` — live channels
-- [ ] `/api/v1/sources/domains` — approved providers
+- [x] Fastify REST API server (`backend/`)
+- [x] PostgreSQL schema via Prisma
+- [x] Seed script with real anime data
+- [x] `/api/v1/anime` — list + filter + pagination
+- [x] `/api/v1/anime/:slug` — series detail
+- [x] `/api/v1/anime/:slug/episodes` — episode list
+- [x] `/api/v1/search` — full-text search
+- [x] `/api/v1/channels` — live channels
+- [x] `/api/v1/sources/domains` — approved providers
+- [x] `/api/v1/profiles/:username` — public profile endpoint
+- [x] `/api/v1/moderation/queue` — moderation queue with batch actions
+- [x] BullMQ workers (session-cleanup, trending, source-check, metadata-refresh)
 - [ ] Wire Next.js API routes to Fastify backend
 - [ ] Remove dependency on mock data for production builds
 
