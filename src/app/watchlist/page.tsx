@@ -5,9 +5,13 @@ import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
+import { useWatchlist } from '@/hooks/useWatchlist';
+
+import MediaCardSkeleton from '@/components/media/MediaCardSkeleton';
+import Skeleton from '@/components/Skeleton';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { useToast } from '@/components/ui/Toast';
-import { useWatchlist } from '@/hooks/useWatchlist';
+
 import type { SourceType } from '@/types';
 
 export default function WatchlistPage() {
@@ -21,8 +25,20 @@ export default function WatchlistPage() {
 
   if (!mounted) {
     return (
-      <div className='mx-auto max-w-screen-xl px-4 py-8'>
-        <div className='h-8 w-32 animate-pulse rounded-lg bg-slate-800' />
+      <div
+        aria-busy='true'
+        aria-label='Loading My List'
+        className='mx-auto max-w-screen-xl px-4 py-8'
+      >
+        <div className='mb-6 flex items-center gap-3'>
+          <Skeleton className='h-6 w-6 rounded' />
+          <Skeleton className='h-7 w-24 rounded-lg' />
+        </div>
+        <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+          {Array.from({ length: 12 }).map((_, i) => (
+            <MediaCardSkeleton key={i} />
+          ))}
+        </div>
       </div>
     );
   }
@@ -98,7 +114,7 @@ export default function WatchlistPage() {
                   remove(item.id);
                   showToast(`Removed "${item.title}" from My List`, 'info');
                 }}
-                className='absolute right-2 top-2 rounded-md bg-slate-950/80 p-1.5 text-slate-300 opacity-0 backdrop-blur-sm transition-all hover:text-red-400 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400'
+                className='absolute right-2 top-2 rounded-md bg-slate-950/80 p-1.5 text-slate-300 opacity-0 backdrop-blur-sm transition-all hover:text-red-400 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 group-hover:opacity-100'
                 aria-label={`Remove ${item.title} from My List`}
               >
                 <BookmarkX className='h-4 w-4' />
