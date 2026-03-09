@@ -1,5 +1,10 @@
 import { NextResponse } from 'next/server';
-import { getStreamingSources, BackendError } from '@/lib/backend';
+
+import {
+  BackendError,
+  ConsumetProvider,
+  getStreamingSources,
+} from '@/lib/backend';
 
 /**
  * GET /api/streaming/sources
@@ -13,19 +18,25 @@ export async function GET(request: Request) {
   const episodeId = searchParams.get('episodeId')?.trim();
 
   if (!episodeId) {
-    return NextResponse.json({ error: 'Missing required param: episodeId' }, { status: 400 });
+    return NextResponse.json(
+      { error: 'Missing required param: episodeId' },
+      { status: 400 }
+    );
   }
 
   try {
     const result = await getStreamingSources(
       episodeId,
-      (searchParams.get('provider') as any) ?? undefined,
+      (searchParams.get('provider') as ConsumetProvider) ?? undefined
     );
     return NextResponse.json(result);
   } catch (err) {
     if (err instanceof BackendError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
-    return NextResponse.json({ error: 'Failed to fetch episode sources' }, { status: 502 });
+    return NextResponse.json(
+      { error: 'Failed to fetch episode sources' },
+      { status: 502 }
+    );
   }
 }

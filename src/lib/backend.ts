@@ -10,10 +10,7 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 const API_BASE = `${BACKEND_URL}/api/v1`;
 
 export class BackendError extends Error {
-  constructor(
-    public status: number,
-    message: string,
-  ) {
+  constructor(public status: number, message: string) {
     super(message);
     this.name = 'BackendError';
   }
@@ -68,9 +65,12 @@ export function listAnime(params: AnimeListParams = {}) {
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null) qs.set(k, String(v));
   }
-  return apiFetch<{ data: unknown[]; total: number; page: number; limit: number }>(
-    `/anime?${qs.toString()}`,
-  );
+  return apiFetch<{
+    data: unknown[];
+    total: number;
+    page: number;
+    limit: number;
+  }>(`/anime?${qs.toString()}`);
 }
 
 export function getAnime(slug: string) {
@@ -78,7 +78,9 @@ export function getAnime(slug: string) {
 }
 
 export function getAnimeEpisodes(slug: string) {
-  return apiFetch<{ data: unknown[]; total: number }>(`/anime/${slug}/episodes`);
+  return apiFetch<{ data: unknown[]; total: number }>(
+    `/anime/${slug}/episodes`
+  );
 }
 
 export function getTrendingAnime() {
@@ -92,7 +94,7 @@ export function getFeaturedAnime() {
 // ─── Search ───────────────────────────────────────────────────────────────────
 
 export interface SearchParams {
-  q: string;
+  q?: string;
   page?: number;
   limit?: number;
   genre?: string;
@@ -109,9 +111,13 @@ export function searchAnime(params: SearchParams) {
   for (const [k, v] of Object.entries(params)) {
     if (v !== undefined && v !== null) qs.set(k, String(v));
   }
-  return apiFetch<{ data: unknown[]; total: number; page: number; limit: number; query: string }>(
-    `/search?${qs.toString()}`,
-  );
+  return apiFetch<{
+    data: unknown[];
+    total: number;
+    page: number;
+    limit: number;
+    query: string;
+  }>(`/search?${qs.toString()}`);
 }
 
 // ─── Channels ─────────────────────────────────────────────────────────────────
@@ -138,7 +144,11 @@ export function listStreamingProviders() {
   return apiFetch<{ data: ConsumetProvider[] }>('/streaming/providers');
 }
 
-export function searchStreaming(params: { q: string; provider?: ConsumetProvider; page?: number }) {
+export function searchStreaming(params: {
+  q: string;
+  provider?: ConsumetProvider;
+  page?: number;
+}) {
   const qs = new URLSearchParams({ q: params.q });
   if (params.provider) qs.set('provider', params.provider);
   if (params.page) qs.set('page', String(params.page));
@@ -151,7 +161,10 @@ export function getStreamingInfo(animeId: string, provider?: ConsumetProvider) {
   return apiFetch<{ data: unknown }>(`/streaming/info?${qs.toString()}`);
 }
 
-export function getStreamingSources(episodeId: string, provider?: ConsumetProvider) {
+export function getStreamingSources(
+  episodeId: string,
+  provider?: ConsumetProvider
+) {
   const qs = new URLSearchParams({ episodeId });
   if (provider) qs.set('provider', provider);
   return apiFetch<{ data: unknown }>(`/streaming/sources?${qs.toString()}`);

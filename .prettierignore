@@ -39,3 +39,6 @@ yarn-error.log*
 CHANGELOG.md
 
 pnpm-lock.yaml
+
+# backend (separate project with its own tooling)
+/backend

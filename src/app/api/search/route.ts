@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { searchAnime, BackendError } from '@/lib/backend';
+
+import { BackendError, searchAnime } from '@/lib/backend';
 
 /**
  * GET /api/search
@@ -13,25 +14,33 @@ import { searchAnime, BackendError } from '@/lib/backend';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim();
+  const genre = searchParams.get('genre') ?? undefined;
+  const source = searchParams.get('source') ?? undefined;
 
-  if (!q) {
+  if (!q && !genre && !source) {
     return NextResponse.json(
-      { error: 'Provide at least one search query: q' },
-      { status: 400 },
+      { error: 'Provide at least one search parameter: q, genre, or source' },
+      { status: 400 }
     );
   }
 
   try {
     const result = await searchAnime({
-      q,
-      genre: searchParams.get('genre') ?? undefined,
-      source: searchParams.get('source') ?? undefined,
+      q: q ?? '',
+      genre,
+      source,
       type: searchParams.get('type') ?? undefined,
-      year: searchParams.get('year') ? Number(searchParams.get('year')) : undefined,
+      year: searchParams.get('year')
+        ? Number(searchParams.get('year'))
+        : undefined,
       season: searchParams.get('season') ?? undefined,
-      sort: (searchParams.get('sort') as any) ?? undefined,
-      page: searchParams.get('page') ? Number(searchParams.get('page')) : undefined,
-      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined,
+      sort: searchParams.get('sort') ?? undefined,
+      page: searchParams.get('page')
+        ? Number(searchParams.get('page'))
+        : undefined,
+      limit: searchParams.get('limit')
+        ? Number(searchParams.get('limit'))
+        : undefined,
     });
 
     return NextResponse.json(result);

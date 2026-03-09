@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getAnimeEpisodes, BackendError } from '@/lib/backend';
+
+import { BackendError, getAnimeEpisodes } from '@/lib/backend';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -18,6 +19,9 @@ export async function GET(_request: Request, { params }: Params) {
     if (err instanceof BackendError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
-    return NextResponse.json({ error: `Failed to fetch episodes for "${slug}"` }, { status: 502 });
+    return NextResponse.json(
+      { error: `Failed to fetch episodes for "${slug}"` },
+      { status: 502 }
+    );
   }
 }

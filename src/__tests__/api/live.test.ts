@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+jest.mock('@/lib/backend');
+
 import { mockLiveChannels } from '@/data/mockData';
 
 import { GET } from '@/app/api/live/route';

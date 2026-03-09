@@ -1,6 +1,8 @@
 /**
  * @jest-environment node
  */
+jest.mock('@/lib/backend');
+
 import { sourceProviders } from '@/data/mockData';
 
 import { GET } from '@/app/api/providers/route';

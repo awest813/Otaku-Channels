@@ -16,6 +16,9 @@ const customJestConfig = {
 
   testEnvironment: 'jest-environment-jsdom',
 
+  // Exclude the backend/ directory — those tests use Vitest, not Jest
+  testPathIgnorePatterns: ['/node_modules/', '<rootDir>/backend/'],
+
   /**
    * Absolute imports and Module Path Aliases
    */

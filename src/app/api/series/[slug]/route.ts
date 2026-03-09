@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import { getAnime, BackendError } from '@/lib/backend';
+
+import { BackendError, getAnime } from '@/lib/backend';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -18,6 +19,9 @@ export async function GET(_request: Request, { params }: Params) {
     if (err instanceof BackendError) {
       return NextResponse.json({ error: err.message }, { status: err.status });
     }
-    return NextResponse.json({ error: `Failed to fetch series "${slug}"` }, { status: 502 });
+    return NextResponse.json(
+      { error: `Failed to fetch series "${slug}"` },
+      { status: 502 }
+    );
   }
 }

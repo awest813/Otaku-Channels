@@ -52,7 +52,11 @@ export async function GET(request: Request) {
   const type = searchParams.get('type') ?? 'waifu';
   if (!SFW_TYPES.has(type)) {
     return NextResponse.json(
-      { error: `Invalid image type. Allowed: ${[...SFW_TYPES].join(', ')}` },
+      {
+        error: `Invalid image type. Allowed: ${Array.from(SFW_TYPES).join(
+          ', '
+        )}`,
+      },
       { status: 400 }
     );
   }
