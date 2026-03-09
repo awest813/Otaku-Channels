@@ -1,34 +1,31 @@
 import { NextResponse } from 'next/server';
-
-import { mockMovies } from '@/data/mockData';
+import { listAnime, BackendError } from '@/lib/backend';
 
 /**
  * GET /api/movies
  *
- * Query params:
- *   genre    — filter by genre name (case-insensitive)
- *   source   — filter by sourceType (e.g. "youtube", "tubi")
- *   language — filter by language ("sub" | "dub" | "both")
+ * Proxies to /api/v1/anime with type=MOVIE.
+ * Query params: genre, source, language, sort, page, limit
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const genre = searchParams.get('genre')?.toLowerCase();
-  const source = searchParams.get('source')?.toLowerCase();
-  const language = searchParams.get('language')?.toLowerCase();
 
-  let results = mockMovies;
+  try {
+    const result = await listAnime({
+      type: 'MOVIE',
+      genre: searchParams.get('genre') ?? undefined,
+      source: searchParams.get('source') ?? undefined,
+      language: searchParams.get('language') ?? undefined,
+      sort: (searchParams.get('sort') as any) ?? undefined,
+      page: searchParams.get('page') ? Number(searchParams.get('page')) : undefined,
+      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined,
+    });
 
-  if (genre) {
-    results = results.filter((m) =>
-      m.genres.some((g) => g.toLowerCase() === genre)
-    );
+    return NextResponse.json(result);
+  } catch (err) {
+    if (err instanceof BackendError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: 'Failed to fetch movies' }, { status: 502 });
   }
-  if (source) {
-    results = results.filter((m) => m.sourceType.toLowerCase() === source);
-  }
-  if (language) {
-    results = results.filter((m) => m.language.toLowerCase() === language);
-  }
-
-  return NextResponse.json({ data: results, total: results.length });
 }

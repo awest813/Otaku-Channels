@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-import { getEpisodesBySeries, getSeriesBySlug } from '@/data/mockData';
+import { getAnimeEpisodes, BackendError } from '@/lib/backend';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -8,21 +7,17 @@ interface Params {
 
 /**
  * GET /api/series/:slug/episodes
- *
- * Returns all episodes for the AnimeSeries matching `slug`.
- * Returns 404 if the series itself doesn't exist.
  */
 export async function GET(_request: Request, { params }: Params) {
   const { slug } = await params;
-  const series = getSeriesBySlug(slug);
 
-  if (!series) {
-    return NextResponse.json(
-      { error: `Series "${slug}" not found` },
-      { status: 404 }
-    );
+  try {
+    const result = await getAnimeEpisodes(slug);
+    return NextResponse.json(result);
+  } catch (err) {
+    if (err instanceof BackendError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: `Failed to fetch episodes for "${slug}"` }, { status: 502 });
   }
-
-  const episodes = getEpisodesBySeries(slug);
-  return NextResponse.json({ data: episodes, total: episodes.length });
 }

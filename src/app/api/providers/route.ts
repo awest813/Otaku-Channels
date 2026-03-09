@@ -1,15 +1,19 @@
 import { NextResponse } from 'next/server';
-
-import { sourceProviders } from '@/data/mockData';
+import { listAllowedDomains, BackendError } from '@/lib/backend';
 
 /**
  * GET /api/providers
  *
- * Returns all registered source providers (YouTube, Tubi, Pluto TV, etc.).
+ * Returns all approved streaming domains / source providers.
  */
 export async function GET() {
-  return NextResponse.json({
-    data: sourceProviders,
-    total: sourceProviders.length,
-  });
+  try {
+    const result = await listAllowedDomains();
+    return NextResponse.json(result);
+  } catch (err) {
+    if (err instanceof BackendError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: 'Failed to fetch providers' }, { status: 502 });
+  }
 }
