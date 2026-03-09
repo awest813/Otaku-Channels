@@ -1,0 +1,647 @@
+// Otaku Channels — Prisma schema
+// Run: cd backend && npx prisma migrate dev --name init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_DATABASE_URL")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Users & Auth
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum Role {
+  USER
+  MODERATOR
+  ADMIN
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  username     String    @unique
+  passwordHash String
+  role         Role      @default(USER)
+  isVerified   Boolean   @default(false)
+  isBanned     Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  deletedAt    DateTime?
+
+  profile        UserProfile?
+  refreshTokens  RefreshToken[]
+  watchHistory   WatchHistory[]
+  watchProgress  WatchProgress[]
+  favorites      Favorite[]
+  watchlists     Watchlist[]
+  reports        Report[]        @relation("ReportedBy")
+  auditLogs      AuditLog[]      @relation("AuditActor")
+  recommendations RecommendationEvent[]
+
+  @@index([email])
+  @@index([username])
+  @@map("users")
+}
+
+model RefreshToken {
+  id        String    @id @default(cuid())
+  userId    String
+  tokenHash String    @unique
+  expiresAt DateTime
+  revokedAt DateTime?
+  createdAt DateTime  @default(now())
+  userAgent String?
+  ipAddress String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([tokenHash])
+  @@map("refresh_tokens")
+}
+
+model UserProfile {
+  id                  String    @id @default(cuid())
+  userId              String    @unique
+  displayName         String?
+  avatarUrl           String?
+  bio                 String?
+  // Preferences
+  preferSub           Boolean   @default(true)
+  preferDub           Boolean   @default(false)
+  preferredLanguage   String    @default("en")
+  showMatureContent   Boolean   @default(false)
+  // UI prefs
+  theme               String    @default("dark")
+  // Genre preferences stored as string array
+  favoriteGenres      String[]  @default([])
+  // Providers they prefer
+  preferredSources    String[]  @default([])
+  createdAt           DateTime  @default(now())
+  updatedAt           DateTime  @updatedAt
+
+  user             User               @relation(fields: [userId], references: [id], onDelete: Cascade)
+  savedChannels    SavedChannel[]
+  hiddenTitles     HiddenTitle[]
+
+  @@map("user_profiles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Anime Catalog
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum AnimeStatus {
+  ONGOING
+  COMPLETED
+  UPCOMING
+  HIATUS
+  CANCELLED
+}
+
+enum AnimeType {
+  TV
+  MOVIE
+  OVA
+  ONA
+  SPECIAL
+  MUSIC
+}
+
+enum AnimeSeason {
+  WINTER
+  SPRING
+  SUMMER
+  FALL
+}
+
+model AnimeTitle {
+  id              String      @id @default(cuid())
+  slug            String      @unique
+  // Canonical title (usually romanized Japanese)
+  title           String
+  titleEnglish    String?
+  titleJapanese   String?
+  synopsis        String?
+  type            AnimeType   @default(TV)
+  status          AnimeStatus @default(COMPLETED)
+  releaseYear     Int?
+  releaseSeason   AnimeSeason?
+  episodeCount    Int?
+  episodeDuration Int?        // minutes
+  // External IDs for metadata sync
+  malId           Int?        @unique
+  anilistId       Int?        @unique
+  // Images
+  posterUrl       String?
+  backdropUrl     String?
+  // Metadata
+  rating          Float?      // 0-10
+  popularityRank  Int?
+  trendingScore   Float?      @default(0)
+  isAdultContent  Boolean     @default(false)
+  // Admin
+  isVisible       Boolean     @default(true)
+  isFeatured      Boolean     @default(false)
+  createdAt       DateTime    @default(now())
+  updatedAt       DateTime    @updatedAt
+
+  aliases        AnimeAlias[]
+  genres         AnimeTitleGenre[]
+  tags           AnimeTitleTag[]
+  episodes       Episode[]
+  studios        AnimeTitleStudio[]
+  sourceLinksTitleLevel ContentSource[] @relation("TitleSources")
+  favorites      Favorite[]
+  watchHistory   WatchHistory[]
+  channelItems   ChannelProgramBlock[]
+  hiddenBy       HiddenTitle[]
+  recommendations RecommendationEvent[]
+
+  @@index([slug])
+  @@index([title])
+  @@index([releaseYear])
+  @@index([trendingScore])
+  @@index([malId])
+  @@map("anime_titles")
+}
+
+model AnimeAlias {
+  id       String @id @default(cuid())
+  animeId  String
+  alias    String
+  language String @default("en")
+
+  anime AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([animeId, alias])
+  @@index([alias])
+  @@map("anime_aliases")
+}
+
+model Genre {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  titles AnimeTitleGenre[]
+
+  @@map("genres")
+}
+
+model AnimeTitleGenre {
+  animeId String
+  genreId String
+
+  anime AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  genre Genre      @relation(fields: [genreId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, genreId])
+  @@map("anime_title_genres")
+}
+
+model Tag {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  titles AnimeTitleTag[]
+
+  @@map("tags")
+}
+
+model AnimeTitleTag {
+  animeId String
+  tagId   String
+
+  anime AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  tag   Tag        @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, tagId])
+  @@map("anime_title_tags")
+}
+
+model Studio {
+  id   String @id @default(cuid())
+  name String @unique
+  slug String @unique
+
+  titles AnimeTitleStudio[]
+
+  @@map("studios")
+}
+
+model AnimeTitleStudio {
+  animeId  String
+  studioId String
+
+  anime  AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  studio Studio     @relation(fields: [studioId], references: [id], onDelete: Cascade)
+
+  @@id([animeId, studioId])
+  @@map("anime_title_studios")
+}
+
+model Episode {
+  id              String   @id @default(cuid())
+  animeId         String
+  episodeNumber   Int
+  seasonNumber    Int      @default(1)
+  title           String?
+  synopsis        String?
+  thumbnailUrl    String?
+  durationSeconds Int?
+  airedAt         DateTime?
+  isSpecial       Boolean  @default(false)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  anime         AnimeTitle    @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  sourceLinks   EpisodeSourceLink[]
+  watchHistory  WatchHistory[]
+  watchProgress WatchProgress[]
+
+  @@unique([animeId, seasonNumber, episodeNumber])
+  @@index([animeId])
+  @@map("episodes")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Legal Source Aggregation
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum SourceStatus {
+  ACTIVE
+  REMOVED
+  UNKNOWN
+  PENDING_REVIEW
+}
+
+model AllowedDomain {
+  id          String    @id @default(cuid())
+  domain      String    @unique
+  name        String
+  isEmbeddable Boolean  @default(false)
+  notes       String?
+  approvedBy  String?   // userId of admin
+  approvedAt  DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([domain])
+  @@map("allowed_domains")
+}
+
+// Title-level source (links to watch the whole series)
+model ContentSource {
+  id           String       @id @default(cuid())
+  animeId      String
+  domain       String       // must match allowed_domains
+  url          String
+  sourceName   String
+  sourceType   String       // e.g. "youtube", "tubi", "crunchyroll"
+  isEmbeddable Boolean      @default(false)
+  language     String?      // "sub", "dub", "both"
+  region       String?      // ISO 3166 or "global"
+  status       SourceStatus @default(ACTIVE)
+  notes        String?
+  submittedBy  String?      // userId
+  verifiedBy   String?      // userId of admin/mod
+  verifiedAt   DateTime?
+  lastCheckedAt DateTime?
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  anime AnimeTitle @relation("TitleSources", fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@index([animeId])
+  @@index([domain])
+  @@index([status])
+  @@map("content_sources")
+}
+
+// Episode-level source link
+model EpisodeSourceLink {
+  id           String       @id @default(cuid())
+  episodeId    String
+  domain       String
+  url          String
+  sourceName   String
+  sourceType   String
+  isEmbeddable Boolean      @default(false)
+  language     String?
+  region       String?
+  status       SourceStatus @default(ACTIVE)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@index([episodeId])
+  @@index([status])
+  @@map("episode_source_links")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Channels
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ChannelVisibility {
+  PUBLIC
+  UNLISTED
+  DRAFT
+  ARCHIVED
+}
+
+enum ChannelType {
+  CURATED        // hand-picked by admin
+  GENRE          // all anime of a genre
+  MOOD           // vibe-based
+  ERA            // decade/year-based
+  ALGORITHMIC    // generated from metadata/prefs
+  SCHEDULED      // pseudo-live with a schedule
+}
+
+model Channel {
+  id             String            @id @default(cuid())
+  slug           String            @unique
+  name           String
+  description    String?
+  artworkUrl     String?
+  bannerUrl      String?
+  type           ChannelType       @default(CURATED)
+  visibility     ChannelVisibility @default(DRAFT)
+  isFeatured     Boolean           @default(false)
+  channelNumber  String?           @unique
+  // Rules/criteria stored as JSON (for algorithmic channels)
+  criteria       Json?
+  ownedBy        String?           // userId of admin
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  programBlocks  ChannelProgramBlock[]
+  schedules      ChannelSchedule[]
+  savedBy        SavedChannel[]
+
+  @@index([slug])
+  @@index([visibility])
+  @@index([isFeatured])
+  @@map("channels")
+}
+
+model ChannelProgramBlock {
+  id          String   @id @default(cuid())
+  channelId   String
+  animeId     String
+  position    Int      // ordering in the channel
+  label       String?  // e.g. "Featured", "This Week"
+  startOffset Int?     // seconds from channel start (for scheduled channels)
+  durationSec Int?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channel Channel    @relation(fields: [channelId], references: [id], onDelete: Cascade)
+  anime   AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([channelId, position])
+  @@index([channelId])
+  @@map("channel_program_blocks")
+}
+
+// Pseudo-live scheduling: a channel has repeating schedule slots
+model ChannelSchedule {
+  id          String   @id @default(cuid())
+  channelId   String
+  // Slot is a position in the repeating rotation (0-based)
+  slotIndex   Int
+  animeId     String?
+  episodeId   String?
+  // Duration of this slot in seconds
+  durationSec Int      @default(1440) // 24 min
+  label       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  channel Channel @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@index([channelId])
+  @@map("channel_schedules")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Watch History & Progress
+// ─────────────────────────────────────────────────────────────────────────────
+
+model WatchHistory {
+  id          String   @id @default(cuid())
+  userId      String
+  animeId     String
+  episodeId   String?
+  sourceType  String?
+  watchedAt   DateTime @default(now())
+  completed   Boolean  @default(false)
+
+  user    User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime   AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+  episode Episode?   @relation(fields: [episodeId], references: [id], onDelete: SetNull)
+
+  @@index([userId])
+  @@index([userId, watchedAt(sort: Desc)])
+  @@map("watch_history")
+}
+
+model WatchProgress {
+  id              String   @id @default(cuid())
+  userId          String
+  episodeId       String
+  positionSeconds Int      @default(0)
+  durationSeconds Int?
+  completed       Boolean  @default(false)
+  updatedAt       DateTime @updatedAt
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  episode Episode @relation(fields: [episodeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, episodeId])
+  @@index([userId])
+  @@map("watch_progress")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Favorites, Watchlists, Saved Channels
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum WatchStatus {
+  PLANNED
+  WATCHING
+  COMPLETED
+  DROPPED
+  ON_HOLD
+}
+
+model Favorite {
+  id        String   @id @default(cuid())
+  userId    String
+  animeId   String
+  createdAt DateTime @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, animeId])
+  @@index([userId])
+  @@map("favorites")
+}
+
+model Watchlist {
+  id          String   @id @default(cuid())
+  userId      String
+  name        String
+  description String?
+  isPublic    Boolean  @default(false)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user  User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items WatchlistItem[]
+
+  @@index([userId])
+  @@map("watchlists")
+}
+
+model WatchlistItem {
+  id          String      @id @default(cuid())
+  watchlistId String
+  animeId     String
+  status      WatchStatus @default(PLANNED)
+  position    Int
+  note        String?
+  addedAt     DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  watchlist Watchlist @relation(fields: [watchlistId], references: [id], onDelete: Cascade)
+
+  @@unique([watchlistId, animeId])
+  @@index([watchlistId])
+  @@map("watchlist_items")
+}
+
+model SavedChannel {
+  id        String   @id @default(cuid())
+  profileId String
+  channelId String
+  savedAt   DateTime @default(now())
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  channel Channel     @relation(fields: [channelId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, channelId])
+  @@index([profileId])
+  @@map("saved_channels")
+}
+
+model HiddenTitle {
+  id        String   @id @default(cuid())
+  profileId String
+  animeId   String
+  reason    String?
+  hiddenAt  DateTime @default(now())
+
+  profile UserProfile @relation(fields: [profileId], references: [id], onDelete: Cascade)
+  anime   AnimeTitle  @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@unique([profileId, animeId])
+  @@index([profileId])
+  @@map("hidden_titles")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Recommendations
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum RecommendationSignal {
+  WATCHED
+  FAVORITED
+  COMPLETED
+  DROPPED
+  SEARCH_CLICK
+  CHANNEL_SAVED
+  GENRE_PREF
+}
+
+model RecommendationEvent {
+  id        String               @id @default(cuid())
+  userId    String
+  animeId   String
+  signal    RecommendationSignal
+  weight    Float                @default(1.0)
+  createdAt DateTime             @default(now())
+
+  user  User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  anime AnimeTitle @relation(fields: [animeId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([animeId])
+  @@map("recommendation_events")
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Admin & Moderation
+// ─────────────────────────────────────────────────────────────────────────────
+
+enum ReportStatus {
+  OPEN
+  UNDER_REVIEW
+  RESOLVED
+  DISMISSED
+}
+
+enum ReportTarget {
+  ANIME
+  SOURCE
+  USER
+  CHANNEL
+}
+
+model Report {
+  id          String       @id @default(cuid())
+  reportedBy  String
+  targetType  ReportTarget
+  targetId    String
+  reason      String
+  details     String?
+  status      ReportStatus @default(OPEN)
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  reporter User @relation("ReportedBy", fields: [reportedBy], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([targetType, targetId])
+  @@map("reports")
+}
+
+model AuditLog {
+  id         String   @id @default(cuid())
+  actorId    String
+  action     String   // e.g. "APPROVE_DOMAIN", "BAN_USER", "MERGE_ANIME"
+  targetType String?
+  targetId   String?
+  metadata   Json?
+  ipAddress  String?
+  createdAt  DateTime @default(now())
+
+  actor User @relation("AuditActor", fields: [actorId], references: [id], onDelete: Cascade)
+
+  @@index([actorId])
+  @@index([action])
+  @@index([createdAt(sort: Desc)])
+  @@map("audit_logs")
+}
