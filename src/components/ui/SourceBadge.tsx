@@ -9,17 +9,37 @@ const styles: Record<SourceType, string> = {
   live: 'bg-green-600/20 text-green-400 border-green-600/30',
 };
 
-const labels: Record<SourceType, string> = {
-  youtube: '▶ YouTube',
-  retro: '📼 Retro',
-  freestream: '🆓 FreeStream',
-  live: '🔴 Live',
+const icons: Record<SourceType, string> = {
+  youtube: '▶',
+  retro: '📼',
+  freestream: '🆓',
+  live: '🔴',
 };
 
-export default function SourceBadge({ sourceType, className }: { sourceType: SourceType; className?: string }) {
+const names: Record<SourceType, string> = {
+  youtube: 'YouTube',
+  retro: 'Retro',
+  freestream: 'FreeStream',
+  live: 'Live',
+};
+
+export default function SourceBadge({
+  sourceType,
+  className,
+}: {
+  sourceType: SourceType;
+  className?: string;
+}) {
   return (
-    <span className={cn('inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium', styles[sourceType], className)}>
-      {labels[sourceType]}
+    <span
+      className={cn(
+        'inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        styles[sourceType],
+        className
+      )}
+    >
+      <span aria-hidden='true'>{icons[sourceType]}</span>
+      {names[sourceType]}
     </span>
   );
 }

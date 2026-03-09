@@ -33,10 +33,16 @@ export default function EpisodeList({ episodes }: { episodes: Episode[] }) {
               )}
             </div>
           </div>
-          <div className='flex-1 min-w-0'>
-            <p className='text-sm font-medium text-white group-hover:text-cyan-400 transition-colors line-clamp-2'>{ep.title}</p>
-            <p className='mt-0.5 text-xs text-slate-500'>{ep.duration} · {ep.sourceName}</p>
-            <p className='mt-1 text-xs text-slate-400 line-clamp-2'>{ep.description}</p>
+          <div className='min-w-0 flex-1'>
+            <p className='line-clamp-2 text-sm font-medium text-white transition-colors group-hover:text-cyan-400'>
+              {ep.title}
+            </p>
+            <p className='mt-0.5 text-xs text-slate-500'>
+              {ep.duration} · {ep.sourceName}
+            </p>
+            <p className='mt-1 line-clamp-2 text-xs text-slate-400'>
+              {ep.description}
+            </p>
           </div>
         </Link>
       ))}

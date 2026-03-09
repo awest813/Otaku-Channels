@@ -11,16 +11,40 @@ export default function Footer() {
             <span className='font-semibold text-white'>Anime TV</span>
           </div>
           <p className='max-w-sm text-xs text-slate-500'>
-            Anime TV is a discovery guide linking to officially licensed free anime. We do not host, stream, or proxy any content. All content is served by the original platforms.
+            Anime TV is a discovery guide linking to officially licensed free
+            anime. We do not host, stream, or proxy any content. All content is
+            served by the original platforms.
           </p>
           <nav className='flex gap-4 text-sm'>
-            <Link href='/browse' className='hover:text-cyan-400 transition-colors'>Browse</Link>
-            <Link href='/search' className='hover:text-cyan-400 transition-colors'>Search</Link>
-            <Link href='/live' className='hover:text-cyan-400 transition-colors'>Live</Link>
-            <Link href='/settings' className='hover:text-cyan-400 transition-colors'>Settings</Link>
+            <Link
+              href='/browse'
+              className='transition-colors hover:text-cyan-400'
+            >
+              Browse
+            </Link>
+            <Link
+              href='/search'
+              className='transition-colors hover:text-cyan-400'
+            >
+              Search
+            </Link>
+            <Link
+              href='/live'
+              className='transition-colors hover:text-cyan-400'
+            >
+              Live
+            </Link>
+            <Link
+              href='/settings'
+              className='transition-colors hover:text-cyan-400'
+            >
+              Settings
+            </Link>
           </nav>
         </div>
-        <p className='mt-6 text-xs text-slate-600'>© 2024 Anime TV — Mock data only. Phase 1 demo.</p>
+        <p className='mt-6 text-xs text-slate-600'>
+          © 2024 Anime TV — Mock data only. Phase 1 demo.
+        </p>
       </div>
     </footer>
   );

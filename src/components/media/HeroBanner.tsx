@@ -26,7 +26,9 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
           <div className='max-w-lg space-y-4'>
             <div className='flex items-center gap-2'>
               <SourceBadge sourceType={series.sourceType} />
-              <span className='text-xs text-slate-400'>{series.releaseYear}</span>
+              <span className='text-xs text-slate-400'>
+                {series.releaseYear}
+              </span>
             </div>
             <h1 className='text-3xl font-bold leading-tight text-white md:text-5xl'>
               {series.title}
@@ -45,9 +47,13 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
                 className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
               >
                 {series.isEmbeddable ? (
-                  <><Play className='h-4 w-4' /> Watch Now</>
+                  <>
+                    <Play className='h-4 w-4' /> Watch Now
+                  </>
                 ) : (
-                  <><ExternalLink className='h-4 w-4' /> Watch on Source</>
+                  <>
+                    <ExternalLink className='h-4 w-4' /> Watch on Source
+                  </>
                 )}
               </Link>
               <Link

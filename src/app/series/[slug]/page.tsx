@@ -4,7 +4,11 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { getEpisodesBySeries, getRelatedSeries, getSeriesBySlug } from '@/data/mockData';
+import {
+  getEpisodesBySeries,
+  getRelatedSeries,
+  getSeriesBySlug,
+} from '@/data/mockData';
 
 import EpisodeList from '@/components/media/EpisodeList';
 import MediaRail from '@/components/media/MediaRail';
@@ -53,18 +57,31 @@ export default async function SeriesPage({ params }: Props) {
             <div className='flex items-center gap-2'>
               <SourceBadge sourceType={series.sourceType} />
             </div>
-            <h1 className='text-3xl font-bold text-white md:text-4xl'>{series.title}</h1>
+            <h1 className='text-3xl font-bold text-white md:text-4xl'>
+              {series.title}
+            </h1>
 
             <div className='flex flex-wrap items-center gap-4 text-sm text-slate-400'>
-              <span className='flex items-center gap-1.5'><Calendar className='h-4 w-4' />{series.releaseYear}</span>
+              <span className='flex items-center gap-1.5'>
+                <Calendar className='h-4 w-4' />
+                {series.releaseYear}
+              </span>
               {'episodeCount' in series && (
-                <span className='flex items-center gap-1.5'><Tv2 className='h-4 w-4' />{series.episodeCount} Episodes</span>
+                <span className='flex items-center gap-1.5'>
+                  <Tv2 className='h-4 w-4' />
+                  {series.episodeCount} Episodes
+                </span>
               )}
-              <span className='flex items-center gap-1.5'><Languages className='h-4 w-4' />{series.language.toUpperCase()}</span>
+              <span className='flex items-center gap-1.5'>
+                <Languages className='h-4 w-4' />
+                {series.language.toUpperCase()}
+              </span>
             </div>
 
             <div className='flex flex-wrap gap-2'>
-              {series.genres.map((g) => <GenrePill key={g} genre={g} />)}
+              {series.genres.map((g) => (
+                <GenrePill key={g} genre={g} />
+              ))}
             </div>
 
             <p className='max-w-2xl text-slate-300'>{series.description}</p>
@@ -73,7 +90,7 @@ export default async function SeriesPage({ params }: Props) {
               {series.isEmbeddable ? (
                 <Link
                   href={`/watch/youtube/${series.id}`}
-                  className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+                  className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <Play className='h-4 w-4' /> Watch Now
                 </Link>
@@ -82,15 +99,17 @@ export default async function SeriesPage({ params }: Props) {
                   href={series.watchUrl}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+                  className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
-                  <ExternalLink className='h-4 w-4' /> Watch on {series.sourceName}
+                  <ExternalLink className='h-4 w-4' /> Watch on{' '}
+                  {series.sourceName}
                 </a>
               )}
             </div>
 
-            <p className='text-xs text-slate-600 pt-1'>
-              Content provided by {series.sourceName}. Anime TV links to official sources only and does not host any video content.
+            <p className='pt-1 text-xs text-slate-600'>
+              Content provided by {series.sourceName}. Anime TV links to
+              official sources only and does not host any video content.
             </p>
           </div>
         </div>

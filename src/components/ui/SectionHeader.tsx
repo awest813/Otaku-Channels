@@ -11,7 +11,10 @@ export default function SectionHeader({ title, href }: Props) {
     <div className='flex items-center justify-between'>
       <h2 className='text-lg font-semibold text-white md:text-xl'>{title}</h2>
       {href && (
-        <Link href={href} className='flex items-center gap-1 text-sm text-cyan-400 hover:text-cyan-300 transition-colors'>
+        <Link
+          href={href}
+          className='flex items-center gap-1 text-sm text-cyan-400 transition-colors hover:text-cyan-300'
+        >
           See all <ChevronRight className='h-4 w-4' />
         </Link>
       )}

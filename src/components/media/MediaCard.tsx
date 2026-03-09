@@ -16,7 +16,7 @@ export default function MediaCard({ item }: Props) {
   return (
     <Link
       href={href}
-      className='group relative flex flex-col overflow-hidden rounded-lg bg-slate-900 ring-1 ring-slate-800 transition-all duration-200 hover:ring-cyan-500 hover:shadow-lg hover:shadow-cyan-500/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+      className='group relative flex flex-col overflow-hidden rounded-lg bg-slate-900 ring-1 ring-slate-800 transition-all duration-200 hover:shadow-lg hover:shadow-cyan-500/10 hover:ring-cyan-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
     >
       <div className='relative aspect-video overflow-hidden bg-slate-800'>
         <Image
@@ -37,17 +37,24 @@ export default function MediaCard({ item }: Props) {
         </div>
       </div>
       <div className='flex flex-1 flex-col gap-1.5 p-3'>
-        <p className='line-clamp-2 text-sm font-semibold text-white'>{item.title}</p>
+        <p className='line-clamp-2 text-sm font-semibold text-white'>
+          {item.title}
+        </p>
         <div className='flex flex-wrap items-center gap-1.5'>
           <SourceBadge sourceType={item.sourceType} />
           {'episodeCount' in item && (
-            <span className='text-xs text-slate-500'>{item.episodeCount} eps</span>
+            <span className='text-xs text-slate-500'>
+              {item.episodeCount} eps
+            </span>
           )}
           <span className='text-xs text-slate-500'>{item.releaseYear}</span>
         </div>
         <div className='mt-auto flex flex-wrap gap-1 pt-1'>
           {item.genres.slice(0, 2).map((g) => (
-            <span key={g} className='rounded bg-slate-800 px-1.5 py-0.5 text-xs text-slate-400'>
+            <span
+              key={g}
+              className='rounded bg-slate-800 px-1.5 py-0.5 text-xs text-slate-400'
+            >
               {g}
             </span>
           ))}

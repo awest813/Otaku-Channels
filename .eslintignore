@@ -1,0 +1,6 @@
+.prettierrc.js
+commitlint.config.js
+next-sitemap.config.js
+jest.config.js
+jest.setup.js
+postcss.config.js

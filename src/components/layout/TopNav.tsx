@@ -21,7 +21,10 @@ export default function TopNav() {
   return (
     <header className='sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur'>
       <div className='mx-auto flex max-w-screen-xl items-center justify-between px-4 py-3'>
-        <Link href='/' className='flex items-center gap-2 text-lg font-bold text-white'>
+        <Link
+          href='/'
+          className='flex items-center gap-2 text-lg font-bold text-white'
+        >
           <Tv className='h-5 w-5 text-cyan-400' />
           <span>Anime TV</span>
         </Link>

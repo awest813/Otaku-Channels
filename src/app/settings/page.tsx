@@ -8,13 +8,21 @@ const sections = [
     icon: Eye,
     title: 'Display Preferences',
     description: 'Theme, language, and subtitle settings',
-    items: ['Dark mode (always on)', 'Subtitle language: Japanese', 'UI language: English'],
+    items: [
+      'Dark mode (always on)',
+      'Subtitle language: Japanese',
+      'UI language: English',
+    ],
   },
   {
     icon: Bell,
     title: 'Notifications',
     description: 'Manage alerts for new episodes and channels',
-    items: ['New episode alerts: Off', 'Live channel notifications: Off', 'Weekly digest: Off'],
+    items: [
+      'New episode alerts: Off',
+      'Live channel notifications: Off',
+      'Weekly digest: Off',
+    ],
   },
   {
     icon: Tv,
@@ -41,11 +49,17 @@ export default function SettingsPage() {
         <Settings className='h-6 w-6 text-slate-400' />
         <h1 className='text-2xl font-bold text-white md:text-3xl'>Settings</h1>
       </div>
-      <p className='mb-8 text-slate-400'>Phase 1 — settings are informational only. Full preferences coming in Phase 2.</p>
+      <p className='mb-8 text-slate-400'>
+        Phase 1 — settings are informational only. Full preferences coming in
+        Phase 2.
+      </p>
 
       <div className='space-y-4'>
         {sections.map((section) => (
-          <div key={section.title} className='rounded-xl border border-slate-800 bg-slate-900 p-5'>
+          <div
+            key={section.title}
+            className='rounded-xl border border-slate-800 bg-slate-900 p-5'
+          >
             <div className='mb-4 flex items-center gap-3'>
               <section.icon className='h-5 w-5 text-cyan-400' />
               <div>
@@ -55,7 +69,10 @@ export default function SettingsPage() {
             </div>
             <ul className='space-y-2'>
               {section.items.map((item) => (
-                <li key={item} className='flex items-center justify-between rounded-lg bg-slate-800/50 px-4 py-2.5 text-sm text-slate-300'>
+                <li
+                  key={item}
+                  className='flex items-center justify-between rounded-lg bg-slate-800/50 px-4 py-2.5 text-sm text-slate-300'
+                >
                   <span>{item}</span>
                 </li>
               ))}

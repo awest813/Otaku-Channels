@@ -6,7 +6,11 @@ interface Props {
   sourceName: string;
 }
 
-export default function WatchPlayerShell({ isEmbeddable, watchUrl, sourceName }: Props) {
+export default function WatchPlayerShell({
+  isEmbeddable,
+  watchUrl,
+  sourceName,
+}: Props) {
   return (
     <div className='overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-800'>
       <div className='relative aspect-video w-full bg-slate-950'>
@@ -20,7 +24,7 @@ export default function WatchPlayerShell({ isEmbeddable, watchUrl, sourceName }:
               href={watchUrl}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex items-center gap-2 rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors'
+              className='flex items-center gap-2 rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400'
             >
               <ExternalLink className='h-4 w-4' />
               Open on {sourceName}
@@ -30,13 +34,14 @@ export default function WatchPlayerShell({ isEmbeddable, watchUrl, sourceName }:
           <div className='absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-400'>
             <ExternalLink className='h-12 w-12 text-slate-600' />
             <p className='text-center text-sm'>
-              This title plays on <span className='text-white font-semibold'>{sourceName}</span>
+              This title plays on{' '}
+              <span className='font-semibold text-white'>{sourceName}</span>
             </p>
             <a
               href={watchUrl}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 hover:bg-cyan-400 transition-colors'
+              className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400'
             >
               <ExternalLink className='h-4 w-4' />
               Watch on {sourceName}

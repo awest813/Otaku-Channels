@@ -10,7 +10,9 @@ import GenrePill from '@/components/ui/GenrePill';
 
 import type { AnimeSeries, Movie } from '@/types';
 
-const allGenres = Array.from(new Set(allContent.flatMap((i) => i.genres))).sort();
+const allGenres = Array.from(
+  new Set(allContent.flatMap((i) => i.genres))
+).sort();
 
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
@@ -18,7 +20,11 @@ export default function SearchPage() {
 
   const results = (allContent as Array<AnimeSeries | Movie>).filter((item) => {
     const q = query.toLowerCase();
-    const matchesQuery = !query || item.title.toLowerCase().includes(q) || item.description.toLowerCase().includes(q) || item.genres.some((g) => g.toLowerCase().includes(q));
+    const matchesQuery =
+      !query ||
+      item.title.toLowerCase().includes(q) ||
+      item.description.toLowerCase().includes(q) ||
+      item.genres.some((g) => g.toLowerCase().includes(q));
     const matchesGenre = !genre || item.genres.includes(genre);
     return matchesQuery && matchesGenre;
   });
@@ -29,11 +35,22 @@ export default function SearchPage() {
       <SearchBar value={query} onChange={setQuery} className='mb-6' />
 
       <div className='mb-6'>
-        <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>Filter by genre</p>
+        <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
+          Filter by genre
+        </p>
         <div className='flex flex-wrap gap-2'>
-          <GenrePill genre='All' active={!genre} onClick={() => setGenre(null)} />
+          <GenrePill
+            genre='All'
+            active={!genre}
+            onClick={() => setGenre(null)}
+          />
           {allGenres.map((g) => (
-            <GenrePill key={g} genre={g} active={genre === g} onClick={() => setGenre(g === genre ? null : g)} />
+            <GenrePill
+              key={g}
+              genre={g}
+              active={genre === g}
+              onClick={() => setGenre(g === genre ? null : g)}
+            />
           ))}
         </div>
       </div>
@@ -43,7 +60,9 @@ export default function SearchPage() {
           <EmptyState message={`No results for "${query}"`} />
         ) : (
           <>
-            <p className='mb-4 text-sm text-slate-400'>{results.length} result{results.length !== 1 ? 's' : ''}</p>
+            <p className='mb-4 text-sm text-slate-400'>
+              {results.length} result{results.length !== 1 ? 's' : ''}
+            </p>
             <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
               {results.map((item) => (
                 <MediaCard key={item.id} item={item} />
@@ -53,7 +72,9 @@ export default function SearchPage() {
         )
       ) : (
         <div className='space-y-6'>
-          <p className='text-slate-500'>Start typing to search all anime and movies.</p>
+          <p className='text-slate-500'>
+            Start typing to search all anime and movies.
+          </p>
           <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
             {allContent.slice(0, 12).map((item) => (
               <MediaCard key={item.id} item={item as AnimeSeries | Movie} />
