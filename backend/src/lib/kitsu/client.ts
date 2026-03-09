@@ -116,6 +116,11 @@ export interface KitsuStreamer {
   };
 }
 
+export interface KitsuStreamingLinkWithStreamer {
+  link: KitsuStreamingLink;
+  streamerName: string | null;
+}
+
 // ─── API methods ──────────────────────────────────────────────────────────────
 
 /** Search Kitsu anime by title. */
@@ -153,7 +158,7 @@ export async function getAnimeBySlug(slug: string): Promise<KitsuAnime | null> {
  */
 export async function getStreamingLinks(
   kitsuId: string
-): Promise<{ link: KitsuStreamingLink; streamerName: string | null }[]> {
+): Promise<KitsuStreamingLinkWithStreamer[]> {
   const result = await kitsuFetch<{
     data: KitsuStreamingLink[];
     included?: (KitsuStreamer | KitsuAnime)[];

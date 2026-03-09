@@ -81,8 +81,8 @@ export async function GET(request: Request) {
 
       const data = (await res.json()) as { files: string[] };
       return NextResponse.json({
-        data: data.files ?? [],
-        total: data.files?.length ?? 0,
+        data: data.files,
+        total: data.files.length,
       });
     }
 
