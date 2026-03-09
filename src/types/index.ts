@@ -10,7 +10,9 @@ export type SourceType =
   | 'retrocrush'
   | 'crunchyroll'
   | 'consumet'
-  | 'jikan';
+  | 'jikan'
+  | 'kitsu'
+  | 'shikimori';
 
 export interface Genre {
   id: string;
@@ -151,4 +153,53 @@ export interface JikanAnime {
   rank: number | null;
   popularity: number | null;
   members: number | null;
+}
+
+/** Raw Kitsu anime object (JSON:API data resource) */
+export interface KitsuAnimeResource {
+  id: string;
+  type: 'anime';
+  attributes: {
+    slug: string;
+    synopsis: string | null;
+    canonicalTitle: string;
+    titles: { en: string | null; en_jp: string | null; ja_jp: string | null };
+    averageRating: string | null; // "7.89" — string decimal
+    startDate: string | null; // "YYYY-MM-DD"
+    endDate: string | null;
+    subtype: string | null; // "TV" | "movie" | "OVA" | "ONA" | "special" | "music"
+    status: string | null; // "current" | "finished" | "tba" | "unreleased" | "upcoming"
+    episodeCount: number | null;
+    nsfw: boolean;
+    posterImage: {
+      tiny: string | null;
+      small: string | null;
+      medium: string | null;
+      large: string | null;
+      original: string | null;
+    } | null;
+    coverImage: {
+      tiny: string | null;
+      small: string | null;
+      large: string | null;
+      original: string | null;
+    } | null;
+  };
+}
+
+/** Raw Shikimori anime object returned by GraphQL */
+export interface ShikimoriAnime {
+  id: string;
+  malId: number | null;
+  name: string;
+  english: string | null;
+  japanese: string | null;
+  kind: string | null; // "tv" | "movie" | "ova" | "ona" | "special" | "music"
+  score: number | null;
+  status: string | null; // "released" | "ongoing" | "anons"
+  episodes: number;
+  airedOn: { year: number | null; date: string | null } | null;
+  description: string | null;
+  poster: { originalUrl: string | null; mainUrl: string | null } | null;
+  genres: Array<{ name: string; russian: string }>;
 }
