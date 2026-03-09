@@ -1,4 +1,4 @@
-import { ExternalLink } from 'lucide-react';
+import { ExternalLink, Tv } from 'lucide-react';
 
 /** Extract a YouTube embed URL from a watch URL, or return null. */
 function getYouTubeEmbedUrl(watchUrl: string): string | null {
@@ -32,7 +32,7 @@ export default function WatchPlayerShell({
   const embedUrl = isEmbeddable ? getYouTubeEmbedUrl(watchUrl) : null;
 
   return (
-    <div className='overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-800'>
+    <div className='overflow-hidden rounded-2xl bg-slate-900 ring-1 ring-slate-800 shadow-2xl shadow-slate-950/50'>
       <div className='relative aspect-video w-full bg-slate-950'>
         {embedUrl ? (
           <iframe
@@ -43,42 +43,55 @@ export default function WatchPlayerShell({
             className='absolute inset-0 h-full w-full border-0'
           />
         ) : isEmbeddable ? (
-          <div className='absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-400'>
+          /* Embeddable flag set but no embed URL — fall back gracefully */
+          <div className='absolute inset-0 flex flex-col items-center justify-center gap-5 p-6 text-center'>
+            <div className='rounded-full bg-slate-800 p-4'>
+              <Tv className='h-8 w-8 text-slate-500' />
+            </div>
+            <div>
+              <p className='font-semibold text-white'>
+                Stream on {sourceName}
+              </p>
+              <p className='mt-1 text-sm text-slate-400'>
+                Click below to open the official watch page
+              </p>
+            </div>
             <a
               href={watchUrl}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex items-center gap-2 rounded-md bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400'
+              className='flex items-center gap-2 rounded-lg bg-cyan-500 px-5 py-2.5 text-sm font-bold text-slate-950 transition-colors hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
             >
               <ExternalLink className='h-4 w-4' />
               Open on {sourceName}
             </a>
           </div>
         ) : (
-          <div className='absolute inset-0 flex flex-col items-center justify-center gap-4 text-slate-400'>
-            <ExternalLink className='h-12 w-12 text-slate-600' />
-            <p className='text-center text-sm'>
-              This title plays on{' '}
-              <span className='font-semibold text-white'>{sourceName}</span>
-            </p>
+          /* Not embeddable — external redirect */
+          <div className='absolute inset-0 flex flex-col items-center justify-center gap-5 p-6 text-center'>
+            <div className='rounded-full bg-slate-800 p-4'>
+              <ExternalLink className='h-8 w-8 text-slate-500' />
+            </div>
+            <div>
+              <p className='font-semibold text-white'>
+                Available on {sourceName}
+              </p>
+              <p className='mt-1 text-sm text-slate-400'>
+                This title plays on {sourceName}&apos;s platform. It opens in a new
+                tab.
+              </p>
+            </div>
             <a
               href={watchUrl}
               target='_blank'
               rel='noopener noreferrer'
-              className='flex items-center gap-2 rounded-md bg-cyan-500 px-5 py-2.5 text-sm font-semibold text-slate-950 transition-colors hover:bg-cyan-400'
+              className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 hover:shadow-cyan-400/30 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
             >
               <ExternalLink className='h-4 w-4' />
               Watch on {sourceName}
             </a>
           </div>
         )}
-      </div>
-      <div className='border-t border-slate-800 px-4 py-3'>
-        <p className='text-xs text-slate-500'>
-          {isEmbeddable
-            ? `Embedded playback via ${sourceName}. No content is hosted or proxied by Anime TV.`
-            : `This content is hosted by ${sourceName}. Clicking opens the official watch page in a new tab.`}
-        </p>
       </div>
     </div>
   );

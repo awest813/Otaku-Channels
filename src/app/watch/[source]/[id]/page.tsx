@@ -1,4 +1,4 @@
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Shield } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
@@ -10,6 +10,7 @@ import {
   mockSeries,
 } from '@/data/mockData';
 
+import SourceBadge from '@/components/ui/SourceBadge';
 import WatchPlayerShell from '@/components/watch/WatchPlayerShell';
 
 interface Props {
@@ -28,18 +29,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 export default async function WatchPage({ params }: Props) {
   const { id } = await params;
 
-  // Try series first, then fall back to an individual episode
   const series = mockSeries.find((s) => s.id === id);
   const episode = series ? null : getEpisodeById(id);
   const episodeParent = episode ? getSeriesBySlug(episode.seriesSlug) : null;
 
   if (!series && !episode) {
     return (
-      <div className='mx-auto max-w-screen-xl px-4 py-16 text-center text-slate-400'>
-        <p>Content not found.</p>
+      <div className='mx-auto max-w-screen-xl px-4 py-16 text-center'>
+        <p className='text-slate-400'>Content not found.</p>
         <Link
           href='/'
-          className='mt-4 inline-block text-cyan-400 hover:underline'
+          className='mt-4 inline-block rounded-lg bg-slate-800 px-4 py-2 text-sm text-cyan-400 hover:bg-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
         >
           ← Back to Home
         </Link>
@@ -47,10 +47,10 @@ export default async function WatchPage({ params }: Props) {
     );
   }
 
-  // Unified playback fields (at this point at least one of series/episode exists)
   const isEmbeddable = series?.isEmbeddable ?? episode?.isEmbeddable ?? false;
   const watchUrl = series?.watchUrl ?? episode?.watchUrl ?? '';
   const sourceName = series?.sourceName ?? episode?.sourceName ?? '';
+  const sourceType = series?.sourceType ?? episode?.sourceType ?? 'youtube';
   const title = series?.title ?? episode?.title ?? '';
   const description = series?.description ?? episode?.description ?? '';
   const backHref = series
@@ -64,66 +64,108 @@ export default async function WatchPage({ params }: Props) {
     ? episodeParent.title
     : 'Home';
 
-  // Related series for the sidebar.
-  // Falls back to general picks when an episode's parent series isn't found.
   const relatedSeries = series
     ? getRelatedSeries(series, 5)
     : episodeParent
     ? getRelatedSeries(episodeParent, 5)
     : mockSeries.slice(0, 5);
 
+  // Episode context
+  const episodeNumber = episode?.title.match(/Episode\s+(\d+)/i)?.[1];
+
   return (
     <div className='mx-auto max-w-screen-xl px-4 py-6'>
+      {/* Back navigation */}
       <Link
         href={backHref}
-        className='mb-4 flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-400'
+        className='mb-4 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:rounded'
       >
-        <ArrowLeft className='h-4 w-4' /> Back to {backLabel}
+        <ArrowLeft className='h-4 w-4' />
+        <span>Back to {backLabel}</span>
       </Link>
 
       <div className='grid gap-6 lg:grid-cols-3'>
-        <div className='space-y-4 lg:col-span-2'>
+        {/* Player + Info */}
+        <div className='space-y-5 lg:col-span-2'>
           <WatchPlayerShell
             isEmbeddable={isEmbeddable}
             watchUrl={watchUrl}
             sourceName={sourceName}
           />
-          <div>
-            <h1 className='text-xl font-bold text-white'>{title}</h1>
-            <p className='mt-1 text-sm text-slate-400'>
-              {series ? `${series.releaseYear} · ` : ''}
-              {sourceName}
+
+          {/* Title + context */}
+          <div className='space-y-3'>
+            <div>
+              {episode && episodeParent && (
+                <p className='mb-1 text-xs font-medium uppercase tracking-wide text-slate-500'>
+                  {episodeParent.title}
+                  {episodeNumber && ` · Episode ${episodeNumber}`}
+                </p>
+              )}
+              <h1 className='text-xl font-bold text-white md:text-2xl'>
+                {title}
+              </h1>
+              <div className='mt-2 flex flex-wrap items-center gap-3'>
+                <SourceBadge sourceType={sourceType} />
+                {series && (
+                  <span className='text-sm text-slate-500'>
+                    {series.releaseYear}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <p className='text-sm leading-relaxed text-slate-400'>
+              {description}
             </p>
-            <p className='mt-3 text-sm text-slate-300'>{description}</p>
+
+            {/* Source trust panel */}
+            <div className='flex items-start gap-3 rounded-lg border border-slate-800 bg-slate-900/60 p-4'>
+              <Shield className='mt-0.5 h-4 w-4 shrink-0 text-green-400' />
+              <div>
+                <p className='text-xs font-semibold text-slate-300'>
+                  Content source: {sourceName}
+                </p>
+                <p className='mt-0.5 text-xs text-slate-500'>
+                  {isEmbeddable
+                    ? `Embedded via ${sourceName}. Anime TV does not host any video.`
+                    : `This title plays on ${sourceName}. Clicking the button opens the official watch page.`}
+                </p>
+              </div>
+            </div>
           </div>
         </div>
-        <div className='space-y-3'>
+
+        {/* Sidebar */}
+        <aside className='space-y-4'>
           <h2 className='text-base font-semibold text-white'>Related Series</h2>
-          {relatedSeries.map((s) => (
-            <Link
-              key={s.id}
-              href={`/series/${s.slug}`}
-              className='flex items-center gap-3 rounded-lg bg-slate-900 p-2.5 ring-1 ring-slate-800 transition-all hover:ring-cyan-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
-            >
-              <div className='relative h-12 w-20 shrink-0 overflow-hidden rounded'>
-                <Image
-                  src={s.thumbnail}
-                  alt={s.title}
-                  fill
-                  sizes='80px'
-                  className='object-cover'
-                  unoptimized
-                />
-              </div>
-              <div className='min-w-0'>
-                <p className='line-clamp-1 text-sm font-medium text-white'>
-                  {s.title}
-                </p>
-                <p className='text-xs text-slate-500'>{s.releaseYear}</p>
-              </div>
-            </Link>
-          ))}
-        </div>
+          <div className='space-y-2'>
+            {relatedSeries.map((s) => (
+              <Link
+                key={s.id}
+                href={`/series/${s.slug}`}
+                className='group flex items-center gap-3 rounded-xl bg-slate-900 p-2.5 ring-1 ring-slate-800 transition-all hover:ring-cyan-500/50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+              >
+                <div className='relative h-14 w-24 shrink-0 overflow-hidden rounded-lg'>
+                  <Image
+                    src={s.thumbnail}
+                    alt={s.title}
+                    fill
+                    sizes='96px'
+                    className='object-cover transition-transform duration-200 group-hover:scale-105'
+                    unoptimized
+                  />
+                </div>
+                <div className='min-w-0 flex-1'>
+                  <p className='line-clamp-2 text-sm font-medium leading-snug text-white group-hover:text-cyan-300 transition-colors'>
+                    {s.title}
+                  </p>
+                  <p className='mt-1 text-xs text-slate-500'>{s.releaseYear}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </aside>
       </div>
     </div>
   );
