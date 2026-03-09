@@ -18,6 +18,14 @@ export default function TopNav() {
   const pathname = usePathname();
   const [open, setOpen] = React.useState(false);
 
+  React.useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) setOpen(false);
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => document.removeEventListener('keydown', onKeyDown);
+  }, [open]);
+
   return (
     <header className='sticky top-0 z-50 border-b border-slate-800 bg-slate-950/95 backdrop-blur'>
       <div className='mx-auto flex max-w-screen-xl items-center justify-between px-4 py-3'>
