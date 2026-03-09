@@ -1,10 +1,10 @@
-import { Calendar, ExternalLink, Languages,Play, Tv2 } from 'lucide-react';
+import { Calendar, ExternalLink, Languages, Play, Tv2 } from 'lucide-react';
 import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 
-import { getEpisodesBySeries, getRelatedSeries,getSeriesBySlug } from '@/data/mockData';
+import { getEpisodesBySeries, getRelatedSeries, getSeriesBySlug } from '@/data/mockData';
 
 import EpisodeList from '@/components/media/EpisodeList';
 import MediaRail from '@/components/media/MediaRail';
@@ -99,7 +99,7 @@ export default async function SeriesPage({ params }: Props) {
         {episodes.length > 0 && (
           <div className='mt-10 space-y-4'>
             <h2 className='text-xl font-bold text-white'>Episodes</h2>
-            <EpisodeList episodes={episodes} seriesSlug={slug} />
+            <EpisodeList episodes={episodes} />
           </div>
         )}
 

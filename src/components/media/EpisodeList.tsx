@@ -1,10 +1,10 @@
-import { ExternalLink,Play } from 'lucide-react';
+import { ExternalLink, Play } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
 import type { Episode } from '@/types';
 
-export default function EpisodeList({ episodes }: { episodes: Episode[]; seriesSlug: string }) {
+export default function EpisodeList({ episodes }: { episodes: Episode[] }) {
   if (!episodes.length) return null;
   return (
     <div className='space-y-2'>
