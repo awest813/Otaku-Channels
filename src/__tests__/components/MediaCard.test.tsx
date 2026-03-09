@@ -3,12 +3,6 @@ import React from 'react';
 
 import MediaCard from '@/components/media/MediaCard';
 
-jest.mock('next/image', () => ({
-  __esModule: true,
-  // eslint-disable-next-line @next/next/no-img-element
-  default: ({ alt, ...props }: { alt: string }) => <img alt={alt} {...props} />,
-}));
-
 jest.mock('next/link', () => ({
   __esModule: true,
   default: ({

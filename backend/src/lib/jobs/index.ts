@@ -8,8 +8,8 @@
  *  - session-cleanup: remove expired refresh tokens
  *  - schedule-generate: pre-generate schedule windows for fast reads
  *
- * TODO: Add workers for each queue. Workers are separate processes that
- *       should be started independently in production (e.g. npm run worker).
+ * Workers are implemented in src/lib/jobs/workers/ and started via
+ * `npm run worker` (see src/worker.ts).
  */
 
 import { Queue } from 'bullmq';
@@ -54,9 +54,3 @@ export async function scheduleRecurringJobs() {
     logger.warn({ err }, 'Failed to schedule recurring jobs — queue may be unavailable');
   }
 }
-
-// TODO: Implement actual worker processes in src/lib/jobs/workers/
-// Each worker should:
-//   1. Process the queue job
-//   2. Log errors without crashing
-//   3. Emit metrics on success/failure

@@ -24,6 +24,8 @@ import { watchlistsRoutes } from '../modules/watchlists/routes';
 import { recommendationsRoutes } from '../modules/recommendations/routes';
 import { adminRoutes } from '../modules/admin/routes';
 import { streamingRoutes } from '../modules/streaming/routes';
+import { profilesRoutes } from '../modules/profiles/routes';
+import { moderationRoutes } from '../modules/moderation/routes';
 
 export async function buildServer() {
   const app = Fastify({
@@ -139,6 +141,8 @@ export async function buildServer() {
   await app.register(recommendationsRoutes, { prefix: `${API}/recommendations` });
   await app.register(adminRoutes, { prefix: `${API}/admin` });
   await app.register(streamingRoutes, { prefix: `${API}/streaming` });
+  await app.register(profilesRoutes, { prefix: `${API}/profiles` });
+  await app.register(moderationRoutes, { prefix: `${API}/moderation` });
 
   return app;
 }

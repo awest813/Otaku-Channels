@@ -5,13 +5,6 @@ jest.mock('next/navigation', () => ({
   usePathname: () => '/',
 }));
 
-// Mock next/image
-jest.mock('next/image', () => ({
-  __esModule: true,
-  // eslint-disable-next-line @next/next/no-img-element
-  default: ({ alt, ...props }: { alt: string }) => <img alt={alt} {...props} />,
-}));
-
 // Mock next/link
 jest.mock('next/link', () => ({
   __esModule: true,
