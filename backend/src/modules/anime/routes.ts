@@ -1,0 +1,177 @@
+import type { FastifyInstance } from 'fastify';
+import { z } from 'zod';
+import { requireAuth, requireRole } from '../../lib/http/auth-middleware';
+import { sendError, NotFoundError } from '../../lib/errors';
+import {
+  listAnime,
+  getAnimeBySlug,
+  createAnime,
+  updateAnime,
+  getRelatedAnime,
+} from './service';
+import { db } from '../../lib/db';
+
+export async function animeRoutes(app: FastifyInstance) {
+  // GET /api/v1/anime
+  app.get('/', async (request, reply) => {
+    try {
+      const q = request.query as Record<string, string>;
+      const result = await listAnime({
+        page: q.page ? parseInt(q.page) : 1,
+        limit: q.limit ? parseInt(q.limit) : 20,
+        genre: q.genre,
+        tag: q.tag,
+        type: q.type as any,
+        status: q.status as any,
+        season: q.season as any,
+        year: q.year ? parseInt(q.year) : undefined,
+        source: q.source,
+        featured: q.featured === 'true' ? true : q.featured === 'false' ? false : undefined,
+        sort: q.sort as any,
+      });
+      return reply.send(result);
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/trending
+  app.get('/trending', async (_request, reply) => {
+    try {
+      const result = await listAnime({ limit: 20, sort: 'trending' });
+      return reply.send(result);
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/featured
+  app.get('/featured', async (_request, reply) => {
+    try {
+      const result = await listAnime({ limit: 10, featured: true, sort: 'trending' });
+      return reply.send(result);
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/genres
+  app.get('/genres', async (_request, reply) => {
+    try {
+      const genres = await db.genre.findMany({ orderBy: { name: 'asc' } });
+      return reply.send({ data: genres });
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/:slug
+  app.get('/:slug', async (request, reply) => {
+    try {
+      const { slug } = request.params as { slug: string };
+      const anime = await getAnimeBySlug(slug);
+      return reply.send({ data: anime });
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/:slug/related
+  app.get('/:slug/related', async (request, reply) => {
+    try {
+      const { slug } = request.params as { slug: string };
+      const anime = await db.animeTitle.findUnique({ where: { slug }, select: { id: true } });
+      if (!anime) throw new NotFoundError('Anime');
+      const related = await getRelatedAnime(anime.id);
+      return reply.send({ data: related });
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // GET /api/v1/anime/:slug/episodes
+  app.get('/:slug/episodes', async (request, reply) => {
+    try {
+      const { slug } = request.params as { slug: string };
+      const anime = await db.animeTitle.findUnique({
+        where: { slug },
+        select: { id: true },
+      });
+      if (!anime) throw new NotFoundError('Anime');
+
+      const q = request.query as Record<string, string>;
+      const episodes = await db.episode.findMany({
+        where: {
+          animeId: anime.id,
+          ...(q.season ? { seasonNumber: parseInt(q.season) } : {}),
+        },
+        include: {
+          sourceLinks: {
+            where: { status: 'ACTIVE' },
+            select: { url: true, sourceName: true, sourceType: true, isEmbeddable: true, language: true },
+          },
+        },
+        orderBy: [{ seasonNumber: 'asc' }, { episodeNumber: 'asc' }],
+      });
+
+      return reply.send({ data: episodes });
+    } catch (err) {
+      return sendError(reply, err);
+    }
+  });
+
+  // ── Admin: create/update anime ─────────────────────────────────────────────
+
+  const CreateAnimeSchema = z.object({
+    title: z.string().min(1),
+    slug: z.string().optional(),
+    titleEnglish: z.string().optional(),
+    titleJapanese: z.string().optional(),
+    synopsis: z.string().optional(),
+    type: z.enum(['TV', 'MOVIE', 'OVA', 'ONA', 'SPECIAL', 'MUSIC']).optional(),
+    status: z.enum(['ONGOING', 'COMPLETED', 'UPCOMING', 'HIATUS', 'CANCELLED']).optional(),
+    releaseYear: z.number().int().min(1900).max(2100).optional(),
+    releaseSeason: z.enum(['WINTER', 'SPRING', 'SUMMER', 'FALL']).optional(),
+    episodeCount: z.number().int().positive().optional(),
+    episodeDuration: z.number().int().positive().optional(),
+    malId: z.number().int().positive().optional(),
+    anilistId: z.number().int().positive().optional(),
+    posterUrl: z.string().url().optional(),
+    backdropUrl: z.string().url().optional(),
+    rating: z.number().min(0).max(10).optional(),
+    isAdultContent: z.boolean().optional(),
+    genres: z.array(z.string()).optional(),
+    tags: z.array(z.string()).optional(),
+    studios: z.array(z.string()).optional(),
+    aliases: z.array(z.object({ alias: z.string(), language: z.string().optional() })).optional(),
+  });
+
+  app.post(
+    '/',
+    { preHandler: [requireAuth, requireRole('ADMIN', 'MODERATOR')] },
+    async (request, reply) => {
+      try {
+        const body = CreateAnimeSchema.parse(request.body);
+        const anime = await createAnime(body);
+        return reply.status(201).send({ data: anime });
+      } catch (err) {
+        return sendError(reply, err);
+      }
+    },
+  );
+
+  app.patch(
+    '/:id',
+    { preHandler: [requireAuth, requireRole('ADMIN', 'MODERATOR')] },
+    async (request, reply) => {
+      try {
+        const { id } = request.params as { id: string };
+        const body = CreateAnimeSchema.partial().parse(request.body);
+        const anime = await updateAnime(id, body as any);
+        return reply.send({ data: anime });
+      } catch (err) {
+        return sendError(reply, err);
+      }
+    },
+  );
+}
