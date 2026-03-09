@@ -100,7 +100,13 @@ export default function SearchPage() {
       {query || genre || source ? (
         results.length === 0 ? (
           <div className='space-y-4'>
-            <EmptyState message={`No results for "${query}"`} />
+            <EmptyState
+              message={
+                query
+                  ? `No results for "${query}"`
+                  : 'No anime matches these filters.'
+              }
+            />
             {query && (
               <div className='flex flex-col items-center gap-2'>
                 <p className='text-sm text-slate-400'>

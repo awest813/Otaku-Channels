@@ -43,7 +43,7 @@ export default function Footer() {
           </nav>
         </div>
         <p className='mt-6 text-xs text-slate-600'>
-          © 2024 Anime TV — Mock data only. Phase 1 demo.
+          © {new Date().getFullYear()} Anime TV
         </p>
       </div>
     </footer>

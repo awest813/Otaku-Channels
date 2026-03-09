@@ -1,7 +1,8 @@
 'use client';
+import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
-import { allContent } from '@/data/mockData';
+import { allContent, sourceProviders } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
 import EmptyState from '@/components/ui/EmptyState';
@@ -19,10 +20,21 @@ const sources = [
 ];
 const languages = ['All', 'sub', 'dub', 'both'];
 
-export default function BrowsePage() {
+function BrowseContent() {
+  const searchParams = useSearchParams();
+
+  // Map sourceType param (e.g. 'youtube') → sourceName (e.g. 'YouTube Official')
+  const sourceParam = searchParams.get('source');
+  const initialSource = sourceParam
+    ? sourceProviders.find((sp) => sp.type === sourceParam)?.name ?? 'All'
+    : 'All';
+  const langParam = searchParams.get('language');
+  const initialLang =
+    langParam && languages.includes(langParam) ? langParam : 'All';
+
   const [genre, setGenre] = React.useState<string | null>(null);
-  const [source, setSource] = React.useState('All');
-  const [lang, setLang] = React.useState('All');
+  const [source, setSource] = React.useState(initialSource);
+  const [lang, setLang] = React.useState(initialLang);
 
   const filtered = (allContent as Array<AnimeSeries | Movie>).filter((item) => {
     if (genre && !item.genres.includes(genre)) return false;
@@ -103,5 +115,19 @@ export default function BrowsePage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function BrowsePage() {
+  return (
+    <React.Suspense
+      fallback={
+        <div className='mx-auto max-w-screen-xl px-4 py-8'>
+          <div className='h-8 w-48 animate-pulse rounded bg-slate-800' />
+        </div>
+      }
+    >
+      <BrowseContent />
+    </React.Suspense>
   );
 }

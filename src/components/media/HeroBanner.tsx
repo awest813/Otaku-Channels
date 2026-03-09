@@ -52,7 +52,8 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
                   </>
                 ) : (
                   <>
-                    <ExternalLink className='h-4 w-4' /> Watch on Source
+                    <ExternalLink className='h-4 w-4' /> Watch on{' '}
+                    {series.sourceName}
                   </>
                 )}
               </Link>

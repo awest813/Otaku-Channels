@@ -19,16 +19,16 @@ export default function Error({
 
   return (
     <main>
-      <section className='bg-white'>
-        <div className='layout flex min-h-screen flex-col items-center justify-center text-center text-black'>
+      <section className='bg-slate-950'>
+        <div className='flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center'>
           <RiAlarmWarningFill
             size={60}
             className='drop-shadow-glow animate-flicker text-red-500'
           />
-          <h1 className='mt-8 text-4xl md:text-6xl'>
+          <h1 className='text-4xl font-bold text-white md:text-6xl'>
             Oops, something went wrong!
           </h1>
-          <TextButton variant='basic' onClick={reset} className='mt-4'>
+          <TextButton variant='basic' onClick={reset} className='mt-2'>
             Try again
           </TextButton>
         </div>

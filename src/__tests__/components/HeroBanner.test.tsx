@@ -73,10 +73,10 @@ describe('HeroBanner', () => {
     );
   });
 
-  it('renders "Watch on Source" link for non-embeddable content', () => {
+  it('renders "Watch on source name" link for non-embeddable content', () => {
     render(<HeroBanner series={{ ...mockSeries, isEmbeddable: false }} />);
     expect(
-      screen.getByRole('link', { name: /Watch on Source/i })
+      screen.getByRole('link', { name: /Watch on YouTube Official/i })
     ).toBeInTheDocument();
   });
 

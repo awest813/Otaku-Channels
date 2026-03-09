@@ -857,6 +857,11 @@ export function getSeriesBySlug(slug: string): AnimeSeries | undefined {
 export function getEpisodesBySeries(slug: string): Episode[] {
   return mockEpisodes[slug] ?? [];
 }
+export function getEpisodeById(id: string): Episode | undefined {
+  return Object.values(mockEpisodes)
+    .flat()
+    .find((ep) => ep.id === id);
+}
 export function getRelatedSeries(
   series: AnimeSeries,
   count = 6
