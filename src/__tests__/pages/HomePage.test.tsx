@@ -1,16 +1,40 @@
 import { render, screen } from '@testing-library/react';
 
+// Mock next/navigation for the TopNav component
+jest.mock('next/navigation', () => ({
+  usePathname: () => '/',
+}));
+
+// Mock next/image
+jest.mock('next/image', () => ({
+  __esModule: true,
+  // eslint-disable-next-line @next/next/no-img-element
+  default: ({ alt, ...props }: { alt: string }) => <img alt={alt} {...props} />,
+}));
+
+// Mock next/link
+jest.mock('next/link', () => ({
+  __esModule: true,
+  default: ({
+    children,
+    href,
+  }: {
+    children: React.ReactNode;
+    href: string;
+  }) => <a href={href}>{children}</a>,
+}));
+
+import React from 'react';
+
 import HomePage from '@/app/page';
 
 describe('Homepage', () => {
-  it('renders the Otaku Channels pitch', () => {
-    render(<HomePage />);
+  it('renders the Anime TV hero and rails', async () => {
+    const Page = await HomePage();
+    render(Page as React.ReactElement);
 
-    expect(
-      screen.getByText(
-        /A browser-based anime TV guide for legally free streams/i
-      )
-    ).toBeInTheDocument();
-    expect(screen.getByText(/Playback guardrails/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trending Free Anime/i)).toBeInTheDocument();
+    expect(screen.getByText(/Official YouTube Anime/i)).toBeInTheDocument();
+    expect(screen.getByText(/Live Channels/i)).toBeInTheDocument();
   });
 });
