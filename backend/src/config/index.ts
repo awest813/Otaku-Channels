@@ -32,6 +32,9 @@ const envSchema = z.object({
   // Kitsu — free public REST API (no key required)
   KITSU_BASE_URL: z.string().url().default('https://kitsu.io/api/edge'),
 
+  // Shikimori — free public GraphQL API (no key required)
+  SHIKIMORI_BASE_URL: z.string().url().default('https://shikimori.one/api/graphql'),
+
   // Consumet — requires self-hosting; leave empty to disable
   CONSUMET_BASE_URL: z.union([z.string().url(), z.literal('')]).default(''),
 

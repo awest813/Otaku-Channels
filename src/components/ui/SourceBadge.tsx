@@ -13,6 +13,8 @@ const styles: Record<SourceType, string> = {
   crunchyroll: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30',
   consumet: 'bg-sky-600/20 text-sky-400 border-sky-600/30',
   jikan: 'bg-violet-600/20 text-violet-400 border-violet-600/30',
+  kitsu: 'bg-rose-600/20 text-rose-400 border-rose-600/30',
+  shikimori: 'bg-indigo-600/20 text-indigo-400 border-indigo-600/30',
 };
 
 const icons: Record<SourceType, string> = {
@@ -26,6 +28,8 @@ const icons: Record<SourceType, string> = {
   crunchyroll: '🍊',
   consumet: '🎞',
   jikan: '📋',
+  kitsu: '🦊',
+  shikimori: '🌐',
 };
 
 const names: Record<SourceType, string> = {
@@ -39,6 +43,8 @@ const names: Record<SourceType, string> = {
   crunchyroll: 'Crunchyroll',
   consumet: 'Streaming',
   jikan: 'MyAnimeList',
+  kitsu: 'Kitsu',
+  shikimori: 'Shikimori',
 };
 
 export default function SourceBadge({
