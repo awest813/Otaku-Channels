@@ -1,15 +1,16 @@
-// !STARTERCONF You should delete this page
-
 import { render, screen } from '@testing-library/react';
 
 import HomePage from '@/app/page';
 
 describe('Homepage', () => {
-  it('renders the Components', () => {
+  it('renders the Otaku Channels pitch', () => {
     render(<HomePage />);
 
-    const heading = screen.getByText(/A starter for Next.js/i);
-
-    expect(heading).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /A browser-based anime TV guide for legally free streams/i
+      )
+    ).toBeInTheDocument();
+    expect(screen.getByText(/Playback guardrails/i)).toBeInTheDocument();
   });
 });
