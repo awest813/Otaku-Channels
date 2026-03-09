@@ -24,6 +24,7 @@ const envSchema = z.object({
 
   JIKAN_BASE_URL: z.string().url().default('https://api.jikan.moe/v4'),
   ANILIST_BASE_URL: z.string().url().default('https://graphql.anilist.co'),
+  CONSUMET_BASE_URL: z.string().url().optional(),
 
   ADMIN_SEED_EMAILS: z.string().default(''),
 });
