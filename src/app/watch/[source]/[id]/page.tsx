@@ -3,6 +3,8 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
+import { getAnime } from '@/lib/backend';
+
 import {
   getEpisodeById,
   getRelatedSeries,
@@ -13,23 +15,40 @@ import {
 import SourceBadge from '@/components/ui/SourceBadge';
 import WatchPlayerShell from '@/components/watch/WatchPlayerShell';
 
+import type { AnimeSeries } from '@/types';
+
 interface Props {
   params: Promise<{ source: string; id: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const series = mockSeries.find((s) => s.id === id);
-  if (series) return { title: `Watch: ${series.title}` };
-  const episode = getEpisodeById(id);
-  if (episode) return { title: `Watch: ${episode.title}` };
-  return { title: 'Watch' };
+  // Try backend for series; fall back to mock
+  try {
+    const result = await getAnime(id);
+    const s = result.data as AnimeSeries;
+    return { title: `Watch: ${s.title}` };
+  } catch {
+    const series = mockSeries.find((s) => s.id === id);
+    if (series) return { title: `Watch: ${series.title}` };
+    const episode = getEpisodeById(id);
+    if (episode) return { title: `Watch: ${episode.title}` };
+    return { title: 'Watch' };
+  }
 }
 
 export default async function WatchPage({ params }: Props) {
   const { id } = await params;
 
-  const series = mockSeries.find((s) => s.id === id);
+  // Try backend first, fall back to mock data
+  let series: AnimeSeries | null = null;
+  try {
+    const result = await getAnime(id);
+    series = result.data as AnimeSeries;
+  } catch {
+    series = mockSeries.find((s) => s.id === id) ?? null;
+  }
+
   const episode = series ? null : getEpisodeById(id);
   const episodeParent = episode ? getSeriesBySlug(episode.seriesSlug) : null;
 
@@ -50,7 +69,8 @@ export default async function WatchPage({ params }: Props) {
   const isEmbeddable = series?.isEmbeddable ?? episode?.isEmbeddable ?? false;
   const watchUrl = series?.watchUrl ?? episode?.watchUrl ?? '';
   const sourceName = series?.sourceName ?? episode?.sourceName ?? '';
-  const sourceType = series?.sourceType ?? episode?.sourceType ?? 'youtube';
+  const sourceType =
+    series?.sourceType ?? episodeParent?.sourceType ?? 'youtube';
   const title = series?.title ?? episode?.title ?? '';
   const description = series?.description ?? episode?.description ?? '';
   const backHref = series
@@ -78,7 +98,7 @@ export default async function WatchPage({ params }: Props) {
       {/* Back navigation */}
       <Link
         href={backHref}
-        className='mb-4 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:rounded'
+        className='mb-4 inline-flex items-center gap-2 text-sm text-slate-400 transition-colors hover:text-cyan-400 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
       >
         <ArrowLeft className='h-4 w-4' />
         <span>Back to {backLabel}</span>
@@ -157,7 +177,7 @@ export default async function WatchPage({ params }: Props) {
                   />
                 </div>
                 <div className='min-w-0 flex-1'>
-                  <p className='line-clamp-2 text-sm font-medium leading-snug text-white group-hover:text-cyan-300 transition-colors'>
+                  <p className='line-clamp-2 text-sm font-medium leading-snug text-white transition-colors group-hover:text-cyan-300'>
                     {s.title}
                   </p>
                   <p className='mt-1 text-xs text-slate-500'>{s.releaseYear}</p>

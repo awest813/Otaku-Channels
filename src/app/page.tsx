@@ -1,5 +1,7 @@
 import type { Metadata } from 'next';
 
+import { listAnime, listChannels } from '@/lib/backend';
+
 import { mockLiveChannels, mockMovies, mockSeries } from '@/data/mockData';
 
 import HeroBanner from '@/components/media/HeroBanner';
@@ -8,25 +10,47 @@ import MediaRail from '@/components/media/MediaRail';
 import RecentlyViewedRail from '@/components/media/RecentlyViewedRail';
 import SectionHeader from '@/components/ui/SectionHeader';
 
+import type { AnimeSeries, LiveChannel, Movie } from '@/types';
+
 export const metadata: Metadata = {
   title: 'Anime TV — Free Official Anime',
   description:
     'Discover and watch officially licensed free anime from YouTube, Tubi, Crunchyroll, RetroCrush, and more.',
 };
 
-export default function HomePage() {
-  const hero = mockSeries[0];
-  const trending = mockSeries.filter((s) => s.tags?.includes('Trending'));
-  const youtube = mockSeries.filter((s) => s.sourceType === 'youtube');
-  const retro = mockSeries.filter(
+export default async function HomePage() {
+  // Try backend first; gracefully fall back to mock data if unavailable.
+  let allSeries: AnimeSeries[] = mockSeries;
+  let allMovies: Movie[] = mockMovies;
+  let allChannels: LiveChannel[] = mockLiveChannels;
+
+  try {
+    const [seriesResult, moviesResult, channelsResult] = await Promise.all([
+      listAnime({ limit: 200 }),
+      listAnime({ type: 'MOVIE', limit: 100 }),
+      listChannels(),
+    ]);
+    if (seriesResult.data.length > 0)
+      allSeries = seriesResult.data as AnimeSeries[];
+    if (moviesResult.data.length > 0) allMovies = moviesResult.data as Movie[];
+    if (channelsResult.data.length > 0)
+      allChannels = channelsResult.data as LiveChannel[];
+  } catch {
+    // Backend unavailable — mock data used as fallback (already set above)
+  }
+
+  const hero = allSeries[0];
+  const trending = allSeries.filter((s) => s.tags?.includes('Trending'));
+  const youtube = allSeries.filter((s) => s.sourceType === 'youtube');
+  const retro = allSeries.filter(
     (s) => s.sourceType === 'retro' || s.sourceType === 'retrocrush'
   );
-  const tubi = mockSeries.filter((s) => s.sourceType === 'tubi');
-  const crunchyroll = mockSeries.filter((s) => s.sourceType === 'crunchyroll');
-  const dubbed = mockSeries.filter(
+  const tubi = allSeries.filter((s) => s.sourceType === 'tubi');
+  const crunchyroll = allSeries.filter((s) => s.sourceType === 'crunchyroll');
+  const dubbed = allSeries.filter(
     (s) => s.language === 'dub' || s.language === 'both'
   );
-  const movies = mockMovies;
+  const movies = allMovies;
 
   return (
     <>
@@ -70,7 +94,7 @@ export default function HomePage() {
         {crunchyroll.length > 0 && (
           <MediaRail
             title='Free on Crunchyroll'
-            description='Available on Crunchyroll&apos;s free tier'
+            description="Available on Crunchyroll's free tier"
             items={crunchyroll}
             seeAllHref='/browse?source=crunchyroll'
           />
@@ -101,11 +125,7 @@ export default function HomePage() {
           <MediaRail
             title='Anime Movies'
             description='Feature films available free'
-            items={
-              movies as Array<
-                import('@/types').AnimeSeries | import('@/types').Movie
-              >
-            }
+            items={movies as Array<AnimeSeries | Movie>}
             seeAllHref='/browse?type=movie'
           />
         )}
@@ -118,7 +138,7 @@ export default function HomePage() {
             description='Free 24/7 anime streaming channels'
           />
           <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4'>
-            {mockLiveChannels.map((ch) => (
+            {allChannels.map((ch) => (
               <LiveChannelCard key={ch.id} channel={ch} />
             ))}
           </div>

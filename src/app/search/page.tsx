@@ -1,8 +1,8 @@
 'use client';
-import { ExternalLink, Search } from 'lucide-react';
+import { ExternalLink, Loader2, Search } from 'lucide-react';
 import * as React from 'react';
 
-import { allContent, sourceProviders } from '@/data/mockData';
+import { allContent } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
 import SearchBar from '@/components/search/SearchBar';
@@ -11,8 +11,9 @@ import GenrePill from '@/components/ui/GenrePill';
 
 import type { AnimeSeries, Movie } from '@/types';
 
-const allGenres = Array.from(
-  new Set(allContent.flatMap((i) => i.genres))
+// Derive genres from the static content for filter chips
+const fallbackGenres = Array.from(
+  new Set((allContent as (AnimeSeries | Movie)[]).flatMap((i) => i.genres))
 ).sort();
 
 /** Build a YouTube search URL for an anime query. */
@@ -21,52 +22,67 @@ function youtubeAnimeSearchUrl(query: string): string {
   return `https://www.youtube.com/results?search_query=${q}`;
 }
 
-function FilterChip({
-  label,
-  active,
-  onClick,
-}: {
-  label: string;
-  active: boolean;
-  onClick: () => void;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
-        active
-          ? 'border-cyan-500 bg-cyan-500/15 text-cyan-300'
-          : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-white'
-      }`}
-    >
-      {label}
-    </button>
-  );
-}
-
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
   const [genre, setGenre] = React.useState<string | null>(null);
-  const [source, setSource] = React.useState<string | null>(null);
+  const [apiResults, setApiResults] = React.useState<
+    (AnimeSeries | Movie)[] | null
+  >(null);
+  const [searching, setSearching] = React.useState(false);
 
-  const results = (allContent as Array<AnimeSeries | Movie>).filter((item) => {
-    const q = query.toLowerCase();
-    const matchesQuery =
-      !query ||
-      item.title.toLowerCase().includes(q) ||
-      item.description.toLowerCase().includes(q) ||
-      item.genres.some((g) => g.toLowerCase().includes(q));
-    const matchesGenre = !genre || item.genres.includes(genre);
-    const matchesSource = !source || item.sourceName === source;
-    return matchesQuery && matchesGenre && matchesSource;
-  });
+  // Debounced API search — fires 400 ms after the user stops typing
+  React.useEffect(() => {
+    if (!query && !genre) {
+      setApiResults(null);
+      return;
+    }
 
-  const hasFilters = !!(query || genre || source);
+    const timer = setTimeout(async () => {
+      setSearching(true);
+      try {
+        const params = new URLSearchParams();
+        if (query) params.set('q', query);
+        if (genre) params.set('genre', genre);
+        const res = await fetch(`/api/search?${params.toString()}`);
+        if (res.ok) {
+          const body = await res.json();
+          setApiResults(body.data as (AnimeSeries | Movie)[]);
+        } else {
+          // Non-OK response: fall back to in-memory
+          setApiResults(null);
+        }
+      } catch {
+        // Network error or backend down: fall back to in-memory
+        setApiResults(null);
+      } finally {
+        setSearching(false);
+      }
+    }, 400);
+
+    return () => clearTimeout(timer);
+  }, [query, genre]);
+
+  // In-memory fallback when API is unavailable
+  const inMemoryResults = (allContent as (AnimeSeries | Movie)[]).filter(
+    (item) => {
+      const q = query.toLowerCase();
+      const matchesQuery =
+        !query ||
+        item.title.toLowerCase().includes(q) ||
+        item.description.toLowerCase().includes(q) ||
+        item.genres.some((g) => g.toLowerCase().includes(q));
+      const matchesGenre = !genre || item.genres.includes(genre);
+      return matchesQuery && matchesGenre;
+    }
+  );
+
+  const results = apiResults ?? inMemoryResults;
+  const hasFilters = !!(query || genre);
 
   const clearFilters = () => {
     setQuery('');
     setGenre(null);
-    setSource(null);
+    setApiResults(null);
   };
 
   return (
@@ -89,9 +105,8 @@ export default function SearchPage() {
         placeholder='Search by title, genre, or description…'
       />
 
-      {/* Filters */}
+      {/* Genre filter */}
       <div className='mb-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4'>
-        {/* Genre filter */}
         <div>
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
             Genre
@@ -102,7 +117,7 @@ export default function SearchPage() {
               active={!genre}
               onClick={() => setGenre(null)}
             />
-            {allGenres.map((g) => (
+            {fallbackGenres.map((g) => (
               <GenrePill
                 key={g}
                 genre={g}
@@ -112,40 +127,19 @@ export default function SearchPage() {
             ))}
           </div>
         </div>
-
-        {/* Source filter */}
-        <div>
-          <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
-            Source
-          </p>
-          <div className='flex flex-wrap gap-2'>
-            <FilterChip
-              label='All Sources'
-              active={!source}
-              onClick={() => setSource(null)}
-            />
-            {sourceProviders.map((sp) => (
-              <FilterChip
-                key={sp.id}
-                label={sp.name}
-                active={source === sp.name}
-                onClick={() =>
-                  setSource(source === sp.name ? null : sp.name)
-                }
-              />
-            ))}
-          </div>
-        </div>
       </div>
 
       {/* Results */}
-      {hasFilters ? (
+      {searching ? (
+        <div className='flex items-center justify-center gap-3 py-16 text-slate-400'>
+          <Loader2 className='h-5 w-5 animate-spin' />
+          <span className='text-sm'>Searching…</span>
+        </div>
+      ) : hasFilters ? (
         results.length === 0 ? (
           <div className='space-y-6'>
             <EmptyState
-              title={
-                query ? `No results for "${query}"` : 'No matches found'
-              }
+              title={query ? `No results for "${query}"` : 'No matches found'}
               message={
                 query
                   ? 'Try a different spelling, or search YouTube for more anime.'
@@ -185,7 +179,7 @@ export default function SearchPage() {
                   href={youtubeAnimeSearchUrl(query)}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='inline-flex items-center gap-1.5 rounded-lg bg-red-600/15 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+                  className='bg-red-600/15 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
                 >
                   <ExternalLink className='h-3.5 w-3.5' />
                   Also search YouTube
@@ -206,9 +200,11 @@ export default function SearchPage() {
               Popular picks to get you started
             </p>
             <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
-              {allContent.slice(0, 12).map((item) => (
-                <MediaCard key={item.id} item={item as AnimeSeries | Movie} />
-              ))}
+              {(allContent as (AnimeSeries | Movie)[])
+                .slice(0, 12)
+                .map((item) => (
+                  <MediaCard key={item.id} item={item} />
+                ))}
             </div>
           </div>
         </div>

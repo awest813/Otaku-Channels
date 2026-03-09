@@ -17,17 +17,28 @@ jest.mock('next/link', () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+// Mock the backend so the async server component uses mock data
+jest.mock('@/lib/backend');
+
+// Mock MediaRail to avoid ResizeObserver dependency in jsdom
+jest.mock('@/components/media/MediaRail', () => ({
+  __esModule: true,
+  default: ({ title }: { title: string }) => <section>{title}</section>,
+}));
+
 import React from 'react';
+
+import { ToastProvider } from '@/components/ui/Toast';
 
 import HomePage from '@/app/page';
 
 describe('Homepage', () => {
   it('renders the Anime TV hero and rails', async () => {
     const Page = await HomePage();
-    render(Page as React.ReactElement);
+    render(<ToastProvider>{Page as React.ReactElement}</ToastProvider>);
 
     expect(screen.getByText(/Trending Free Anime/i)).toBeInTheDocument();
-    expect(screen.getByText(/Official YouTube Anime/i)).toBeInTheDocument();
+    expect(screen.getByText(/Official on YouTube/i)).toBeInTheDocument();
     expect(screen.getByText(/Live Channels/i)).toBeInTheDocument();
   });
 });
