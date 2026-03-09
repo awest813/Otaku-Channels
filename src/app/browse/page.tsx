@@ -6,6 +6,8 @@ import * as React from 'react';
 import { allContent, sourceProviders } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
+import MediaCardSkeleton from '@/components/media/MediaCardSkeleton';
+import Skeleton from '@/components/Skeleton';
 import EmptyState from '@/components/ui/EmptyState';
 import GenrePill from '@/components/ui/GenrePill';
 
@@ -36,7 +38,7 @@ function FilterChip({
       onClick={onClick}
       className={`rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
         active
-          ? 'border-cyan-500 bg-cyan-500/15 text-cyan-300'
+          ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300'
           : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-white'
       }`}
     >
@@ -220,9 +222,7 @@ function BrowseContent() {
                 label={ct.label}
                 active={contentType === ct.value}
                 onClick={() =>
-                  setContentType(
-                    contentType === ct.value ? null : ct.value
-                  )
+                  setContentType(contentType === ct.value ? null : ct.value)
                 }
               />
             ))}
@@ -234,7 +234,7 @@ function BrowseContent() {
           <div className='border-t border-slate-800 pt-3'>
             <button
               onClick={clearAll}
-              className='flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-red-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400 focus-visible:rounded'
+              className='flex items-center gap-1.5 text-xs text-slate-500 transition-colors hover:text-red-400 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-400'
             >
               <X className='h-3.5 w-3.5' />
               Clear all filters
@@ -271,15 +271,49 @@ function BrowseContent() {
   );
 }
 
+function BrowsePageSkeleton() {
+  return (
+    <div
+      aria-busy='true'
+      aria-label='Loading browse page'
+      className='mx-auto max-w-screen-xl px-4 py-8'
+    >
+      {/* Page header */}
+      <div className='mb-6'>
+        <Skeleton className='h-8 w-28 rounded-lg' />
+        <Skeleton className='mt-1.5 h-4 w-64 rounded' />
+      </div>
+
+      {/* Filter panel */}
+      <div className='mb-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4'>
+        {[...Array(4)].map((_, row) => (
+          <div key={row}>
+            <Skeleton className='mb-2 h-3 w-16 rounded' />
+            <div className='flex flex-wrap gap-2'>
+              {Array.from({ length: 5 + row }).map((_, i) => (
+                <Skeleton key={i} className='h-6 w-16 rounded-full' />
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+
+      {/* Results count */}
+      <Skeleton className='mb-4 h-4 w-24 rounded' />
+
+      {/* Card grid */}
+      <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+        {Array.from({ length: 18 }).map((_, i) => (
+          <MediaCardSkeleton key={i} />
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export default function BrowsePage() {
   return (
-    <React.Suspense
-      fallback={
-        <div className='mx-auto max-w-screen-xl px-4 py-8'>
-          <div className='h-8 w-48 animate-pulse rounded-lg bg-slate-800' />
-        </div>
-      }
-    >
+    <React.Suspense fallback={<BrowsePageSkeleton />}>
       <BrowseContent />
     </React.Suspense>
   );
