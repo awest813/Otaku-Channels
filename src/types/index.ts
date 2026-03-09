@@ -1,6 +1,14 @@
 export type LanguageOption = 'sub' | 'dub' | 'both';
 export type ContentType = 'series' | 'movie' | 'live' | 'episode';
-export type SourceType = 'youtube' | 'retro' | 'freestream' | 'live';
+export type SourceType =
+  | 'youtube'
+  | 'retro'
+  | 'freestream'
+  | 'live'
+  | 'tubi'
+  | 'pluto'
+  | 'retrocrush'
+  | 'crunchyroll';
 
 export interface Genre {
   id: string;

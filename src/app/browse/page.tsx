@@ -12,11 +12,10 @@ import type { AnimeSeries, Movie } from '@/types';
 const allGenres = Array.from(
   new Set(allContent.flatMap((i) => i.genres))
 ).sort();
+/** Derive the source list from content that actually exists in mock data. */
 const sources = [
   'All',
-  'YouTube Official',
-  'Retro Channel',
-  'FreeStream Anime',
+  ...Array.from(new Set(allContent.map((i) => i.sourceName))).sort(),
 ];
 const languages = ['All', 'sub', 'dub', 'both'];
 

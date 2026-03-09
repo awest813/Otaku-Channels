@@ -7,6 +7,10 @@ const styles: Record<SourceType, string> = {
   retro: 'bg-amber-600/20 text-amber-400 border-amber-600/30',
   freestream: 'bg-blue-600/20 text-blue-400 border-blue-600/30',
   live: 'bg-green-600/20 text-green-400 border-green-600/30',
+  tubi: 'bg-orange-600/20 text-orange-400 border-orange-600/30',
+  pluto: 'bg-purple-600/20 text-purple-400 border-purple-600/30',
+  retrocrush: 'bg-pink-600/20 text-pink-400 border-pink-600/30',
+  crunchyroll: 'bg-yellow-600/20 text-yellow-400 border-yellow-600/30',
 };
 
 const icons: Record<SourceType, string> = {
@@ -14,6 +18,10 @@ const icons: Record<SourceType, string> = {
   retro: '📼',
   freestream: '🆓',
   live: '🔴',
+  tubi: '🎬',
+  pluto: '📡',
+  retrocrush: '🌸',
+  crunchyroll: '🍊',
 };
 
 const names: Record<SourceType, string> = {
@@ -21,6 +29,10 @@ const names: Record<SourceType, string> = {
   retro: 'Retro',
   freestream: 'FreeStream',
   live: 'Live',
+  tubi: 'Tubi',
+  pluto: 'Pluto TV',
+  retrocrush: 'RetroCrush',
+  crunchyroll: 'Crunchyroll',
 };
 
 export default function SourceBadge({
