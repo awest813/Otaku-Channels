@@ -44,17 +44,35 @@ export async function getKitsuAnime(
   return kitsuFetch(`/anime/${kitsuId}`);
 }
 
-/** Convert a raw KitsuAnimeResource to our AnimeSeries type. */
-export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
-  const attrs = anime.attributes;
-  const thumbnail =
+/** Extract thumbnail image URL from Kitsu poster images. */
+function getKitsuThumbnail(attrs: KitsuAnimeResource['attributes']): string {
+  return (
     attrs.posterImage?.large ||
     attrs.posterImage?.medium ||
     attrs.posterImage?.original ||
-    '';
-  const heroImage =
-    attrs.coverImage?.large || attrs.coverImage?.original || thumbnail;
-  const year = attrs.startDate ? parseInt(attrs.startDate.slice(0, 4), 10) : 0;
+    ''
+  );
+}
+
+/** Extract hero image URL from Kitsu cover/poster images. */
+function getKitsuHeroImage(
+  attrs: KitsuAnimeResource['attributes'],
+  thumbnail: string
+): string {
+  return attrs.coverImage?.large || attrs.coverImage?.original || thumbnail;
+}
+
+/** Parse release year from Kitsu startDate string. */
+function parseKitsuYear(startDate: string | null): number {
+  if (!startDate) return 0;
+  const year = parseInt(startDate.slice(0, 4), 10);
+  return isNaN(year) ? 0 : year;
+}
+
+/** Convert a raw KitsuAnimeResource to our AnimeSeries type. */
+export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
+  const attrs = anime.attributes;
+  const thumbnail = getKitsuThumbnail(attrs);
 
   return {
     id: `kitsu-${anime.id}`,
@@ -62,7 +80,7 @@ export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
     title: attrs.titles.en || attrs.canonicalTitle,
     description: attrs.synopsis ?? 'No description available.',
     thumbnail,
-    heroImage,
+    heroImage: getKitsuHeroImage(attrs, thumbnail),
     type: 'series',
     genres: [],
     language: 'sub',
@@ -70,7 +88,7 @@ export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
     sourceType: 'kitsu',
     isEmbeddable: false,
     watchUrl: `https://kitsu.io/anime/${attrs.slug}`,
-    releaseYear: isNaN(year) ? 0 : year,
+    releaseYear: parseKitsuYear(attrs.startDate),
     episodeCount: attrs.episodeCount ?? 0,
     tags: [],
   };
@@ -79,14 +97,7 @@ export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
 /** Convert a raw KitsuAnimeResource to our Movie type. */
 export function kitsuToMovie(anime: KitsuAnimeResource): Movie {
   const attrs = anime.attributes;
-  const thumbnail =
-    attrs.posterImage?.large ||
-    attrs.posterImage?.medium ||
-    attrs.posterImage?.original ||
-    '';
-  const heroImage =
-    attrs.coverImage?.large || attrs.coverImage?.original || thumbnail;
-  const year = attrs.startDate ? parseInt(attrs.startDate.slice(0, 4), 10) : 0;
+  const thumbnail = getKitsuThumbnail(attrs);
 
   return {
     id: `kitsu-${anime.id}`,
@@ -94,7 +105,7 @@ export function kitsuToMovie(anime: KitsuAnimeResource): Movie {
     title: attrs.titles.en || attrs.canonicalTitle,
     description: attrs.synopsis ?? 'No description available.',
     thumbnail,
-    heroImage,
+    heroImage: getKitsuHeroImage(attrs, thumbnail),
     type: 'movie',
     genres: [],
     language: 'sub',
@@ -102,7 +113,7 @@ export function kitsuToMovie(anime: KitsuAnimeResource): Movie {
     sourceType: 'kitsu',
     isEmbeddable: false,
     watchUrl: `https://kitsu.io/anime/${attrs.slug}`,
-    releaseYear: isNaN(year) ? 0 : year,
+    releaseYear: parseKitsuYear(attrs.startDate),
     tags: ['Movie'],
   };
 }

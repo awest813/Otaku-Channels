@@ -14,6 +14,7 @@ import { kitsuToMovie, kitsuToSeries, searchKitsu } from '@/lib/kitsu';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const q = searchParams.get('q')?.trim();
+  // Kitsu page[limit] max is 20 per the JSON:API spec
   const limit = Math.min(Number(searchParams.get('limit') ?? '20'), 20);
 
   if (!q) {

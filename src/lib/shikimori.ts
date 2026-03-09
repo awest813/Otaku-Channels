@@ -90,10 +90,19 @@ function stripHtml(html: string | null): string {
   );
 }
 
+/** Extract thumbnail image URL from Shikimori poster. */
+function getShikimoriThumbnail(anime: ShikimoriAnime): string {
+  return anime.poster?.originalUrl || anime.poster?.mainUrl || '';
+}
+
+/** Parse release year from Shikimori airedOn. */
+function getShikimoriYear(anime: ShikimoriAnime): number {
+  return anime.airedOn?.year ?? 0;
+}
+
 /** Convert a raw ShikimoriAnime to our AnimeSeries type. */
 export function shikimoriToSeries(anime: ShikimoriAnime): AnimeSeries {
-  const thumbnail = anime.poster?.originalUrl || anime.poster?.mainUrl || '';
-  const year = anime.airedOn?.year ?? 0;
+  const thumbnail = getShikimoriThumbnail(anime);
 
   return {
     id: `shikimori-${anime.id}`,
@@ -109,7 +118,7 @@ export function shikimoriToSeries(anime: ShikimoriAnime): AnimeSeries {
     sourceType: 'shikimori',
     isEmbeddable: false,
     watchUrl: `https://shikimori.one/animes/${anime.id}`,
-    releaseYear: year ?? 0,
+    releaseYear: getShikimoriYear(anime),
     episodeCount: anime.episodes ?? 0,
     tags: [],
     malId: anime.malId ?? undefined,
@@ -118,8 +127,7 @@ export function shikimoriToSeries(anime: ShikimoriAnime): AnimeSeries {
 
 /** Convert a raw ShikimoriAnime to our Movie type. */
 export function shikimoriToMovie(anime: ShikimoriAnime): Movie {
-  const thumbnail = anime.poster?.originalUrl || anime.poster?.mainUrl || '';
-  const year = anime.airedOn?.year ?? 0;
+  const thumbnail = getShikimoriThumbnail(anime);
 
   return {
     id: `shikimori-${anime.id}`,
@@ -135,7 +143,7 @@ export function shikimoriToMovie(anime: ShikimoriAnime): Movie {
     sourceType: 'shikimori',
     isEmbeddable: false,
     watchUrl: `https://shikimori.one/animes/${anime.id}`,
-    releaseYear: year ?? 0,
+    releaseYear: getShikimoriYear(anime),
     tags: ['Movie'],
     malId: anime.malId ?? undefined,
   };
