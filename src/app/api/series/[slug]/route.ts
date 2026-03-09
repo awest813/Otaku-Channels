@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-import { getSeriesBySlug } from '@/data/mockData';
+import { getAnime, BackendError } from '@/lib/backend';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -8,19 +7,17 @@ interface Params {
 
 /**
  * GET /api/series/:slug
- *
- * Returns the AnimeSeries matching `slug`, or 404 if not found.
  */
 export async function GET(_request: Request, { params }: Params) {
   const { slug } = await params;
-  const series = getSeriesBySlug(slug);
 
-  if (!series) {
-    return NextResponse.json(
-      { error: `Series "${slug}" not found` },
-      { status: 404 }
-    );
+  try {
+    const result = await getAnime(slug);
+    return NextResponse.json(result);
+  } catch (err) {
+    if (err instanceof BackendError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: `Failed to fetch series "${slug}"` }, { status: 502 });
   }
-
-  return NextResponse.json({ data: series });
 }

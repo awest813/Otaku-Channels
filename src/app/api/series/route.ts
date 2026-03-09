@@ -1,41 +1,33 @@
 import { NextResponse } from 'next/server';
-
-import { mockSeries } from '@/data/mockData';
+import { listAnime, BackendError } from '@/lib/backend';
 
 /**
  * GET /api/series
  *
- * Query params:
- *   genre    — filter by genre name (case-insensitive)
- *   source   — filter by sourceType (e.g. "youtube", "tubi")
- *   language — filter by language ("sub" | "dub" | "both")
- *   tag      — filter by tag name (case-insensitive)
+ * Query params forwarded to the backend:
+ *   genre, source, language, tag, type, status, sort, page, limit
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const genre = searchParams.get('genre')?.toLowerCase();
-  const source = searchParams.get('source')?.toLowerCase();
-  const language = searchParams.get('language')?.toLowerCase();
-  const tag = searchParams.get('tag')?.toLowerCase();
 
-  let results = mockSeries;
+  try {
+    const result = await listAnime({
+      genre: searchParams.get('genre') ?? undefined,
+      source: searchParams.get('source') ?? undefined,
+      language: searchParams.get('language') ?? undefined,
+      tag: searchParams.get('tag') ?? undefined,
+      type: searchParams.get('type') ?? undefined,
+      status: searchParams.get('status') ?? undefined,
+      sort: (searchParams.get('sort') as any) ?? undefined,
+      page: searchParams.get('page') ? Number(searchParams.get('page')) : undefined,
+      limit: searchParams.get('limit') ? Number(searchParams.get('limit')) : undefined,
+    });
 
-  if (genre) {
-    results = results.filter((s) =>
-      s.genres.some((g) => g.toLowerCase() === genre)
-    );
+    return NextResponse.json(result);
+  } catch (err) {
+    if (err instanceof BackendError) {
+      return NextResponse.json({ error: err.message }, { status: err.status });
+    }
+    return NextResponse.json({ error: 'Failed to fetch series' }, { status: 502 });
   }
-  if (source) {
-    results = results.filter((s) => s.sourceType.toLowerCase() === source);
-  }
-  if (language) {
-    results = results.filter((s) => s.language.toLowerCase() === language);
-  }
-  if (tag) {
-    results = results.filter((s) =>
-      s.tags.some((t) => t.toLowerCase() === tag)
-    );
-  }
-
-  return NextResponse.json({ data: results, total: results.length });
 }
