@@ -156,6 +156,11 @@ function normalizeEpisode(
       (firstRaw?.sourceName as string) ||
       (raw.sourceName as string) ||
       '',
+    language:
+      primaryLink?.language ??
+      (firstRaw?.language as LanguageOption) ??
+      (raw.language as LanguageOption) ??
+      undefined,
     sourceLinks,
   };
 }

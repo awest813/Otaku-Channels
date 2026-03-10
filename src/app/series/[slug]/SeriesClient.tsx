@@ -27,13 +27,15 @@ import GenrePill from '@/components/ui/GenrePill';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { useToast } from '@/components/ui/Toast';
 
-import type { AnimeSeries, Episode, Movie } from '@/types';
+import type { AnimeSeries, Episode, LanguageOption, Movie } from '@/types';
 
 interface Props {
   series: AnimeSeries;
   episodes: Episode[];
   related: AnimeSeries[];
 }
+
+type LangFilter = 'all' | 'sub' | 'dub';
 
 /** Streaming platform badge colours */
 const PLATFORM_COLORS: Record<string, string> = {
@@ -86,8 +88,26 @@ export default function SeriesClient({ series, episodes, related }: Props) {
     if (added) trackAddedWatchlist(series.id);
   };
 
+  const [langFilter, setLangFilter] = React.useState<LangFilter>('all');
+
   const episodeCount =
     'episodeCount' in series ? (series.episodeCount as number) : null;
+
+  // Determine whether the filter should be shown (series offers both sub and dub)
+  const hasSubDubChoice =
+    series.language === 'both' ||
+    (episodes.some((ep) => ep.language === 'sub') &&
+      episodes.some((ep) => ep.language === 'dub'));
+
+  // Derive per-episode language falling back to the series-level language
+  function resolveEpLang(ep: Episode): LanguageOption {
+    return ep.language ?? (series.language === 'both' ? 'sub' : series.language);
+  }
+
+  const filteredEpisodes =
+    langFilter === 'all'
+      ? episodes
+      : episodes.filter((ep) => resolveEpLang(ep) === langFilter);
 
   const isJikan = series.sourceType === 'jikan';
   const hasTrailer = !!series.trailerEmbedUrl;
@@ -300,19 +320,48 @@ export default function SeriesClient({ series, episodes, related }: Props) {
         {/* Episodes */}
         {episodes.length > 0 && (
           <div className='mt-12 space-y-4'>
-            <h2 className='text-xl font-bold text-white'>
-              Episodes{' '}
-              <span className='text-base font-normal text-slate-500'>
-                ({episodes.length})
-              </span>
-            </h2>
+            <div className='flex flex-wrap items-center justify-between gap-3'>
+              <h2 className='text-xl font-bold text-white'>
+                Episodes{' '}
+                <span className='text-base font-normal text-slate-500'>
+                  ({filteredEpisodes.length}
+                  {langFilter !== 'all' && ` of ${episodes.length}`})
+                </span>
+              </h2>
+
+              {/* Sub / Dub language filter */}
+              {hasSubDubChoice && (
+                <div
+                  className='flex items-center gap-1 rounded-lg bg-slate-900 p-1 ring-1 ring-slate-800'
+                  role='group'
+                  aria-label='Language filter'
+                >
+                  {(['all', 'sub', 'dub'] as LangFilter[]).map((opt) => (
+                    <button
+                      key={opt}
+                      onClick={() => setLangFilter(opt)}
+                      className={cn(
+                        'rounded-md px-3 py-1 text-xs font-semibold capitalize transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                        langFilter === opt
+                          ? 'bg-cyan-500 text-slate-950'
+                          : 'text-slate-400 hover:text-white'
+                      )}
+                      aria-pressed={langFilter === opt}
+                    >
+                      {opt === 'all' ? 'All' : opt === 'sub' ? 'Sub' : 'Dub'}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
+
             {isJikan && (
               <p className='text-xs text-slate-500'>
                 Episode list from MyAnimeList. Click an episode to open it on
                 the official streaming platform.
               </p>
             )}
-            <EpisodeList episodes={episodes} />
+            <EpisodeList episodes={filteredEpisodes} seriesSlug={series.slug} />
           </div>
         )}
 

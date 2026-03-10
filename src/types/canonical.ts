@@ -152,6 +152,8 @@ export interface Episode {
   watchUrl: string;
   isEmbeddable: boolean;
   sourceName: string;
+  /** Primary audio/subtitle language for this episode (sub, dub, or both). */
+  language?: LanguageOption;
   /** Episode-level source links with provenance (enriched when available). */
   sourceLinks?: SourceLink[];
 }
