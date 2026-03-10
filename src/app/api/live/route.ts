@@ -2,8 +2,6 @@ import { NextResponse } from 'next/server';
 
 import { BackendError, listChannels } from '@/lib/backend';
 
-import type { LiveChannel } from '@/types';
-
 /**
  * GET /api/live
  *
@@ -19,7 +17,7 @@ export async function GET(request: Request) {
 
     // Apply optional source/type filter on the response if requested
     const data = source
-      ? (result.data as LiveChannel[]).filter(
+      ? result.data.filter(
           (ch) => (ch.sourceType ?? '').toLowerCase() === source
         )
       : result.data;

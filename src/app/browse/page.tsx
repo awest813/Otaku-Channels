@@ -19,10 +19,7 @@ async function getBrowseData(): Promise<{
       listAnime({ limit: 200 }),
       listAnime({ type: 'MOVIE', limit: 100 }),
     ]);
-    const combined = [...seriesResult.data, ...moviesResult.data] as (
-      | AnimeSeries
-      | Movie
-    )[];
+    const combined = [...seriesResult.data, ...moviesResult.data];
     if (combined.length > 0) return { items: combined };
   } catch {
     // Backend unavailable — fall through to mock data

@@ -8,6 +8,7 @@
 import {
   allContent,
   getEpisodesBySeries,
+  getRelatedSeries,
   getSeriesBySlug,
   mockLiveChannels,
   mockMovies,
@@ -91,6 +92,14 @@ export const getTrendingAnime = jest.fn(async () => ({
 export const getFeaturedAnime = jest.fn(async () => ({
   data: mockSeries.slice(0, 3),
 }));
+
+export const getRelatedAnime = jest.fn(async (slug: string) => {
+  const series = getSeriesBySlug(slug);
+  if (!series) {
+    throw new BackendError(404, `Series "${slug}" not found`);
+  }
+  return { data: getRelatedSeries(series) };
+});
 
 export const listChannels = jest.fn(async () => ({
   data: mockLiveChannels,
