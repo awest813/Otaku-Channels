@@ -230,7 +230,7 @@ export default function SearchPage() {
                   href={youtubeAnimeSearchUrl(query)}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='bg-red-600/15 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+                  className='inline-flex items-center gap-1.5 rounded-lg bg-red-600/15 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
                 >
                   <ExternalLink className='h-3.5 w-3.5' />
                   Also search YouTube

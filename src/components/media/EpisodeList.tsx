@@ -24,7 +24,6 @@ export default function EpisodeList({ episodes }: { episodes: Episode[] }) {
               fill
               sizes='128px'
               className='object-cover transition-transform duration-200 group-hover:scale-105'
-              unoptimized
             />
             <div className='absolute inset-0 flex items-center justify-center bg-slate-950/0 transition-colors group-hover:bg-slate-950/30'>
               <div className='rounded-full bg-white/0 p-2 transition-all group-hover:bg-white/20'>

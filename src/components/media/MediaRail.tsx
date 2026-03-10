@@ -3,6 +3,8 @@
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
 
+import { cn } from '@/lib/utils';
+
 import SectionHeader from '@/components/ui/SectionHeader';
 
 import MediaCard from './MediaCard';
@@ -60,7 +62,10 @@ export default function MediaRail({ title, description, items, seeAllHref }: Pro
       <div className='relative'>
         {/* Left fade + scroll button */}
         <div
-          className={`pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-slate-950 to-transparent transition-opacity duration-200 ${canScrollLeft ? 'opacity-100' : 'opacity-0'}`}
+          className={cn(
+            'pointer-events-none absolute left-0 top-0 z-10 h-full w-12 bg-gradient-to-r from-slate-950 to-transparent transition-opacity duration-200',
+            canScrollLeft ? 'opacity-100' : 'opacity-0'
+          )}
         />
         <button
           onClick={() => scroll('left')}
@@ -85,7 +90,10 @@ export default function MediaRail({ title, description, items, seeAllHref }: Pro
 
         {/* Right fade + scroll button */}
         <div
-          className={`pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-slate-950 to-transparent transition-opacity duration-200 ${canScrollRight ? 'opacity-100' : 'opacity-0'}`}
+          className={cn(
+            'pointer-events-none absolute right-0 top-0 z-10 h-full w-12 bg-gradient-to-l from-slate-950 to-transparent transition-opacity duration-200',
+            canScrollRight ? 'opacity-100' : 'opacity-0'
+          )}
         />
         <button
           onClick={() => scroll('right')}

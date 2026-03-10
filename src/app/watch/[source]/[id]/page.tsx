@@ -221,7 +221,6 @@ export default async function WatchPage({ params }: Props) {
                       fill
                       sizes='96px'
                       className='object-cover transition-transform duration-200 group-hover:scale-105'
-                      unoptimized
                     />
                   </div>
                   <div className='min-w-0 flex-1'>
