@@ -2,6 +2,7 @@ import { render, screen } from '@testing-library/react';
 import React from 'react';
 
 import MediaCard from '@/components/media/MediaCard';
+import { ToastProvider } from '@/components/ui/Toast';
 
 jest.mock('next/link', () => ({
   __esModule: true,
@@ -13,6 +14,10 @@ jest.mock('next/link', () => ({
     href: string;
   }) => <a href={href}>{children}</a>,
 }));
+
+function renderWithProviders(ui: React.ReactElement) {
+  return render(<ToastProvider>{ui}</ToastProvider>);
+}
 
 const baseSeries = {
   id: 's1',
@@ -35,39 +40,39 @@ const baseSeries = {
 
 describe('MediaCard', () => {
   it('renders the series title', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     expect(screen.getByText('Blade of Eternity')).toBeInTheDocument();
   });
 
   it('links to the series detail page', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     const link = screen.getByRole('link');
     expect(link).toHaveAttribute('href', '/series/blade-of-eternity');
   });
 
   it('renders the thumbnail image with alt text', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     expect(screen.getByAltText('Blade of Eternity')).toBeInTheDocument();
   });
 
   it('renders the release year', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     expect(screen.getByText('2021')).toBeInTheDocument();
   });
 
   it('renders the episode count for a series', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     expect(screen.getByText('24 eps')).toBeInTheDocument();
   });
 
   it('renders up to two genre tags', () => {
-    render(<MediaCard item={baseSeries} />);
+    renderWithProviders(<MediaCard item={baseSeries} />);
     expect(screen.getByText('Action')).toBeInTheDocument();
     expect(screen.getByText('Fantasy')).toBeInTheDocument();
   });
 
   it('renders only the first two genres when more than two are present', () => {
-    render(
+    renderWithProviders(
       <MediaCard
         item={{ ...baseSeries, genres: ['Action', 'Fantasy', 'Adventure'] }}
       />
@@ -95,7 +100,7 @@ describe('MediaCard', () => {
       releaseYear: 2020,
       tags: [],
     };
-    render(<MediaCard item={movie} />);
+    renderWithProviders(<MediaCard item={movie} />);
     expect(screen.queryByText(/eps/i)).not.toBeInTheDocument();
   });
 });

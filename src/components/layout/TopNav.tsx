@@ -59,7 +59,10 @@ export default function TopNav() {
           </Link>
 
           {/* Desktop nav */}
-          <nav className='hidden items-center gap-1 md:flex' aria-label='Main navigation'>
+          <nav
+            className='hidden items-center gap-1 md:flex'
+            aria-label='Main navigation'
+          >
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -89,7 +92,7 @@ export default function TopNav() {
               )}
               aria-label='Search'
             >
-              <Search className='h-4.5 w-4.5' />
+              <Search className='h-[18px] w-[18px]' />
             </Link>
             <Link
               href='/watchlist'

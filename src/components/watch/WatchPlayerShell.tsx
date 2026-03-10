@@ -99,8 +99,7 @@ export default function WatchPlayerShell({
                   Available on {sourceName}
                 </p>
                 <p className='mt-1 text-sm text-slate-400'>
-                  This title plays on {sourceName}&apos;s platform. It opens in
-                  a new tab.
+                  This content is hosted by {sourceName}. It opens in a new tab.
                 </p>
               </div>
               <a
@@ -116,6 +115,13 @@ export default function WatchPlayerShell({
           )}
         </div>
       </div>
+
+      {/* Attribution notice for embedded content */}
+      {embedUrl && (
+        <p className='text-center text-xs text-slate-600'>
+          Embedded playback via {sourceName}. No content is hosted on this site.
+        </p>
+      )}
 
       {/* Streaming platform links */}
       {streamingLinks.length > 0 && (

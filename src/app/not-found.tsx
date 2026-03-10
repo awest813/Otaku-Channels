@@ -1,7 +1,7 @@
+import { AlertTriangle } from 'lucide-react';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import * as React from 'react';
-import { RiAlarmWarningFill } from 'react-icons/ri';
 
 export const metadata: Metadata = {
   title: 'Not Found',
@@ -12,10 +12,7 @@ export default function NotFound() {
     <main>
       <section className='bg-slate-950'>
         <div className='flex min-h-[60vh] flex-col items-center justify-center gap-4 text-center'>
-          <RiAlarmWarningFill
-            size={60}
-            className='drop-shadow-glow animate-flicker text-red-500'
-          />
+          <AlertTriangle className='h-16 w-16 animate-pulse text-red-500' />
           <h1 className='text-4xl font-bold text-white md:text-6xl'>
             Page Not Found
           </h1>
