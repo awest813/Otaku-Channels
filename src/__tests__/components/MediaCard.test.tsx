@@ -15,6 +15,22 @@ jest.mock('next/link', () => ({
   }) => <a href={href}>{children}</a>,
 }));
 
+// Mock auth context so useWatchlist doesn't throw
+jest.mock('@/context/auth', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: jest.fn(),
+    signup: jest.fn(),
+    logout: jest.fn(),
+    clearError: jest.fn(),
+  }),
+}));
+
 function renderWithProviders(ui: React.ReactElement) {
   return render(<ToastProvider>{ui}</ToastProvider>);
 }

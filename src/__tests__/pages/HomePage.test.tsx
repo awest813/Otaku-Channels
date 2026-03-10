@@ -3,6 +3,7 @@ import { render, screen } from '@testing-library/react';
 // Mock next/navigation for the TopNav component
 jest.mock('next/navigation', () => ({
   usePathname: () => '/',
+  useRouter: () => ({ push: jest.fn(), replace: jest.fn() }),
 }));
 
 // Mock next/link
@@ -19,6 +20,22 @@ jest.mock('next/link', () => ({
 
 // Mock the backend so the async server component uses mock data
 jest.mock('@/lib/backend');
+
+// Mock the auth context so components that call useAuth don't throw
+jest.mock('@/context/auth', () => ({
+  AuthProvider: ({ children }: { children: React.ReactNode }) => (
+    <>{children}</>
+  ),
+  useAuth: () => ({
+    user: null,
+    loading: false,
+    error: null,
+    login: jest.fn(),
+    signup: jest.fn(),
+    logout: jest.fn(),
+    clearError: jest.fn(),
+  }),
+}));
 
 // Mock MediaRail to avoid ResizeObserver dependency in jsdom
 jest.mock('@/components/media/MediaRail', () => ({
