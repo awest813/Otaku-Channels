@@ -17,17 +17,17 @@ import { useWatchlist } from '@/hooks/useWatchlist';
 import SourceBadge from '@/components/ui/SourceBadge';
 import { useToast } from '@/components/ui/Toast';
 
-import type { AnimeSeries, Movie } from '@/types';
+import type { Anime } from '@/types';
 
 type Props = {
-  item: AnimeSeries | Movie;
+  item: Anime;
 };
 
 export default function MediaCard({ item }: Props) {
   const href = `/series/${item.slug}`;
+  const isMovie = item.type === 'movie';
   const episodeCount =
-    'episodeCount' in item ? (item.episodeCount as number) : null;
-  const isMovie = !episodeCount;
+    !isMovie && 'episodeCount' in item ? (item as { episodeCount: number }).episodeCount : null;
 
   const { isInList, toggle } = useWatchlist();
   const { show: showToast } = useToast();

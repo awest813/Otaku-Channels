@@ -6,18 +6,25 @@
  * so the Next.js route can re-return them with the correct status code.
  *
  * All public functions normalise the raw Fastify/Prisma response into the
- * frontend's AnimeSeries / Movie / Episode / LiveChannel types so callers
- * never have to deal with `unknown` data or field-name mismatches.
+ * canonical Anime / Episode / Channel types via the ingestion pipeline so
+ * callers never have to deal with `unknown` data or field-name mismatches.
  */
 
 import type {
+  Anime,
   AnimeSeries,
+  Channel,
   Episode,
   LanguageOption,
-  LiveChannel,
   Movie,
+  SourceLink,
   SourceType,
 } from '@/types';
+import {
+  deriveEmbedType,
+  isOfficialSource,
+} from '@/lib/ingestion/normalize';
+import { normalizeBackendAnime } from '@/lib/ingestion/normalize';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 const API_BASE = `${BACKEND_URL}/api/v1`;
@@ -56,90 +63,23 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   return res.json() as Promise<T>;
 }
 
-// ─── Normalizers ──────────────────────────────────────────────────────────────
+// ─── Episode normalizer ───────────────────────────────────────────────────────
 
-type RawSourceLink = {
+type RawEpisodeSourceLink = {
   url: string;
   sourceName: string;
   sourceType: string;
   isEmbeddable: boolean;
   language: string;
   region?: string | null;
+  isOfficial?: boolean;
+  embedType?: string;
+  availabilityStatus?: string;
+  lastVerifiedAt?: string | null;
 };
 
-type RawGenreOrTag = { name: string } | string;
-
 /**
- * Convert a backend AnimeTitle record (after Fastify's formatAnime helper)
- * into the frontend AnimeSeries or Movie type.
- *
- * Field mapping:
- *   synopsis        → description
- *   posterUrl       → thumbnail
- *   backdropUrl     → heroImage
- *   titleEnglish    → title (preferred over Japanese romanisation)
- *   sourceLinksTitleLevel[0] → sourceName, sourceType, isEmbeddable, watchUrl, language
- *   genres[].name   → genres (string array)
- *   tags[].name     → tags (string array)
- */
-function normalizeAnime(raw: Record<string, unknown>): AnimeSeries | Movie {
-  const srcLinks = (raw.sourceLinksTitleLevel as RawSourceLink[]) ?? [];
-  const src = srcLinks[0] ?? {
-    url: '',
-    sourceName: '',
-    sourceType: 'youtube',
-    isEmbeddable: false,
-    language: 'sub',
-  };
-
-  const genreNames = ((raw.genres as RawGenreOrTag[]) ?? []).map((g) =>
-    typeof g === 'string' ? g : g.name
-  );
-
-  const tagNames = ((raw.tags as RawGenreOrTag[]) ?? []).map((t) =>
-    typeof t === 'string' ? t : t.name
-  );
-
-  const isMovie = raw.type === 'MOVIE';
-
-  const base = {
-    id: raw.id as string,
-    slug: raw.slug as string,
-    title: ((raw.titleEnglish ?? raw.title) as string) || '',
-    description: (raw.synopsis ??
-      raw.description ??
-      'No description available.') as string,
-    thumbnail: (raw.posterUrl ?? raw.thumbnail ?? '') as string,
-    heroImage: (raw.backdropUrl ??
-      raw.heroImage ??
-      raw.posterUrl ??
-      '') as string,
-    genres: genreNames,
-    language: (src.language ||
-      (raw.language as string) ||
-      'sub') as LanguageOption,
-    sourceName: src.sourceName || (raw.sourceName as string) || '',
-    sourceType: (src.sourceType ||
-      (raw.sourceType as string) ||
-      'youtube') as SourceType,
-    isEmbeddable: src.isEmbeddable ?? (raw.isEmbeddable as boolean) ?? false,
-    watchUrl: src.url || (raw.watchUrl as string) || '',
-    releaseYear: (raw.releaseYear as number) ?? 0,
-    tags: tagNames,
-  };
-
-  if (isMovie) {
-    return { ...base, type: 'movie' } as Movie;
-  }
-  return {
-    ...base,
-    type: 'series',
-    episodeCount: (raw.episodeCount as number) ?? 0,
-  } as AnimeSeries;
-}
-
-/**
- * Convert a backend Episode record to the frontend Episode type.
+ * Convert a backend Episode record to the canonical Episode type.
  *
  * Field mapping:
  *   thumbnailUrl          → thumbnail
@@ -151,12 +91,28 @@ function normalizeEpisode(
   raw: Record<string, unknown>,
   seriesSlug: string
 ): Episode {
-  const srcLinks = (raw.sourceLinks as RawSourceLink[]) ?? [];
-  const src = srcLinks[0] ?? {
-    url: '',
-    sourceName: '',
-    isEmbeddable: false,
-  };
+  const rawLinks = (raw.sourceLinks as RawEpisodeSourceLink[]) ?? [];
+  const animeId = String(raw.id ?? seriesSlug);
+
+  const sourceLinks: SourceLink[] = rawLinks.map((l) => {
+    const sourceType = (l.sourceType || 'youtube') as SourceType;
+    return {
+      providerId: `${sourceType}-${animeId}-ep${raw.episodeNumber ?? 0}`,
+      providerUrl: l.url,
+      sourceName: l.sourceName || '',
+      sourceType,
+      embedType: deriveEmbedType(sourceType),
+      region: l.region ?? 'global',
+      isOfficial: l.isOfficial ?? isOfficialSource(sourceType),
+      isEmbeddable: l.isEmbeddable ?? false,
+      language: (l.language || 'sub') as LanguageOption,
+      availabilityStatus: (l.availabilityStatus ?? 'unknown') as SourceLink['availabilityStatus'],
+      lastVerifiedAt: l.lastVerifiedAt ?? null,
+    };
+  });
+
+  const primaryLink = sourceLinks[0];
+  const firstRaw = rawLinks[0];
 
   const durationRaw = raw.duration;
   const duration =
@@ -175,30 +131,39 @@ function normalizeEpisode(
     episodeNumber: (raw.episodeNumber as number) ?? 0,
     seasonNumber: (raw.seasonNumber as number) ?? 1,
     duration,
-    watchUrl: src.url || (raw.watchUrl as string) || '',
-    isEmbeddable: src.isEmbeddable ?? (raw.isEmbeddable as boolean) ?? false,
-    sourceName: src.sourceName || (raw.sourceName as string) || '',
+    watchUrl:
+      primaryLink?.providerUrl || (firstRaw?.url as string) || (raw.watchUrl as string) || '',
+    isEmbeddable:
+      primaryLink?.isEmbeddable ??
+      (firstRaw?.isEmbeddable as boolean) ??
+      (raw.isEmbeddable as boolean) ??
+      false,
+    sourceName:
+      primaryLink?.sourceName ||
+      (firstRaw?.sourceName as string) ||
+      (raw.sourceName as string) ||
+      '',
+    sourceLinks,
   };
 }
 
+// ─── Channel normalizer ───────────────────────────────────────────────────────
+
 /**
- * Convert a backend Channel record to the frontend LiveChannel type.
+ * Convert a backend Channel record to the canonical Channel type.
  *
  * Note: The backend Channel schema does not include live-stream fields like
  * watchUrl, nowPlaying, or nextUp — those are available from the mock data
  * layer or the /now-playing endpoint. Sensible defaults are provided so
  * backend channels render without crashing.
  */
-function normalizeChannel(raw: Record<string, unknown>): LiveChannel {
+function normalizeChannel(raw: Record<string, unknown>): Channel {
   return {
     id: raw.id as string,
     slug: raw.slug as string,
     name: raw.name as string,
     description: (raw.description ?? '') as string,
-    thumbnail: (raw.artworkUrl ??
-      raw.bannerUrl ??
-      raw.thumbnail ??
-      '') as string,
+    thumbnail: (raw.artworkUrl ?? raw.bannerUrl ?? raw.thumbnail ?? '') as string,
     channelNumber: (raw.channelNumber ?? '') as string,
     sourceName: (raw.sourceName ?? raw.name) as string,
     sourceType: (raw.sourceType ?? 'live') as SourceType,
@@ -243,16 +208,16 @@ export async function listAnime(params: AnimeListParams = {}): Promise<{
     page: number;
     limit: number;
   }>(`/anime?${qs.toString()}`);
-  return { ...result, data: result.data.map(normalizeAnime) };
+  return { ...result, data: result.data.map(normalizeBackendAnime) };
 }
 
 export async function getAnime(
   slug: string
-): Promise<{ data: AnimeSeries | Movie }> {
+): Promise<{ data: Anime }> {
   const result = await apiFetch<{ data: Record<string, unknown> }>(
     `/anime/${slug}`
   );
-  return { data: normalizeAnime(result.data) };
+  return { data: normalizeBackendAnime(result.data) };
 }
 
 export async function getAnimeEpisodes(
@@ -273,7 +238,7 @@ export async function getTrendingAnime(): Promise<{
   const result = await apiFetch<{ data: Record<string, unknown>[] }>(
     '/anime/trending'
   );
-  return { data: result.data.map(normalizeAnime) };
+  return { data: result.data.map(normalizeBackendAnime) };
 }
 
 export async function getFeaturedAnime(): Promise<{
@@ -282,7 +247,7 @@ export async function getFeaturedAnime(): Promise<{
   const result = await apiFetch<{ data: Record<string, unknown>[] }>(
     '/anime/featured'
   );
-  return { data: result.data.map(normalizeAnime) };
+  return { data: result.data.map(normalizeBackendAnime) };
 }
 
 export async function getRelatedAnime(
@@ -291,7 +256,7 @@ export async function getRelatedAnime(
   const result = await apiFetch<{ data: Record<string, unknown>[] }>(
     `/anime/${slug}/related`
   );
-  return { data: result.data.map(normalizeAnime) as AnimeSeries[] };
+  return { data: result.data.map(normalizeBackendAnime) as AnimeSeries[] };
 }
 
 // ─── Search ───────────────────────────────────────────────────────────────────
@@ -327,13 +292,13 @@ export async function searchAnime(params: SearchParams): Promise<{
     limit: number;
     query: string;
   }>(`/search?${qs.toString()}`);
-  return { ...result, data: result.data.map(normalizeAnime) };
+  return { ...result, data: result.data.map(normalizeBackendAnime) };
 }
 
 // ─── Channels ─────────────────────────────────────────────────────────────────
 
 export async function listChannels(): Promise<{
-  data: LiveChannel[];
+  data: Channel[];
   total: number;
 }> {
   const result = await apiFetch<{
