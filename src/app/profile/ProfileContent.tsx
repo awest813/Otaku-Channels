@@ -1,11 +1,21 @@
 'use client';
 
-import { BookMarked, CheckCircle, Save, User } from 'lucide-react';
+import {
+  Bookmark,
+  BookMarked,
+  CheckCircle,
+  Clock,
+  Save,
+  User,
+} from 'lucide-react';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
+import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
+import { useWatchlist } from '@/hooks/useWatchlist';
 
 import { useAuth } from '@/context/auth';
 
@@ -52,6 +62,8 @@ const SOURCE_OPTIONS = [
 export default function ProfileContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
+  const { list: watchlist } = useWatchlist();
+  const { items: recentItems } = useRecentlyViewed();
 
   const [profile, setProfile] = React.useState<UserProfile | null>(null);
   const [loadingProfile, setLoadingProfile] = React.useState(true);
@@ -187,6 +199,114 @@ export default function ProfileContent() {
           My Watchlist
         </Link>
       </div>
+
+      {/* Watchlist preview */}
+      <section
+        aria-label='Watchlist preview'
+        className='mb-8 rounded-xl border border-slate-800 bg-slate-900 p-6'
+      >
+        <div className='mb-4 flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Bookmark className='h-5 w-5 text-cyan-400' />
+            <h2 className='text-lg font-semibold text-white'>My Watchlist</h2>
+            {watchlist.length > 0 && (
+              <span className='rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400'>
+                {watchlist.length}
+              </span>
+            )}
+          </div>
+          {watchlist.length > 0 && (
+            <Link
+              href='/watchlist'
+              className='text-sm text-cyan-400 hover:text-cyan-300'
+            >
+              See all →
+            </Link>
+          )}
+        </div>
+
+        {watchlist.length === 0 ? (
+          <p className='text-sm text-slate-500'>
+            No titles saved yet.{' '}
+            <Link href='/browse' className='text-cyan-400 hover:text-cyan-300'>
+              Browse anime
+            </Link>{' '}
+            and bookmark titles to watch later.
+          </p>
+        ) : (
+          <div className='grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6'>
+            {watchlist.slice(0, 6).map((item) => (
+              <Link
+                key={item.id}
+                href={`/series/${item.slug}`}
+                className='group overflow-hidden rounded-lg ring-1 ring-slate-700 transition-all hover:ring-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+              >
+                <div className='relative aspect-video bg-slate-800'>
+                  <Image
+                    src={item.thumbnail}
+                    alt={item.title}
+                    fill
+                    sizes='(max-width: 640px) 33vw, 16vw'
+                    className='object-cover transition-transform duration-200 group-hover:scale-105'
+                  />
+                </div>
+                <p className='line-clamp-1 px-2 py-1.5 text-xs font-medium text-slate-300'>
+                  {item.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Watch history preview */}
+      <section
+        aria-label='Watch history preview'
+        className='mb-8 rounded-xl border border-slate-800 bg-slate-900 p-6'
+      >
+        <div className='mb-4 flex items-center justify-between'>
+          <div className='flex items-center gap-2'>
+            <Clock className='h-5 w-5 text-cyan-400' />
+            <h2 className='text-lg font-semibold text-white'>
+              Recently Watched
+            </h2>
+            {recentItems.length > 0 && (
+              <span className='rounded-full bg-slate-700 px-2 py-0.5 text-xs text-slate-400'>
+                {recentItems.length}
+              </span>
+            )}
+          </div>
+        </div>
+
+        {recentItems.length === 0 ? (
+          <p className='text-sm text-slate-500'>
+            Nothing watched yet. Start watching anime to see your history here.
+          </p>
+        ) : (
+          <div className='grid grid-cols-3 gap-3 sm:grid-cols-4 md:grid-cols-6'>
+            {recentItems.slice(0, 6).map((item) => (
+              <Link
+                key={item.id}
+                href={`/series/${item.slug}`}
+                className='group overflow-hidden rounded-lg ring-1 ring-slate-700 transition-all hover:ring-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+              >
+                <div className='relative aspect-video bg-slate-800'>
+                  <Image
+                    src={item.thumbnail}
+                    alt={item.title}
+                    fill
+                    sizes='(max-width: 640px) 33vw, 16vw'
+                    className='object-cover transition-transform duration-200 group-hover:scale-105'
+                  />
+                </div>
+                <p className='line-clamp-1 px-2 py-1.5 text-xs font-medium text-slate-300'>
+                  {item.title}
+                </p>
+              </Link>
+            ))}
+          </div>
+        )}
+      </section>
 
       {/* Preferences form */}
       <form
