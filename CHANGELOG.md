@@ -11,6 +11,11 @@ All notable changes to this project will be documented here.
 - Wiring Next.js API routes to Fastify backend (replacing mock data)
 - User authentication UI (login / signup forms)
 
+### Documentation
+
+- Updated docs to explicitly allow vetted grey APIs and anime sources alongside official providers
+- Renamed legal/allowlist language to source-policy language for consistency across frontend and backend docs
+
 ---
 
 ## [0.3.0] — 2025 — Metadata APIs & UI Polish
@@ -43,12 +48,12 @@ All notable changes to this project will be documented here.
 
 - **Fastify REST API** (`backend/`) with TypeScript, Prisma ORM, PostgreSQL, Redis, and BullMQ
 - Prisma schema: `Anime`, `Episode`, `Channel`, `User`, `Watchlist`, `WatchHistory`, `Source`, `Report` models
-- Seed script: 11 anime titles, 7 themed channels, approved source domains
+- Seed script: 11 anime titles, 7 themed channels, approved source domains (official + grey-vetted)
 - Auth routes: register, login, refresh, logout, `/auth/me`
 - Anime catalog: list, filter, trending, featured, genres, detail, related, episodes
 - Channel routes: list, featured, detail, now-playing (pseudo-live), schedule
 - Search: full-text + autocomplete suggestions
-- Source allowlist: approved domain management
+- Source governance: approved domain management for official + grey providers
 - Watch history and progress tracking
 - Watchlists and favorites management
 - Recommendations: for-you, similar, trending, because-you-watched

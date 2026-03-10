@@ -1,6 +1,6 @@
 # Otaku Channels
 
-**Otaku Channels** is a browser-based anime TV guide and launcher that aggregates legally free anime from official sources — YouTube, Tubi, Pluto TV, RetroCrush, Crunchyroll, and more — into a single couch-friendly interface.
+**Otaku Channels** is a browser-based anime TV guide and launcher that aggregates anime from official providers, community-maintained anime indexes, and vetted grey APIs/sources into a single couch-friendly interface.
 
 > **Status:** Active development — full UI with mock data, Fastify backend complete, frontend-to-backend wiring in progress.
 
@@ -22,18 +22,18 @@
 - [Linting & formatting](#linting--formatting)
 - [Contributing](#contributing)
 - [Roadmap](#roadmap)
-- [Legal guardrails](#legal-guardrails)
+- [Source policy](#source-policy)
 
 ---
 
 ## Features
 
-- **Discover free anime** — series, movies, and clips from YouTube, Tubi, Pluto TV, RetroCrush, Crunchyroll, and more.
+- **Discover anime across the ecosystem** — series, movies, and clips from official platforms plus vetted grey/community sources.
 - **Rich metadata** — thumbnails, episode numbers, genres, dub/sub flags, runtime, and MAL scores via Jikan, Kitsu, and Shikimori.
 - **TV-style interface** — horizontal content rails, hero banner, and a faux cable-box channel guide.
 - **Live channels** — pseudo-live channels with deterministic rotation so all viewers see the same schedule.
 - **Universal search** — full-text search and filtering by genre, source, language, and content type.
-- **Watch player** — opens content in an official embed (YouTube, etc.) or deep-links to the source platform. No re-streaming.
+- **Watch player** — opens official embeds where available or deep-links to the original source page, including approved grey-api-backed providers.
 - **Watchlist & recently viewed** — local watchlist and watch-history hooks (backend persistence planned).
 - **Skeleton loading states** — `MediaCardSkeleton`, `MediaRailSkeleton`, and `HeroBannerSkeleton` for smooth loading transitions.
 - **Error boundaries** — graceful fallback UI on API failures.
@@ -57,20 +57,20 @@
 
 ## Tech stack
 
-| Layer             | Technology                                              |
-| ----------------- | ------------------------------------------------------- |
-| Frontend          | Next.js 15 (App Router) + TypeScript                    |
-| Styling           | Tailwind CSS v4                                         |
-| Icons             | Lucide React + React Icons                              |
-| Validation        | Zod                                                     |
-| Metadata APIs     | Jikan v4 (MAL), Kitsu (JSON:API), Shikimori (GraphQL)   |
-| Backend           | Fastify + Prisma + PostgreSQL (in `backend/`)           |
-| Background jobs   | BullMQ cron workers                                     |
-| Auth              | Argon2 + JWT sessions                                   |
-| Search            | PostgreSQL full-text search                             |
-| Video             | Official embeds only — no re-streaming                  |
-| Testing           | Jest + React Testing Library                            |
-| CI                | GitHub Actions (lint → typecheck → format check → test) |
+| Layer           | Technology                                              |
+| --------------- | ------------------------------------------------------- |
+| Frontend        | Next.js 15 (App Router) + TypeScript                    |
+| Styling         | Tailwind CSS v4                                         |
+| Icons           | Lucide React + React Icons                              |
+| Validation      | Zod                                                     |
+| Metadata APIs   | Jikan v4 (MAL), Kitsu (JSON:API), Shikimori (GraphQL)   |
+| Backend         | Fastify + Prisma + PostgreSQL (in `backend/`)           |
+| Background jobs | BullMQ cron workers                                     |
+| Auth            | Argon2 + JWT sessions                                   |
+| Search          | PostgreSQL full-text search                             |
+| Video           | Official embeds only — no re-streaming                  |
+| Testing         | Jest + React Testing Library                            |
+| CI              | GitHub Actions (lint → typecheck → format check → test) |
 
 ---
 
@@ -125,7 +125,7 @@ Swagger API docs are available at [http://localhost:3001/docs](http://localhost:
 
 ### Manual backend setup
 
-See [`backend/README.md`](./backend/README.md) for a full breakdown of the Fastify API, scripts, endpoints, and the source allowlist policy.
+See [`backend/README.md`](./backend/README.md) for a full breakdown of the Fastify API, scripts, endpoints, and the source governance policy.
 
 ---
 
@@ -195,34 +195,34 @@ Otaku-Channels/
 
 All Next.js API routes live under `/api/`. When `BACKEND_URL` is configured they proxy to the Fastify backend; otherwise they fall back to mock data.
 
-| Method | Route                        | Description                         |
-| ------ | ---------------------------- | ----------------------------------- |
-| GET    | `/api/series`                | List anime series (filterable)      |
-| GET    | `/api/series/:slug`          | Get series by slug                  |
-| GET    | `/api/series/:slug/episodes` | Episode list for a series           |
-| GET    | `/api/movies`                | List anime movies (filterable)      |
-| GET    | `/api/live`                  | List live channels                  |
-| GET    | `/api/search`                | Full-text search                    |
-| GET    | `/api/providers`             | List approved streaming sources     |
-| GET    | `/api/images`                | Random SFW anime image (waifu.pics) |
-| GET    | `/api/quotes`                | Random anime quote (AnimeChan)      |
-| GET    | `/api/streaming/search`      | Anime search via Consumet           |
-| GET    | `/api/streaming/info`        | Anime info via Consumet             |
-| GET    | `/api/streaming/sources`     | Episode sources via Consumet        |
+| Method | Route                        | Description                                       |
+| ------ | ---------------------------- | ------------------------------------------------- |
+| GET    | `/api/series`                | List anime series (filterable)                    |
+| GET    | `/api/series/:slug`          | Get series by slug                                |
+| GET    | `/api/series/:slug/episodes` | Episode list for a series                         |
+| GET    | `/api/movies`                | List anime movies (filterable)                    |
+| GET    | `/api/live`                  | List live channels                                |
+| GET    | `/api/search`                | Full-text search                                  |
+| GET    | `/api/providers`             | List approved streaming sources (official + grey) |
+| GET    | `/api/images`                | Random SFW anime image (waifu.pics)               |
+| GET    | `/api/quotes`                | Random anime quote (AnimeChan)                    |
+| GET    | `/api/streaming/search`      | Anime search via Consumet                         |
+| GET    | `/api/streaming/info`        | Anime info via Consumet                           |
+| GET    | `/api/streaming/sources`     | Episode sources via Consumet                      |
 
 ### Query parameters
 
 **`/api/series` and `/api/movies`**
 
-| Param      | Type   | Example    | Description                      |
-| ---------- | ------ | ---------- | -------------------------------- |
-| `genre`    | string | `action`   | Filter by genre (case-insensitive)|
-| `source`   | string | `youtube`  | Filter by source type            |
-| `language` | string | `dub`      | Filter by language               |
-| `tag`      | string | `trending` | Filter by tag (case-insensitive) |
-| `sort`     | string | `recent`   | Sort order                       |
-| `page`     | number | `1`        | Page number                      |
-| `limit`    | number | `20`       | Results per page                 |
+| Param      | Type   | Example    | Description                        |
+| ---------- | ------ | ---------- | ---------------------------------- |
+| `genre`    | string | `action`   | Filter by genre (case-insensitive) |
+| `source`   | string | `youtube`  | Filter by source type              |
+| `language` | string | `dub`      | Filter by language                 |
+| `tag`      | string | `trending` | Filter by tag (case-insensitive)   |
+| `sort`     | string | `recent`   | Sort order                         |
+| `page`     | number | `1`        | Page number                        |
+| `limit`    | number | `20`       | Results per page                   |
 
 **`/api/search`** — requires at least one of `q`, `genre`, or `source`.
 
@@ -234,11 +234,11 @@ For the full Fastify backend API (auth, channels, watchlists, recommendations, a
 
 Copy `.env.example` to `.env.local` and fill in values as needed.
 
-| Variable                  | Required | Default                  | Description                         |
-| ------------------------- | -------- | ------------------------ | ----------------------------------- |
-| `BACKEND_URL`             | No       | `http://localhost:3001`  | Fastify backend URL                 |
-| `NEXT_PUBLIC_SHOW_LOGGER` | No       | —                        | Set to `true` to enable dev logger  |
-| `WAIFUPICS_BASE_URL`      | No       | `https://api.waifu.pics` | Waifu.pics API base URL             |
+| Variable                  | Required | Default                  | Description                        |
+| ------------------------- | -------- | ------------------------ | ---------------------------------- |
+| `BACKEND_URL`             | No       | `http://localhost:3001`  | Fastify backend URL                |
+| `NEXT_PUBLIC_SHOW_LOGGER` | No       | —                        | Set to `true` to enable dev logger |
+| `WAIFUPICS_BASE_URL`      | No       | `https://api.waifu.pics` | Waifu.pics API base URL            |
 
 For local UI-only development with mock data, **no environment variables are required** — the app works out of the box.
 
@@ -297,7 +297,7 @@ The CI workflow (`.github/workflows/lint.yml`) runs all four checks on every pus
 3. Run `pnpm lint:strict && pnpm typecheck && pnpm test` before pushing
 4. Open a pull request — CI must pass before merge
 
-> Only link to legally free, officially licensed anime sources. See [Legal guardrails](#legal-guardrails) below.
+> Source submissions can include official providers and vetted grey APIs as long as they pass the project review policy. See [Source policy](#source-policy) below.
 
 ---
 
@@ -326,11 +326,11 @@ See [ROADMAP.md](./ROADMAP.md) for the full milestone-based roadmap.
 
 ---
 
-## Legal guardrails
+## Source policy
 
-- Ingest only from sources with permission or public APIs/feeds.
-- Respect `robots.txt` and platform Terms of Service.
-- **Do not** rip or proxy HLS streams.
-- **Do not** remove ads from official players.
-- **Do not** rebroadcast paid or geo-locked content.
-- Always show source attribution and open official platforms when required.
+- We intentionally support both official platforms and vetted grey APIs/sources used by the anime community.
+- Grey sources must be reviewable and stable (domain allowlisted + source health checks).
+- Always preserve source attribution and send users to the origin host when required.
+- **Do not** host, mirror, or rebroadcast content ourselves.
+- **Do not** bypass DRM or paywalls.
+- Admins can approve or remove source domains as provider reliability and policy needs evolve.

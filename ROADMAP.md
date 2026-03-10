@@ -63,12 +63,12 @@ This document tracks the planned features and milestones for Otaku Channels.
 
 - [x] Fastify REST API server (`backend/`)
 - [x] PostgreSQL schema via Prisma ORM
-- [x] Seed script with 11 anime, 7 channels, and approved source domains
+- [x] Seed script with 11 anime, 7 channels, and approved source domains (including vetted grey providers)
 - [x] Auth routes (`/api/v1/auth/register`, `login`, `refresh`, `logout`, `me`)
 - [x] Anime catalog (`/api/v1/anime` — list, filter, trending, featured, genres, detail, related, episodes)
 - [x] Channel routes (`/api/v1/channels` — list, featured, detail, now-playing, schedule)
 - [x] Search routes (`/api/v1/search`, `/api/v1/search/suggest`)
-- [x] Source allowlist (`/api/v1/sources/domains`)
+- [x] Source allowlist and grey-source governance (`/api/v1/sources/domains`)
 - [x] Watch history & progress routes
 - [x] Watchlist & favorites routes
 - [x] Recommendations (`for-you`, `similar`, `trending`, `because-you-watched`)
@@ -100,7 +100,7 @@ This document tracks the planned features and milestones for Otaku Channels.
 - [ ] "Recommended for you" rail (genre-based)
 - [ ] "Continue watching" rail on home page
 - [ ] Sub/dub language filter UI
-- [ ] Source filter UI (YouTube, Tubi, Pluto TV, etc.)
+- [ ] Source filter UI (official + grey providers)
 - [ ] Genre browse page with paginated results
 - [ ] Autoplay next episode
 - [ ] Search autocomplete suggestions (`/api/v1/search/suggest`)
@@ -110,7 +110,7 @@ This document tracks the planned features and milestones for Otaku Channels.
 ## Milestone 7 — Streaming Integration 📅 (planned)
 
 - [ ] Consumet API integration (gogoanime, Zoro, AnimePahe)
-- [ ] Episode source resolution (HLS → official player handoff)
+- [ ] Episode source resolution (official + grey source handoff)
 - [ ] Graceful fallback when Consumet is unavailable
 - [ ] Source quality selector in watch player
 
@@ -146,7 +146,7 @@ This document tracks the planned features and milestones for Otaku Channels.
 - Faux channel guide (grid schedule view)
 - Anime stations by vibe (Shonen, Retro, Mecha, Chill, Fantasy)
 - Kiosk / couch fullscreen mode
-- RSS / publisher feed ingestion for user-added sources
+- RSS / publisher/community feed ingestion for user-added sources
 - Clip / highlight reels
 - New episode notifications (push / email)
 - Social features (activity feed, public lists, follows)
@@ -163,3 +163,12 @@ This document tracks the planned features and milestones for Otaku Channels.
 | ✅     | Complete    |
 | 🚧     | In progress |
 | 📅     | Planned     |
+
+---
+
+## Milestone 10 — Source Governance 📅 (planned)
+
+- [ ] Expand approved source registry for grey anime APIs
+- [ ] Add risk labels per source (`official`, `grey-vetted`, `community`)
+- [ ] Automated uptime and takedown-signal monitoring
+- [ ] Admin review queue SLA and moderation notes for source decisions

@@ -21,6 +21,12 @@ npm run dev
 
 ---
 
+## Source policy note
+
+The migration path supports both official providers and vetted grey anime sources. Route behavior, filtering, and fallback chains should treat both classes as first-class providers once domains are approved.
+
+---
+
 ## API Routes
 
 | Route                            | Wired | Mock Fallback | Notes                                                                                     |
@@ -37,16 +43,16 @@ npm run dev
 
 ## Frontend Pages
 
-| Page          | Route                  | Data Source                                            | Off Mock? | Notes                                                     |
-| ------------- | ---------------------- | ------------------------------------------------------ | --------- | --------------------------------------------------------- |
-| Home          | `/`                    | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback for series, movies, channels  |
-| Browse        | `/browse`              | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback                               |
-| Live Channels | `/live`                | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback                               |
-| Series Detail | `/series/[slug]`       | `lib/backend.ts` (server component)                    | ✅        | try backend → Jikan (for `jikan-*` slugs) → mock fallback |
-| Search        | `/search`              | `lib/api-client.ts` → `/api/search` (client component) | ✅        | backend → Jikan → mock; previously called Jikan directly  |
-| Watch         | `/watch/[source]/[id]` | Static / URL params                                    | ✅        | No backend call; renders embedded player from URL         |
-| Watchlist     | `/watchlist`           | `localStorage`                                         | ✅        | Client-side only; no backend dependency                   |
-| Settings      | `/settings`            | `localStorage`                                         | ✅        | Client-side only                                          |
+| Page          | Route                  | Data Source                                            | Off Mock? | Notes                                                                                          |
+| ------------- | ---------------------- | ------------------------------------------------------ | --------- | ---------------------------------------------------------------------------------------------- |
+| Home          | `/`                    | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback for series, movies, channels                                       |
+| Browse        | `/browse`              | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback                                                                    |
+| Live Channels | `/live`                | `lib/backend.ts` (server component)                    | ✅        | try backend → mock fallback                                                                    |
+| Series Detail | `/series/[slug]`       | `lib/backend.ts` (server component)                    | ✅        | try backend → Jikan (for `jikan-*` slugs) → mock fallback                                      |
+| Search        | `/search`              | `lib/api-client.ts` → `/api/search` (client component) | ✅        | backend → Jikan → mock; previously called Jikan directly                                       |
+| Watch         | `/watch/[source]/[id]` | Static / URL params                                    | ✅        | No backend call; renders embedded/deep-link player from URL (official or approved grey source) |
+| Watchlist     | `/watchlist`           | `localStorage`                                         | ✅        | Client-side only; no backend dependency                                                        |
+| Settings      | `/settings`            | `localStorage`                                         | ✅        | Client-side only                                                                               |
 
 ---
 
