@@ -52,7 +52,9 @@ export async function GET(request: Request) {
     const quotes: AnimeQuote[] = Array.isArray(raw) ? raw : [raw];
 
     return NextResponse.json({ data: quotes, total: quotes.length });
-  } catch {
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[/api/quotes] Failed to fetch quotes:', err);
     return NextResponse.json(
       { error: 'Failed to fetch quotes' },
       { status: 502 }

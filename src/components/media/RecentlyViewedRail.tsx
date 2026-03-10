@@ -5,8 +5,10 @@ import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
-import SourceBadge from '@/components/ui/SourceBadge';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
+
+import SourceBadge from '@/components/ui/SourceBadge';
+
 import type { SourceType } from '@/types';
 
 export default function RecentlyViewedRail() {
@@ -28,7 +30,7 @@ export default function RecentlyViewedRail() {
           Continue Watching
         </h2>
       </div>
-      <div className='flex gap-3 overflow-x-auto pb-1 scrollbar-hide'>
+      <div className='scrollbar-hide flex gap-3 overflow-x-auto pb-1'>
         {items.map((item) => (
           <Link
             key={item.id}

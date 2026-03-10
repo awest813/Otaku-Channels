@@ -105,7 +105,9 @@ export async function GET(request: Request) {
 
     const data = (await res.json()) as { url: string };
     return NextResponse.json({ data: data.url ?? null });
-  } catch {
+  } catch (err) {
+    // eslint-disable-next-line no-console
+    console.error('[/api/images] Failed to fetch images:', err);
     return NextResponse.json(
       { error: 'Failed to fetch images' },
       { status: 502 }
