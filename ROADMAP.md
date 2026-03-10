@@ -10,13 +10,19 @@ This document tracks the planned features and milestones for Otaku Channels.
 - [x] TypeScript + Tailwind CSS v4 setup
 - [x] Mock data layer (`src/data/mockData.ts`)
 - [x] Core types (`AnimeSeries`, `Movie`, `LiveChannel`, `Episode`, `SourceProvider`)
-- [x] Home page with hero banner and content rails
-- [x] Series detail page
+- [x] Home page with hero banner and horizontal content rails
+- [x] Series detail page with episode list
 - [x] Live channels page
 - [x] Watch player (YouTube embed + external link fallback)
+- [x] Watchlist page + `useWatchlist` hook (localStorage)
+- [x] Recently viewed rail + `useRecentlyViewed` hook (localStorage)
+- [x] Skeleton loading states (`MediaCardSkeleton`, `MediaRailSkeleton`, `HeroBannerSkeleton`)
+- [x] Error boundary with fallback UI
 - [x] SearchBar component
+- [x] Browse page (genre + source filtering)
+- [x] Settings page
 - [x] SourceBadge, GenrePill, MediaCard, MediaRail, LiveChannelCard
-- [x] AppShell layout with navigation
+- [x] AppShell layout with TopNav and Footer
 
 ---
 
@@ -27,86 +33,111 @@ This document tracks the planned features and milestones for Otaku Channels.
 - [x] Component tests (MediaCard, HeroBanner, SearchBar, SourceBadge, GenrePill, WatchPlayerShell)
 - [x] Page tests (HomePage)
 - [x] Jest manual mock for backend (`src/lib/__mocks__/backend.ts`)
-- [x] Jest mock for `next/image` that strips Next.js-only DOM props (no React warnings)
+- [x] Jest mock for `next/image` (strips Next.js-only DOM props — no React warnings)
 - [x] ESLint strict (`--max-warnings=0`) — zero warnings
 - [x] TypeScript strict mode — zero errors
 - [x] Prettier formatting — enforced in CI
 - [x] GitHub Actions workflow (lint → typecheck → format check → tests)
+- [x] Husky pre-commit hooks + commitlint (Conventional Commits)
 
 ---
 
-## Milestone 3 — Backend Integration 🚧 (in progress)
+## Milestone 3 — Metadata & External APIs ✅ (complete)
+
+- [x] Jikan v4 client (`src/lib/jikan.ts`) — MyAnimeList public API
+  - [x] `searchJikan()` — full-text anime search
+  - [x] `getJikanById()` — fetch anime by MAL ID
+  - [x] `toSeries()` / `toMovie()` — normalize Jikan responses to shared types
+- [x] Kitsu client (`src/lib/kitsu.ts`) — Kitsu JSON:API
+  - [x] `searchKitsu()` — full-text anime search
+  - [x] `toSeries()` / `toMovie()` — normalize Kitsu responses to shared types
+- [x] Shikimori client (`src/lib/shikimori.ts`) — Shikimori GraphQL
+  - [x] `searchShikimori()` — anime search via GraphQL
+  - [x] `toSeries()` / `toMovie()` — normalize Shikimori responses to shared types
+- [x] Shared `JikanAnime`, `KitsuAnimeResource`, `ShikimoriAnime` types
+- [x] `trailerEmbedUrl`, `streamingLinks`, `malId` fields on `AnimeSeries` and `Movie`
+
+---
+
+## Milestone 4 — Backend Integration 🚧 (in progress)
 
 - [x] Fastify REST API server (`backend/`)
-- [x] PostgreSQL schema via Prisma
-- [x] Seed script with real anime data
-- [x] `/api/v1/anime` — list + filter + pagination
-- [x] `/api/v1/anime/:slug` — series detail
-- [x] `/api/v1/anime/:slug/episodes` — episode list
-- [x] `/api/v1/search` — full-text search
-- [x] `/api/v1/channels` — live channels
-- [x] `/api/v1/sources/domains` — approved providers
-- [x] `/api/v1/profiles/:username` — public profile endpoint
-- [x] `/api/v1/moderation/queue` — moderation queue with batch actions
-- [x] BullMQ workers (session-cleanup, trending, source-check, metadata-refresh)
+- [x] PostgreSQL schema via Prisma ORM
+- [x] Seed script with 11 anime, 7 channels, and approved source domains
+- [x] Auth routes (`/api/v1/auth/register`, `login`, `refresh`, `logout`, `me`)
+- [x] Anime catalog (`/api/v1/anime` — list, filter, trending, featured, genres, detail, related, episodes)
+- [x] Channel routes (`/api/v1/channels` — list, featured, detail, now-playing, schedule)
+- [x] Search routes (`/api/v1/search`, `/api/v1/search/suggest`)
+- [x] Source allowlist (`/api/v1/sources/domains`)
+- [x] Watch history & progress routes
+- [x] Watchlist & favorites routes
+- [x] Recommendations (`for-you`, `similar`, `trending`, `because-you-watched`)
+- [x] User / profile routes
+- [x] Admin routes (stats, ban/unban, role change, visibility, merge, reports, audit)
+- [x] BullMQ cron workers (session-cleanup, trending, source-check, metadata-refresh)
+- [x] Pseudo-live channel rotation algorithm
+- [x] Swagger/OpenAPI docs at `/docs`
 - [ ] Wire Next.js API routes to Fastify backend
 - [ ] Remove dependency on mock data for production builds
+- [ ] End-to-end smoke tests for the wired API
 
 ---
 
-## Milestone 4 — User Accounts 📅 (planned)
+## Milestone 5 — User Accounts 📅 (planned)
 
-- [ ] User registration & login (Argon2 + JWT sessions)
-- [ ] Favorites / watchlist (add/remove series and movies)
-- [ ] Watch history tracking
-- [ ] User preferences (default language: sub/dub, preferred sources)
-- [ ] Profile page
+- [ ] User registration & login UI (forms, validation)
+- [ ] JWT session management in Next.js (cookie-based)
+- [ ] Favorites / watchlist persisted to Fastify backend
+- [ ] Watch history tracked in backend
+- [ ] User preferences: default language (sub/dub), preferred sources
+- [ ] Profile page with watchlist and history
 
 ---
 
-## Milestone 5 — Discovery & Content 📅 (planned)
+## Milestone 6 — Discovery & Content 📅 (planned)
 
-- [ ] Trending anime (view count / trending score)
-- [ ] Recommended for you (genre-based)
+- [ ] Trending anime rail (view count / trending score from backend)
+- [ ] "Recommended for you" rail (genre-based)
+- [ ] "Continue watching" rail on home page
 - [ ] Sub/dub language filter UI
 - [ ] Source filter UI (YouTube, Tubi, Pluto TV, etc.)
-- [ ] Genre browse page with all anime by genre
+- [ ] Genre browse page with paginated results
 - [ ] Autoplay next episode
-- [ ] "Continue watching" rail on home page
+- [ ] Search autocomplete suggestions (`/api/v1/search/suggest`)
 
 ---
 
-## Milestone 6 — Streaming Integration 📅 (planned)
+## Milestone 7 — Streaming Integration 📅 (planned)
 
 - [ ] Consumet API integration (gogoanime, Zoro, AnimePahe)
 - [ ] Episode source resolution (HLS → official player handoff)
 - [ ] Graceful fallback when Consumet is unavailable
-- [ ] Source quality selector
+- [ ] Source quality selector in watch player
 
 ---
 
-## Milestone 7 — Polish & Accessibility 📅 (planned)
+## Milestone 8 — Polish & Accessibility 📅 (planned)
 
 - [ ] Keyboard navigation (10-foot / couch mode)
 - [ ] Controller / gamepad support
 - [ ] ARIA labels and screen reader support
-- [ ] Skeleton loading states on all content rails
-- [ ] Error boundaries with retry UI
-- [ ] PWA manifest + installable on mobile/desktop
+- [ ] PWA manifest — installable on mobile/desktop
 - [ ] Sleep timer
 - [ ] Dark/light theme toggle
+- [ ] Offline fallback page
 
 ---
 
-## Milestone 8 — Production & Deployment 📅 (planned)
+## Milestone 9 — Production & Deployment 📅 (planned)
 
 - [ ] Vercel deployment (frontend)
 - [ ] Fly.io or Railway deployment (Fastify backend)
-- [ ] PostgreSQL + Redis hosted instances
-- [ ] BullMQ cron workers for metadata refresh
-- [ ] Uptime monitoring
+- [ ] Hosted PostgreSQL + Redis
+- [ ] BullMQ cron workers in production
 - [ ] Rate limiting on all public API routes
 - [ ] CDN for thumbnails and hero images
+- [ ] Uptime monitoring and alerting
+- [ ] Structured logging (Pino) + log aggregation
 
 ---
 
@@ -117,8 +148,11 @@ This document tracks the planned features and milestones for Otaku Channels.
 - Kiosk / couch fullscreen mode
 - RSS / publisher feed ingestion for user-added sources
 - Clip / highlight reels
-- Notifications for new episodes
-- Social features (activity feed, lists)
+- New episode notifications (push / email)
+- Social features (activity feed, public lists, follows)
+- Metadata sync jobs (Jikan / Kitsu / Shikimori auto-refresh)
+- OAuth login (Google / Discord)
+- Public API for third-party clients
 
 ---
 
