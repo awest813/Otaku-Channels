@@ -20,7 +20,6 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
         sizes='100vw'
         className='object-cover object-center'
         priority
-        unoptimized
       />
       {/* Cinematic gradient overlays */}
       <div className='absolute inset-0 bg-gradient-to-r from-slate-950 via-slate-950/75 to-transparent' />

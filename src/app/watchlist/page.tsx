@@ -93,7 +93,6 @@ export default function WatchlistPage() {
                     fill
                     sizes='(max-width: 640px) 50vw, 20vw'
                     className='object-cover transition-transform duration-200 group-hover:scale-105'
-                    unoptimized
                   />
                 </div>
                 <div className='p-3'>

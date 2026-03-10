@@ -3,6 +3,8 @@ import { SlidersHorizontal, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
+import { cn } from '@/lib/utils';
+
 import MediaCard from '@/components/media/MediaCard';
 import EmptyState from '@/components/ui/EmptyState';
 import GenrePill from '@/components/ui/GenrePill';
@@ -21,11 +23,12 @@ function FilterChip({
   return (
     <button
       onClick={onClick}
-      className={`rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+      className={cn(
+        'rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
         active
-          ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300'
+          ? 'border-cyan-500 bg-cyan-500/15 text-cyan-300'
           : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-white'
-      }`}
+      )}
     >
       {label}
     </button>
@@ -114,11 +117,12 @@ export default function BrowseContent({
         </div>
         <button
           onClick={() => setShowFilters(!showFilters)}
-          className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 md:hidden ${
+          className={cn(
+            'flex items-center gap-2 rounded-lg border px-3 py-2 text-sm font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 md:hidden',
             hasActiveFilters
               ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
               : 'border-slate-700 bg-slate-900 text-slate-400'
-          }`}
+          )}
           aria-expanded={showFilters}
           aria-label='Toggle filters'
         >
@@ -134,9 +138,10 @@ export default function BrowseContent({
 
       {/* Filter panel — always visible on md+, toggleable on mobile */}
       <div
-        className={`mb-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4 md:block ${
+        className={cn(
+          'mb-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4',
           showFilters ? 'block' : 'hidden md:block'
-        }`}
+        )}
       >
         {/* Genre */}
         <div>

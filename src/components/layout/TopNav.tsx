@@ -1,6 +1,6 @@
 'use client';
 
-import { Bookmark, Menu, Search, Tv, X } from 'lucide-react';
+import { Bookmark, Menu, Search, Settings, Tv, X } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import * as React from 'react';
@@ -209,6 +209,20 @@ export default function TopNav() {
               >
                 <Bookmark className='h-4 w-4' />
                 My List
+              </Link>
+
+              <Link
+                href='/settings'
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive('/settings')
+                    ? 'bg-slate-800 text-white'
+                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                )}
+              >
+                <Settings className='h-4 w-4' />
+                Settings
               </Link>
             </div>
           </nav>

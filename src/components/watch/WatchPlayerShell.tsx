@@ -1,5 +1,7 @@
 import { ExternalLink, Star, Tv } from 'lucide-react';
 
+import { cn } from '@/lib/utils';
+
 /** Extract a YouTube embed URL from a watch URL, or return null. */
 function getYouTubeEmbedUrl(watchUrl: string): string | null {
   try {
@@ -140,7 +142,7 @@ export default function WatchPlayerShell({
                   href={link.url}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ring-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${colorClass}`}
+                  className={cn('inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ring-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400', colorClass)}
                 >
                   <Star className='h-3.5 w-3.5' />
                   {link.name}

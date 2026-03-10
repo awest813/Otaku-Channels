@@ -19,6 +19,8 @@ import * as React from 'react';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
+import { cn } from '@/lib/utils';
+
 import EpisodeList from '@/components/media/EpisodeList';
 import MediaRail from '@/components/media/MediaRail';
 import GenrePill from '@/components/ui/GenrePill';
@@ -100,7 +102,6 @@ export default function SeriesClient({ series, episodes, related }: Props) {
           sizes='100vw'
           className='object-cover object-top'
           priority
-          unoptimized
         />
         <div className='absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/50 to-transparent' />
         <div className='absolute inset-0 bg-gradient-to-r from-slate-950/40 to-transparent' />
@@ -127,7 +128,6 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                 fill
                 sizes='224px'
                 className='object-cover'
-                unoptimized
               />
             </div>
           </div>
@@ -216,11 +216,12 @@ export default function SeriesClient({ series, episodes, related }: Props) {
               )}
               <button
                 onClick={handleWatchlist}
-                className={`flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${
+                className={cn(
+                  'flex items-center gap-2 rounded-lg border px-5 py-2.5 text-sm font-semibold transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                   inList
                     ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300 hover:bg-cyan-500/20'
                     : 'border-slate-700 bg-slate-900 text-slate-300 hover:border-slate-600 hover:text-white'
-                }`}
+                )}
               >
                 {inList ? (
                   <>
@@ -251,7 +252,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                         href={link.url}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className={`inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 ${colorClass}`}
+                        className={cn('inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400', colorClass)}
                       >
                         <Star className='h-3 w-3' />
                         {link.name}

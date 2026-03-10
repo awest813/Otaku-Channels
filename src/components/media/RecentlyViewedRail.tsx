@@ -42,7 +42,6 @@ export default function RecentlyViewedRail() {
                 fill
                 sizes='192px'
                 className='object-cover transition-transform duration-200 group-hover:scale-105'
-                unoptimized
               />
               <div className='absolute inset-0 bg-gradient-to-t from-slate-950/80 to-transparent opacity-0 transition-opacity group-hover:opacity-100' />
             </div>
