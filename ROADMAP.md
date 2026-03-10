@@ -124,7 +124,7 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 ---
 
-## Milestone 6 — Discovery & Content 📅 (planned)
+## Milestone 6 — Discovery & Content 🚧 (in progress)
 
 - [ ] Trending anime rail (view count / trending score from backend)
 - [ ] "Recommended for you" rail (genre-based)

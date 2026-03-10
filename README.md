@@ -2,7 +2,7 @@
 
 **Otaku Channels** is a browser-based anime TV guide and launcher that aggregates anime from official providers, community-maintained anime indexes, and vetted grey APIs/sources into a single couch-friendly interface.
 
-> **Status:** Active development — full UI with mock data, Fastify backend complete, frontend-to-backend wiring in progress.
+> **Status:** Milestone 5 (User Accounts) ✅ complete — now progressing through Milestone 6 (Discovery & Content: trending, recommendations, continue watching).
 
 ---
 
@@ -305,7 +305,7 @@ The CI workflow (`.github/workflows/lint.yml`) runs all four checks on every pus
 
 See [ROADMAP.md](./ROADMAP.md) for the full milestone-based roadmap.
 
-**Currently in progress: Milestone 3 — Backend integration**
+**Currently in progress: Milestone 6 — Discovery & Content**
 
 - [x] Home screen with anime rails and hero banner
 - [x] Series detail pages with episode list

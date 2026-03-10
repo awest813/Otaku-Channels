@@ -8,8 +8,12 @@ All notable changes to this project will be documented here.
 
 ### In progress
 
-- Wiring Next.js API routes to Fastify backend (replacing mock data)
-- User authentication UI (login / signup forms)
+- Discovery & Content (Milestone 6)
+  - Trending anime rail powered by backend view counts
+  - "Recommended for you" rail with genre-based personalization
+  - "Continue watching" rail on the home page
+  - Search autocomplete suggestions via `/api/v1/search/suggest`
+  - Sub/dub + source filtering UI refinements
 
 ### Documentation
 
