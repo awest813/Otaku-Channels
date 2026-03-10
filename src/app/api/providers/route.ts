@@ -12,7 +12,7 @@ import { sourceProviders } from '@/data/mockData';
  *
  * Respects DATA_MODE env var: mock | backend | hybrid (default)
  */
-export async function GET() {
+export async function GET(_request: Request) {
   const mode = getDataMode();
 
   if (mode === 'mock') {

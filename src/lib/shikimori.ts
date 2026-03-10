@@ -7,8 +7,9 @@
  * The converter functions below are thin wrappers kept for backward compat.
  */
 
-import type { AnimeSeries, Movie, ShikimoriAnime } from '@/types';
 import { normalizeShikimoriAnime } from '@/lib/ingestion/normalize';
+
+import type { AnimeSeries, Movie, ShikimoriAnime } from '@/types';
 
 const SHIKIMORI_ENDPOINT = 'https://shikimori.one/api/graphql';
 

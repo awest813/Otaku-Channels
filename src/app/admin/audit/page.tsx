@@ -1,8 +1,8 @@
 'use client';
 
-import * as React from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import { ChevronLeft, ChevronRight, RefreshCw } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -30,12 +30,30 @@ interface AuditResponse {
 }
 
 const ACTION_LABELS: Record<string, { label: string; color: string }> = {
-  BAN_USER: { label: 'Ban User', color: 'text-red-400 bg-red-950/20 border-red-900/50' },
-  UNBAN_USER: { label: 'Unban User', color: 'text-green-400 bg-green-950/20 border-green-900/50' },
-  CHANGE_USER_ROLE: { label: 'Change Role', color: 'text-cyan-400 bg-cyan-950/20 border-cyan-900/50' },
-  UPDATE_ANIME_VISIBILITY: { label: 'Visibility', color: 'text-purple-400 bg-purple-950/20 border-purple-900/50' },
-  MERGE_ANIME: { label: 'Merge Anime', color: 'text-amber-400 bg-amber-950/20 border-amber-900/50' },
-  TRIGGER_JOB: { label: 'Trigger Job', color: 'text-slate-300 bg-slate-800 border-slate-700' },
+  BAN_USER: {
+    label: 'Ban User',
+    color: 'text-red-400 bg-red-950/20 border-red-900/50',
+  },
+  UNBAN_USER: {
+    label: 'Unban User',
+    color: 'text-green-400 bg-green-950/20 border-green-900/50',
+  },
+  CHANGE_USER_ROLE: {
+    label: 'Change Role',
+    color: 'text-cyan-400 bg-cyan-950/20 border-cyan-900/50',
+  },
+  UPDATE_ANIME_VISIBILITY: {
+    label: 'Visibility',
+    color: 'text-purple-400 bg-purple-950/20 border-purple-900/50',
+  },
+  MERGE_ANIME: {
+    label: 'Merge Anime',
+    color: 'text-amber-400 bg-amber-950/20 border-amber-900/50',
+  },
+  TRIGGER_JOB: {
+    label: 'Trigger Job',
+    color: 'text-slate-300 bg-slate-800 border-slate-700',
+  },
 };
 
 const KNOWN_ACTIONS = Object.keys(ACTION_LABELS);
@@ -51,7 +69,10 @@ function ActionBadge({ action }: { action: string }) {
   }
   return (
     <span
-      className={cn('rounded border px-1.5 py-0.5 text-xs font-medium', def.color)}
+      className={cn(
+        'rounded border px-1.5 py-0.5 text-xs font-medium',
+        def.color
+      )}
     >
       {def.label}
     </span>
@@ -70,9 +91,15 @@ export default function AuditLogPage() {
   const page = Number(searchParams.get('page') ?? '1');
   const actionFilter = searchParams.get('action') ?? '';
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = React.useMemo<Record<string, string>>(() => {
+    const tok =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
+    const headers: Record<string, string> = {};
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    return headers;
+  }, []);
 
   const fetchLogs = React.useCallback(async () => {
     setLoading(true);
@@ -94,7 +121,7 @@ export default function AuditLogPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, actionFilter]);
+  }, [page, actionFilter, authHeader]);
 
   React.useEffect(() => {
     fetchLogs();
@@ -115,7 +142,9 @@ export default function AuditLogPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-white'>Audit Log</h1>
-          <p className='text-sm text-slate-400'>{total.toLocaleString()} entries</p>
+          <p className='text-sm text-slate-400'>
+            {total.toLocaleString()} entries
+          </p>
         </div>
         <button
           onClick={fetchLogs}
@@ -153,82 +182,96 @@ export default function AuditLogPage() {
         <table className='w-full text-sm'>
           <thead>
             <tr className='border-b border-slate-800 bg-slate-900/60'>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Time
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Actor
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Action
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden sm:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 sm:table-cell'>
                 Target
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden lg:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 lg:table-cell'>
                 Metadata
               </th>
             </tr>
           </thead>
           <tbody className='divide-y divide-slate-800'>
-            {loading
-              ? Array.from({ length: 15 }).map((_, i) => (
-                  <tr key={i}>
-                    <td colSpan={5} className='px-4 py-3'>
-                      <div className='h-4 animate-pulse rounded bg-slate-800' />
-                    </td>
-                  </tr>
-                ))
-              : logs.length === 0 ? (
-                  <tr>
-                    <td colSpan={5} className='px-4 py-12 text-center text-slate-500'>
-                      No audit log entries found
-                    </td>
-                  </tr>
-                ) : (
-                  logs.map((log) => (
-                    <tr key={log.id} className='transition-colors hover:bg-slate-900/40'>
-                      <td className='px-4 py-3 text-xs text-slate-500 whitespace-nowrap'>
-                        {new Date(log.createdAt).toLocaleString()}
-                      </td>
-                      <td className='px-4 py-3'>
-                        {log.actor ? (
-                          <div>
-                            <p className='text-sm font-medium text-white'>{log.actor.username}</p>
-                            <p className='text-xs text-slate-500'>{log.actor.role}</p>
-                          </div>
-                        ) : (
-                          <span className='text-slate-600'>system</span>
-                        )}
-                      </td>
-                      <td className='px-4 py-3'>
-                        <ActionBadge action={log.action} />
-                      </td>
-                      <td className='hidden px-4 py-3 sm:table-cell'>
-                        <span className='text-xs text-slate-400'>{log.targetType}</span>
-                        {log.targetId && (
-                          <code
-                            className='ml-1.5 cursor-pointer rounded bg-slate-800 px-1 py-0.5 text-xs text-slate-500 hover:text-slate-300'
-                            onClick={() => navigator.clipboard.writeText(log.targetId)}
-                            title='Click to copy'
-                          >
-                            {log.targetId.slice(0, 8)}…
-                          </code>
-                        )}
-                      </td>
-                      <td className='hidden px-4 py-3 lg:table-cell'>
-                        {log.metadata && Object.keys(log.metadata).length > 0 ? (
-                          <code className='rounded bg-slate-800 px-2 py-1 text-xs text-slate-400'>
-                            {JSON.stringify(log.metadata).slice(0, 80)}
-                            {JSON.stringify(log.metadata).length > 80 ? '…' : ''}
-                          </code>
-                        ) : (
-                          <span className='text-slate-700'>—</span>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
+            {loading ? (
+              Array.from({ length: 15 }).map((_, i) => (
+                <tr key={i}>
+                  <td colSpan={5} className='px-4 py-3'>
+                    <div className='h-4 animate-pulse rounded bg-slate-800' />
+                  </td>
+                </tr>
+              ))
+            ) : logs.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className='px-4 py-12 text-center text-slate-500'
+                >
+                  No audit log entries found
+                </td>
+              </tr>
+            ) : (
+              logs.map((log) => (
+                <tr
+                  key={log.id}
+                  className='transition-colors hover:bg-slate-900/40'
+                >
+                  <td className='whitespace-nowrap px-4 py-3 text-xs text-slate-500'>
+                    {new Date(log.createdAt).toLocaleString()}
+                  </td>
+                  <td className='px-4 py-3'>
+                    {log.actor ? (
+                      <div>
+                        <p className='text-sm font-medium text-white'>
+                          {log.actor.username}
+                        </p>
+                        <p className='text-xs text-slate-500'>
+                          {log.actor.role}
+                        </p>
+                      </div>
+                    ) : (
+                      <span className='text-slate-600'>system</span>
+                    )}
+                  </td>
+                  <td className='px-4 py-3'>
+                    <ActionBadge action={log.action} />
+                  </td>
+                  <td className='hidden px-4 py-3 sm:table-cell'>
+                    <span className='text-xs text-slate-400'>
+                      {log.targetType}
+                    </span>
+                    {log.targetId && (
+                      <code
+                        className='ml-1.5 cursor-pointer rounded bg-slate-800 px-1 py-0.5 text-xs text-slate-500 hover:text-slate-300'
+                        onClick={() =>
+                          navigator.clipboard.writeText(log.targetId)
+                        }
+                        title='Click to copy'
+                      >
+                        {log.targetId.slice(0, 8)}…
+                      </code>
+                    )}
+                  </td>
+                  <td className='hidden px-4 py-3 lg:table-cell'>
+                    {log.metadata && Object.keys(log.metadata).length > 0 ? (
+                      <code className='rounded bg-slate-800 px-2 py-1 text-xs text-slate-400'>
+                        {JSON.stringify(log.metadata).slice(0, 80)}
+                        {JSON.stringify(log.metadata).length > 80 ? '…' : ''}
+                      </code>
+                    ) : (
+                      <span className='text-slate-700'>—</span>
+                    )}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

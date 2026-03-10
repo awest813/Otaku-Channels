@@ -7,8 +7,9 @@
  * The converter functions below are thin wrappers kept for backward compat.
  */
 
-import type { AnimeSeries, KitsuAnimeResource, Movie } from '@/types';
 import { normalizeKitsuAnime } from '@/lib/ingestion/normalize';
+
+import type { AnimeSeries, KitsuAnimeResource, Movie } from '@/types';
 
 const KITSU_BASE = 'https://kitsu.io/api/edge';
 

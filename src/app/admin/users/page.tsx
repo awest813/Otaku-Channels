@@ -1,8 +1,8 @@
 'use client';
 
+import { Ban, ChevronLeft, ChevronRight, RefreshCw, User } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
 import * as React from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
-import { Ban, ChevronLeft, ChevronRight, RefreshCw, Shield, User } from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -25,21 +25,6 @@ interface UsersResponse {
 
 const ROLES = ['USER', 'MODERATOR', 'ADMIN'] as const;
 
-function roleBadge(role: string) {
-  const map: Record<string, string> = {
-    ADMIN: 'bg-red-500/15 text-red-400 border-red-500/30',
-    MODERATOR: 'bg-cyan-500/15 text-cyan-400 border-cyan-500/30',
-    USER: 'bg-slate-700 text-slate-400 border-slate-600',
-  };
-  return (
-    <span
-      className={cn('rounded border px-1.5 py-0.5 text-xs font-medium', map[role] ?? map.USER)}
-    >
-      {role}
-    </span>
-  );
-}
-
 export default function UsersPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -55,9 +40,15 @@ export default function UsersPage() {
   const roleFilter = searchParams.get('role') ?? '';
   const bannedFilter = searchParams.get('banned') ?? '';
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = React.useMemo<Record<string, string>>(() => {
+    const tok =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
+    const headers: Record<string, string> = {};
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    return headers;
+  }, []);
 
   const fetchUsers = React.useCallback(async () => {
     setLoading(true);
@@ -81,7 +72,7 @@ export default function UsersPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, roleFilter, bannedFilter]);
+  }, [page, search, roleFilter, bannedFilter, authHeader]);
 
   React.useEffect(() => {
     fetchUsers();
@@ -98,7 +89,7 @@ export default function UsersPage() {
   const toggleBan = async (user: AdminUser) => {
     if (actionLoading) return;
     const confirmed = confirm(
-      `${user.isBanned ? 'Unban' : 'Ban'} user "${user.username}"?`,
+      `${user.isBanned ? 'Unban' : 'Ban'} user "${user.username}"?`
     );
     if (!confirmed) return;
 
@@ -145,7 +136,9 @@ export default function UsersPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-white'>Users</h1>
-          <p className='text-sm text-slate-400'>{total.toLocaleString()} total users</p>
+          <p className='text-sm text-slate-400'>
+            {total.toLocaleString()} total users
+          </p>
         </div>
         <button
           onClick={fetchUsers}
@@ -163,7 +156,8 @@ export default function UsersPage() {
           placeholder='Search username or email…'
           defaultValue={search}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') updateParam('search', (e.target as HTMLInputElement).value);
+            if (e.key === 'Enter')
+              updateParam('search', (e.target as HTMLInputElement).value);
           }}
           className='rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none'
         />
@@ -174,7 +168,9 @@ export default function UsersPage() {
         >
           <option value=''>All roles</option>
           {ROLES.map((r) => (
-            <option key={r} value={r}>{r}</option>
+            <option key={r} value={r}>
+              {r}
+            </option>
           ))}
         </select>
         <select
@@ -199,19 +195,19 @@ export default function UsersPage() {
         <table className='w-full text-sm'>
           <thead>
             <tr className='border-b border-slate-800 bg-slate-900/60'>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 User
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Role
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden sm:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 sm:table-cell'>
                 Activity
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden md:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 md:table-cell'>
                 Joined
               </th>
-              <th className='px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Actions
               </th>
             </tr>
@@ -230,7 +226,7 @@ export default function UsersPage() {
                     key={u.id}
                     className={cn(
                       'transition-colors hover:bg-slate-900/40',
-                      u.isBanned && 'opacity-60',
+                      u.isBanned && 'opacity-60'
                     )}
                   >
                     <td className='px-4 py-3'>
@@ -255,16 +251,22 @@ export default function UsersPage() {
                         className='rounded border border-slate-700 bg-slate-800 px-2 py-1 text-xs text-white focus:border-cyan-500 focus:outline-none disabled:opacity-50'
                       >
                         {ROLES.map((r) => (
-                          <option key={r} value={r}>{r}</option>
+                          <option key={r} value={r}>
+                            {r}
+                          </option>
                         ))}
                       </select>
                     </td>
                     <td className='hidden px-4 py-3 text-slate-400 sm:table-cell'>
-                      <span title='Watch history'>{u._count.watchHistory} watches</span>
+                      <span title='Watch history'>
+                        {u._count.watchHistory} watches
+                      </span>
                       {' · '}
-                      <span title='Reports filed'>{u._count.reports} reports</span>
+                      <span title='Reports filed'>
+                        {u._count.reports} reports
+                      </span>
                     </td>
-                    <td className='hidden px-4 py-3 text-slate-500 text-xs md:table-cell'>
+                    <td className='hidden px-4 py-3 text-xs text-slate-500 md:table-cell'>
                       {new Date(u.createdAt).toLocaleDateString()}
                     </td>
                     <td className='px-4 py-3 text-right'>
@@ -275,7 +277,7 @@ export default function UsersPage() {
                           'flex items-center gap-1 rounded-lg border px-2 py-1 text-xs font-medium transition-colors disabled:opacity-50',
                           u.isBanned
                             ? 'border-green-800 bg-green-950/30 text-green-400 hover:bg-green-950/50'
-                            : 'border-red-900 bg-red-950/20 text-red-400 hover:bg-red-950/40',
+                            : 'border-red-900 bg-red-950/20 text-red-400 hover:bg-red-950/40'
                         )}
                       >
                         <Ban className='h-3 w-3' />

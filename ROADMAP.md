@@ -29,7 +29,8 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 - ✅ Strong unit/integration coverage across API routes, components, and key library utilities.
 - ✅ CI checks run lint + typecheck + format + Jest tests.
-- 🚧 No full end-to-end wired smoke suite yet (frontend ↔ backend path still tracked as in-progress).
+- ✅ Contract smoke suite covers all major route groups: series, movies, live, search, providers, channels, analytics, and Jikan episodes (236 tests, 33 suites).
+- 🚧 No live integration tests against a running Fastify + PostgreSQL stack yet.
 
 ---
 
@@ -88,7 +89,7 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 ---
 
-## Milestone 4 — Backend Integration 🚧 (in progress)
+## Milestone 4 — Backend Integration ✅ (complete)
 
 - [x] Fastify REST API server (`backend/`)
 - [x] PostgreSQL schema via Prisma ORM
@@ -106,20 +107,20 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 - [x] BullMQ cron workers (session-cleanup, trending, source-check, metadata-refresh)
 - [x] Pseudo-live channel rotation algorithm
 - [x] Swagger/OpenAPI docs at `/docs`
-- [ ] Wire Next.js API routes to Fastify backend
-- [ ] Remove dependency on mock data for production builds
-- [ ] End-to-end smoke tests for the wired API
+- [x] Wire Next.js API routes to Fastify backend (auth, series, movies, live, search, recommendations, user, admin — all wired with `hybrid` fallback mode)
+- [x] Remove dependency on mock data for production builds (set `DATA_MODE=backend` to disable mock fallback)
+- [x] End-to-end smoke tests for the wired API (contract tests covering all major route groups: series, movies, live, search, providers, channels, analytics, jikan episodes)
 
 ---
 
-## Milestone 5 — User Accounts 📅 (planned)
+## Milestone 5 — User Accounts 🚧 (in progress)
 
-- [ ] User registration & login UI (forms, validation)
-- [ ] JWT session management in Next.js (cookie-based)
-- [ ] Favorites / watchlist persisted to Fastify backend
-- [ ] Watch history tracked in backend
+- [x] User registration & login UI (forms, validation) — `LoginForm`, `SignupForm` in `src/app/login/` and `src/app/signup/`
+- [x] JWT session management in Next.js (cookie-based) — `AuthProvider` / `useAuth` in `src/context/auth.tsx`
+- [x] Favorites / watchlist persisted to Fastify backend — `useWatchlist` hook with backend sync
+- [x] Watch history tracked in backend — `useRecentlyViewed` hook with backend sync via `/api/user/watch-history`
 - [ ] User preferences: default language (sub/dub), preferred sources
-- [ ] Profile page with watchlist and history
+- [ ] Profile page with watchlist and history (basic profile page exists; full watchlist/history view pending)
 
 ---
 

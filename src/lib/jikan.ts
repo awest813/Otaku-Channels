@@ -7,8 +7,9 @@
  * The converter functions below are thin wrappers kept for backward compat.
  */
 
-import type { AnimeSeries, JikanAnime, Movie } from '@/types';
 import { normalizeJikanAnime } from '@/lib/ingestion/normalize';
+
+import type { AnimeSeries, JikanAnime, Movie } from '@/types';
 
 const JIKAN_BASE = 'https://api.jikan.moe/v4';
 
