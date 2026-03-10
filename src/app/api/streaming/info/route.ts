@@ -1,42 +1,40 @@
 import { NextResponse } from 'next/server';
 
-import {
-  BackendError,
-  ConsumetProvider,
-  getStreamingInfo,
-} from '@/lib/backend';
-
 /**
  * GET /api/streaming/info
  *
- * Query params:
- *   id       — required, provider-specific anime ID
- *   provider — gogoanime | zoro | animepahe (default: gogoanime)
+ * ⚠️  REMOVED — Legal compliance block.
+ *
+ * This endpoint previously proxied to Consumet providers (gogoanime, zoro,
+ * animepahe) to fetch anime info from unauthorized scraper sites.
+ * This violates the Otaku Channels source policy:
+ *   - No ingest from unapproved / unlicensed sources
+ *   - No proxying of content from piracy aggregators
+ *   - No rebroadcasting of content without rights-holder authorization
+ *
+ * Use the official metadata APIs instead:
+ *   GET /api/jikan/anime/:id    — MyAnimeList metadata (Jikan v4)
+ *   GET /api/kitsu/anime/:id    — Kitsu metadata
+ *   GET /api/shikimori/anime/:id — Shikimori metadata
+ *
+ * See SOURCE_POLICY.md §3.1 for the full prohibited-sources list.
+ *
+ * HTTP 451 — Unavailable For Legal Reasons (RFC 7725)
  */
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const id = searchParams.get('id')?.trim();
-
-  if (!id) {
-    return NextResponse.json(
-      { error: 'Missing required param: id' },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const result = await getStreamingInfo(
-      id,
-      (searchParams.get('provider') as ConsumetProvider) ?? undefined
-    );
-    return NextResponse.json(result);
-  } catch (err) {
-    if (err instanceof BackendError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
-    }
-    return NextResponse.json(
-      { error: 'Failed to fetch streaming info' },
-      { status: 502 }
-    );
-  }
+export async function GET(_request: Request) {
+  return NextResponse.json(
+    {
+      error:
+        'This streaming info endpoint has been disabled for legal compliance reasons. ' +
+        'Use /api/jikan/anime/:id, /api/kitsu/anime/:id, or /api/shikimori/anime/:id ' +
+        'for anime metadata. See SOURCE_POLICY.md for details.',
+      code: 'LEGAL_COMPLIANCE_BLOCK',
+      alternatives: [
+        '/api/jikan/anime/:id',
+        '/api/kitsu/anime/:id',
+        '/api/shikimori/anime/:id',
+      ],
+    },
+    { status: 451 }
+  );
 }

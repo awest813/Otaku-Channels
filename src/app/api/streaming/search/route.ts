@@ -1,42 +1,30 @@
 import { NextResponse } from 'next/server';
 
-import { BackendError, ConsumetProvider, searchStreaming } from '@/lib/backend';
-
 /**
  * GET /api/streaming/search
  *
- * Query params:
- *   q        — required, anime title to search
- *   provider — gogoanime | zoro | animepahe (default: gogoanime)
- *   page     — page number (default: 1)
+ * ⚠️  REMOVED — Legal compliance block.
+ *
+ * This endpoint previously proxied to Consumet providers (gogoanime, zoro,
+ * animepahe) which are unauthorized scrapers distributing pirated content.
+ * Proxying their streams violates the Otaku Channels source policy:
+ *   - No ingest from unapproved / unlicensed sources
+ *   - No HLS extraction or proxying
+ *   - No rebroadcasting of content without rights-holder authorization
+ *
+ * See SOURCE_POLICY.md §3.1 for the full prohibited-sources list.
+ *
+ * HTTP 451 — Unavailable For Legal Reasons (RFC 7725)
  */
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const q = searchParams.get('q')?.trim();
-
-  if (!q) {
-    return NextResponse.json(
-      { error: 'Missing required param: q' },
-      { status: 400 }
-    );
-  }
-
-  try {
-    const result = await searchStreaming({
-      q,
-      provider: (searchParams.get('provider') as ConsumetProvider) ?? undefined,
-      page: searchParams.get('page')
-        ? Number(searchParams.get('page'))
-        : undefined,
-    });
-    return NextResponse.json(result);
-  } catch (err) {
-    if (err instanceof BackendError) {
-      return NextResponse.json({ error: err.message }, { status: err.status });
-    }
-    return NextResponse.json(
-      { error: 'Streaming search failed' },
-      { status: 502 }
-    );
-  }
+export async function GET(_request: Request) {
+  return NextResponse.json(
+    {
+      error:
+        'This streaming search endpoint has been disabled for legal compliance reasons. ' +
+        'Otaku Channels only serves content from officially licensed sources. ' +
+        'See SOURCE_POLICY.md for details.',
+      code: 'LEGAL_COMPLIANCE_BLOCK',
+    },
+    { status: 451 }
+  );
 }

@@ -34,7 +34,7 @@ import type {
 /** Derive the EmbedType for a given SourceType. */
 export function deriveEmbedType(sourceType: SourceType): EmbedType {
   if (sourceType === 'youtube') return 'youtube';
-  if (sourceType === 'consumet') return 'hls';
+  // 'consumet' is deprecated and blocked at the API layer; treat as external link only.
   if (
     sourceType === 'retro' ||
     sourceType === 'live' ||
@@ -52,6 +52,7 @@ export function isOfficialSource(sourceType: SourceType): boolean {
     sourceType === 'pluto' ||
     sourceType === 'retrocrush' ||
     sourceType === 'youtube'
+    // Note: 'consumet' is explicitly NOT in this list — it routes to piracy sites.
   );
 }
 
@@ -111,18 +112,32 @@ function deriveJikanPrimarySource(anime: JikanAnime): {
   const streaming = anime.streaming ?? [];
 
   const cr = streaming.find((s) => s.name === 'Crunchyroll');
-  if (cr) return { sourceType: 'crunchyroll', sourceName: 'Crunchyroll', watchUrl: cr.url };
+  if (cr)
+    return {
+      sourceType: 'crunchyroll',
+      sourceName: 'Crunchyroll',
+      watchUrl: cr.url,
+    };
 
   const tubi = streaming.find((s) => s.name.toLowerCase().includes('tubi'));
-  if (tubi) return { sourceType: 'tubi', sourceName: 'Tubi', watchUrl: tubi.url };
+  if (tubi)
+    return { sourceType: 'tubi', sourceName: 'Tubi', watchUrl: tubi.url };
 
   const funi = streaming.find((s) =>
     s.name.toLowerCase().includes('funimation')
   );
   if (funi)
-    return { sourceType: 'crunchyroll', sourceName: 'Funimation', watchUrl: funi.url };
+    return {
+      sourceType: 'crunchyroll',
+      sourceName: 'Funimation',
+      watchUrl: funi.url,
+    };
 
-  return { sourceType: 'jikan', sourceName: 'MyAnimeList', watchUrl: anime.url };
+  return {
+    sourceType: 'jikan',
+    sourceName: 'MyAnimeList',
+    watchUrl: anime.url,
+  };
 }
 
 /** Build a SourceLink[] from all Jikan streaming entries + MAL page fallback. */
@@ -484,7 +499,6 @@ export function normalizeBackendAnime(
   return {
     ...base,
     type: 'series',
-    episodeCount:
-      (raw.episodeCount as number) ?? rawEpisodes.length ?? 0,
+    episodeCount: (raw.episodeCount as number) ?? rawEpisodes.length ?? 0,
   } as AnimeSeries;
 }

@@ -25,6 +25,7 @@ export type SourceType =
   | 'pluto'
   | 'retrocrush'
   | 'crunchyroll'
+  /** @deprecated Consumet routes to unauthorized piracy scrapers and is blocked at the API layer. Do not use for new source links. */
   | 'consumet'
   | 'jikan'
   | 'kitsu'

@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { BackendError, searchAnime } from '@/lib/backend';
 import { getDataMode } from '@/lib/data-mode';
 import { jikanToMovie, jikanToSeries, searchJikan } from '@/lib/jikan';
+import { clampLimit, clampPage, clampYear, sanitizeQuery } from '@/lib/params';
 
 import { allContent } from '@/data/mockData';
 
@@ -24,11 +25,11 @@ import type { AnimeSeries, Movie } from '@/types';
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get('q')?.trim();
+  const q = sanitizeQuery(searchParams.get('q'));
   const genre = searchParams.get('genre') ?? undefined;
   const source = searchParams.get('source') ?? undefined;
   const language = searchParams.get('language') ?? undefined;
-  const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
+  const page = clampPage(searchParams.get('page')) ?? 1;
   const mode = getDataMode();
 
   if (!q && !genre && !source && !language) {
@@ -40,7 +41,9 @@ export async function GET(request: Request) {
 
   // mock-only mode — search in-memory
   if (mode === 'mock') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
+    return NextResponse.json(
+      buildMockSearchResponse(q, genre, source, language, page)
+    );
   }
 
   // 1. Try backend
@@ -51,15 +54,11 @@ export async function GET(request: Request) {
       source,
       language,
       type: searchParams.get('type') ?? undefined,
-      year: searchParams.get('year')
-        ? Number(searchParams.get('year'))
-        : undefined,
+      year: clampYear(searchParams.get('year')),
       season: searchParams.get('season') ?? undefined,
       sort: searchParams.get('sort') ?? undefined,
-      page,
-      limit: searchParams.get('limit')
-        ? Number(searchParams.get('limit'))
-        : undefined,
+      page: clampPage(searchParams.get('page')) ?? 1,
+      limit: clampLimit(searchParams.get('limit')),
     });
     return NextResponse.json({ ...result, source: 'backend' });
   } catch (err) {
@@ -99,7 +98,14 @@ export async function GET(request: Request) {
 
   // 3. Hybrid mode: fall back to mock data
   if (mode === 'hybrid') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[/api/search] Backend unavailable — serving mock data as fallback.'
+    );
+    return NextResponse.json({
+      ...buildMockSearchResponse(q, genre, source, language, page),
+      fallback: true,
+    });
   }
 
   // 4. Last resort: empty results

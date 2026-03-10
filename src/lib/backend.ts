@@ -24,7 +24,18 @@ import type {
   SourceType,
 } from '@/types';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+const BACKEND_URL = (() => {
+  const url = process.env.BACKEND_URL;
+  if (!url) {
+    // eslint-disable-next-line no-console
+    console.warn(
+      '[backend] BACKEND_URL is not set — falling back to http://localhost:3001. ' +
+        'Set BACKEND_URL in production to point at the Fastify backend.'
+    );
+    return 'http://localhost:3001';
+  }
+  return url;
+})();
 const API_BASE = `${BACKEND_URL}/api/v1`;
 
 export class BackendError extends Error {
@@ -43,6 +54,8 @@ async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
       'Content-Type': 'application/json',
       ...(init?.headers ?? {}),
     },
+    // 15-second timeout prevents indefinite hangs on a dead backend
+    signal: AbortSignal.timeout(15_000),
     // Disable Next.js data cache for these server-to-server calls
     cache: 'no-store',
   });
@@ -335,7 +348,10 @@ export async function getBecauseYouWatched(animeId: string): Promise<{
     data: Record<string, unknown>[];
     basedOn: { id: string; title: string } | null;
   }>(`/recommendations/because-you-watched/${encodeURIComponent(animeId)}`);
-  return { data: result.data.map(normalizeBackendAnime), basedOn: result.basedOn };
+  return {
+    data: result.data.map(normalizeBackendAnime),
+    basedOn: result.basedOn,
+  };
 }
 
 // ─── Channels ─────────────────────────────────────────────────────────────────

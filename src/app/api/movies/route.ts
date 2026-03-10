@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { BackendError, listAnime } from '@/lib/backend';
 import { getDataMode } from '@/lib/data-mode';
+import { clampLimit, clampPage } from '@/lib/params';
 
 import { mockMovies } from '@/data/mockData';
 
@@ -25,12 +26,8 @@ export async function GET(request: Request) {
     source: searchParams.get('source') ?? undefined,
     language: searchParams.get('language') ?? undefined,
     sort: searchParams.get('sort') ?? undefined,
-    page: searchParams.get('page')
-      ? Number(searchParams.get('page'))
-      : undefined,
-    limit: searchParams.get('limit')
-      ? Number(searchParams.get('limit'))
-      : undefined,
+    page: clampPage(searchParams.get('page')),
+    limit: clampLimit(searchParams.get('limit')),
   };
 
   if (mode === 'mock') {
