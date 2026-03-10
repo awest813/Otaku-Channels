@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { BackendError, listAnime } from '@/lib/backend';
 import { getDataMode } from '@/lib/data-mode';
+import { clampLimit, clampPage, clampYear, sanitizeQuery } from '@/lib/params';
 
 import { mockMovies, mockSeries } from '@/data/mockData';
 
@@ -20,19 +21,16 @@ export async function GET(request: Request) {
   const mode = getDataMode();
 
   const params: SeriesListParams = {
-    genre: searchParams.get('genre') ?? undefined,
-    source: searchParams.get('source') ?? undefined,
-    language: searchParams.get('language') ?? undefined,
-    tag: searchParams.get('tag') ?? undefined,
-    type: searchParams.get('type') ?? undefined,
-    status: searchParams.get('status') ?? undefined,
-    sort: searchParams.get('sort') ?? undefined,
-    page: searchParams.get('page')
-      ? Number(searchParams.get('page'))
-      : undefined,
-    limit: searchParams.get('limit')
-      ? Number(searchParams.get('limit'))
-      : undefined,
+    genre: sanitizeQuery(searchParams.get('genre')),
+    source: sanitizeQuery(searchParams.get('source')),
+    language: sanitizeQuery(searchParams.get('language')),
+    tag: sanitizeQuery(searchParams.get('tag')),
+    type: sanitizeQuery(searchParams.get('type')),
+    status: sanitizeQuery(searchParams.get('status')),
+    year: clampYear(searchParams.get('year')),
+    sort: sanitizeQuery(searchParams.get('sort')),
+    page: clampPage(searchParams.get('page')),
+    limit: clampLimit(searchParams.get('limit')),
   };
 
   // mock-only mode
@@ -65,7 +63,7 @@ export async function GET(request: Request) {
 
 function buildMockResponse(params: SeriesListParams) {
   const isMovie = params.type === 'MOVIE';
-  let data: (typeof mockSeries[number] | typeof mockMovies[number])[] =
+  let data: ((typeof mockSeries)[number] | (typeof mockMovies)[number])[] =
     isMovie ? [...mockMovies] : [...mockSeries];
 
   if (params.genre) {

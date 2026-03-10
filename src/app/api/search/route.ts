@@ -3,6 +3,7 @@ import { NextResponse } from 'next/server';
 import { BackendError, searchAnime } from '@/lib/backend';
 import { getDataMode } from '@/lib/data-mode';
 import { jikanToMovie, jikanToSeries, searchJikan } from '@/lib/jikan';
+import { clampLimit, clampPage, clampYear, sanitizeQuery } from '@/lib/params';
 
 import { allContent } from '@/data/mockData';
 
@@ -24,11 +25,11 @@ import type { AnimeSeries, Movie } from '@/types';
  */
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const q = searchParams.get('q')?.trim();
-  const genre = searchParams.get('genre') ?? undefined;
-  const source = searchParams.get('source') ?? undefined;
-  const language = searchParams.get('language') ?? undefined;
-  const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
+  const q = sanitizeQuery(searchParams.get('q'));
+  const genre = sanitizeQuery(searchParams.get('genre'));
+  const source = sanitizeQuery(searchParams.get('source'));
+  const language = sanitizeQuery(searchParams.get('language'));
+  const page = clampPage(searchParams.get('page')) ?? 1;
   const mode = getDataMode();
 
   if (!q && !genre && !source && !language) {
@@ -40,7 +41,9 @@ export async function GET(request: Request) {
 
   // mock-only mode — search in-memory
   if (mode === 'mock') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
+    return NextResponse.json(
+      buildMockSearchResponse(q, genre, source, language, page)
+    );
   }
 
   // 1. Try backend
@@ -50,16 +53,12 @@ export async function GET(request: Request) {
       genre,
       source,
       language,
-      type: searchParams.get('type') ?? undefined,
-      year: searchParams.get('year')
-        ? Number(searchParams.get('year'))
-        : undefined,
-      season: searchParams.get('season') ?? undefined,
-      sort: searchParams.get('sort') ?? undefined,
+      type: sanitizeQuery(searchParams.get('type')),
+      year: clampYear(searchParams.get('year')),
+      season: sanitizeQuery(searchParams.get('season')),
+      sort: sanitizeQuery(searchParams.get('sort')),
       page,
-      limit: searchParams.get('limit')
-        ? Number(searchParams.get('limit'))
-        : undefined,
+      limit: clampLimit(searchParams.get('limit')),
     });
     return NextResponse.json({ ...result, source: 'backend' });
   } catch (err) {
@@ -99,7 +98,9 @@ export async function GET(request: Request) {
 
   // 3. Hybrid mode: fall back to mock data
   if (mode === 'hybrid') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
+    return NextResponse.json(
+      buildMockSearchResponse(q, genre, source, language, page, true)
+    );
   }
 
   // 4. Last resort: empty results
@@ -110,6 +111,7 @@ export async function GET(request: Request) {
     limit: 0,
     query: q ?? '',
     source: 'mock',
+    fallback: true,
   });
 }
 
@@ -118,7 +120,8 @@ function buildMockSearchResponse(
   genre: string | undefined,
   source: string | undefined,
   language: string | undefined,
-  page: number
+  page: number,
+  fallback = false
 ) {
   let data = allContent as (AnimeSeries | Movie)[];
 
@@ -153,5 +156,6 @@ function buildMockSearchResponse(
     limit: data.length,
     query: q ?? '',
     source: 'mock' as const,
+    fallback,
   };
 }
