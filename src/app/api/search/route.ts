@@ -79,8 +79,9 @@ export async function GET(request: Request) {
         query: q,
         source: 'jikan',
       });
-    } catch {
-      // Jikan also failed
+    } catch (jikanErr) {
+      // eslint-disable-next-line no-console
+      console.error('[/api/search] Jikan fallback failed:', jikanErr);
     }
   }
 

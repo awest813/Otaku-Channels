@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { z } from 'zod';
 
 const STORAGE_KEY = 'anime-tv-watchlist';
 
@@ -13,11 +14,25 @@ export interface WatchlistItem {
   releaseYear: number;
 }
 
+const WatchlistItemSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  thumbnail: z.string(),
+  sourceType: z.string(),
+  releaseYear: z.number(),
+});
+
+const WatchlistSchema = z.array(WatchlistItemSchema);
+
 function readStorage(): WatchlistItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as WatchlistItem[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const result = WatchlistSchema.safeParse(parsed);
+    return result.success ? result.data : [];
   } catch {
     return [];
   }

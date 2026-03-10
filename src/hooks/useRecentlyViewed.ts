@@ -1,6 +1,7 @@
 'use client';
 
 import * as React from 'react';
+import { z } from 'zod';
 
 const STORAGE_KEY = 'anime-tv-recently-viewed';
 const MAX_ITEMS = 12;
@@ -15,11 +16,26 @@ export interface RecentItem {
   viewedAt: number;
 }
 
+const RecentItemSchema = z.object({
+  id: z.string(),
+  slug: z.string(),
+  title: z.string(),
+  thumbnail: z.string(),
+  sourceType: z.string(),
+  releaseYear: z.number(),
+  viewedAt: z.number(),
+});
+
+const RecentItemsSchema = z.array(RecentItemSchema);
+
 function readStorage(): RecentItem[] {
   if (typeof window === 'undefined') return [];
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    return raw ? (JSON.parse(raw) as RecentItem[]) : [];
+    if (!raw) return [];
+    const parsed = JSON.parse(raw);
+    const result = RecentItemsSchema.safeParse(parsed);
+    return result.success ? result.data : [];
   } catch {
     return [];
   }

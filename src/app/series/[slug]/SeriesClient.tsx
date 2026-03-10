@@ -16,10 +16,9 @@ import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
+import { cn } from '@/lib/utils';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { useWatchlist } from '@/hooks/useWatchlist';
-
-import { cn } from '@/lib/utils';
 
 import EpisodeList from '@/components/media/EpisodeList';
 import MediaRail from '@/components/media/MediaRail';
@@ -252,7 +251,10 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                         href={link.url}
                         target='_blank'
                         rel='noopener noreferrer'
-                        className={cn('inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400', colorClass)}
+                        className={cn(
+                          'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                          colorClass
+                        )}
                       >
                         <Star className='h-3 w-3' />
                         {link.name}
