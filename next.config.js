@@ -7,6 +7,11 @@ const nextConfig = {
   reactStrictMode: true,
 
   images: {
+    // Responsive sizes for artwork served through Next.js Image Optimisation /
+    // a CDN in front of it (Vercel Edge Network, Cloudflare, etc.)
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    formats: ['image/avif', 'image/webp'],
     remotePatterns: [
       { protocol: 'https', hostname: 'images.unsplash.com' },
       // MyAnimeList / Jikan
@@ -17,7 +22,30 @@ const nextConfig = {
       { protocol: 'https', hostname: 'media.kitsu.io' },
       // Waifu.pics
       { protocol: 'https', hostname: 'i.waifu.pics' },
+      // Shikimori artwork
+      { protocol: 'https', hostname: 'shikimori.one' },
+      { protocol: 'https', hostname: 'dere.shikimori.one' },
+      // AnimePlanet
+      { protocol: 'https', hostname: 'cdn.anime-planet.com' },
     ],
+  },
+
+  async headers() {
+    return [
+      {
+        // Apply security headers to all routes
+        source: '/(.*)',
+        headers: [
+          { key: 'X-Frame-Options', value: 'SAMEORIGIN' },
+          { key: 'X-Content-Type-Options', value: 'nosniff' },
+          { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+    ];
   },
 
   webpack(config) {
