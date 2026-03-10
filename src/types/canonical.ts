@@ -178,6 +178,65 @@ export interface Channel {
 }
 
 /**
+ * A single programming slot in a pseudo-live channel schedule.
+ * Slots are ordered by slotIndex and cycle deterministically using an epoch.
+ */
+export interface ScheduleSlot {
+  /** Zero-based position in the rotation. */
+  slotIndex: number;
+  /** Human-readable label shown in the program guide (e.g. "Demon Slayer – Ep 1"). */
+  label: string;
+  /** Parent series or film title. */
+  seriesTitle: string;
+  /** Episode-specific title, if applicable. */
+  episodeTitle?: string;
+  /** Episode number within its season. */
+  episodeNumber?: number;
+  /** Season number. */
+  seasonNumber?: number;
+  /** Runtime in seconds (default: 1440 = 24 min). */
+  durationSec: number;
+  /** Thumbnail URL for the slot. */
+  thumbnailUrl?: string;
+  /** Content tags, e.g. ['Action', 'Shonen']. */
+  tags?: string[];
+  /** Short description for tooltips / detail screens. */
+  description?: string;
+}
+
+/**
+ * Result of the now-playing computation for a channel.
+ */
+export interface NowPlayingResult {
+  channelSlug: string;
+  /** Currently airing slot, augmented with live-playback metadata. */
+  current: ScheduleSlot & {
+    /** Playback progress as a percentage (0–100). */
+    progressPercent: number;
+    /** Seconds until this slot ends and the next begins. */
+    remainingSec: number;
+  };
+  /** Next slot to air, or null if the schedule has only one slot. */
+  next: ScheduleSlot | null;
+}
+
+/**
+ * A Channel extended with its full pseudo-live schedule.
+ * The schedule is used by the channel engine to compute "now playing" / "up next"
+ * deterministically without a live backend.
+ */
+export interface ChannelWithSchedule extends Channel {
+  /** Ordered list of content slots that repeat on a fixed cycle. */
+  scheduleSlots: ScheduleSlot[];
+  /** Primary genre theme for the channel (e.g. 'Action', 'Retro'). */
+  genre?: string;
+  /** Mood/tone label (e.g. 'Chill', 'Hype', 'Nostalgic'). */
+  mood?: string;
+  /** Short tagline shown on the channel card. */
+  tagline?: string;
+}
+
+/**
  * A metadata / streaming service provider known to the app.
  */
 export interface SourceProvider {

@@ -10,6 +10,9 @@
  * callers never have to deal with `unknown` data or field-name mismatches.
  */
 
+import { deriveEmbedType, isOfficialSource } from '@/lib/ingestion/normalize';
+import { normalizeBackendAnime } from '@/lib/ingestion/normalize';
+
 import type {
   Anime,
   AnimeSeries,
@@ -20,11 +23,6 @@ import type {
   SourceLink,
   SourceType,
 } from '@/types';
-import {
-  deriveEmbedType,
-  isOfficialSource,
-} from '@/lib/ingestion/normalize';
-import { normalizeBackendAnime } from '@/lib/ingestion/normalize';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 const API_BASE = `${BACKEND_URL}/api/v1`;
@@ -106,7 +104,8 @@ function normalizeEpisode(
       isOfficial: l.isOfficial ?? isOfficialSource(sourceType),
       isEmbeddable: l.isEmbeddable ?? false,
       language: (l.language || 'sub') as LanguageOption,
-      availabilityStatus: (l.availabilityStatus ?? 'unknown') as SourceLink['availabilityStatus'],
+      availabilityStatus: (l.availabilityStatus ??
+        'unknown') as SourceLink['availabilityStatus'],
       lastVerifiedAt: l.lastVerifiedAt ?? null,
     };
   });
@@ -132,7 +131,10 @@ function normalizeEpisode(
     seasonNumber: (raw.seasonNumber as number) ?? 1,
     duration,
     watchUrl:
-      primaryLink?.providerUrl || (firstRaw?.url as string) || (raw.watchUrl as string) || '',
+      primaryLink?.providerUrl ||
+      (firstRaw?.url as string) ||
+      (raw.watchUrl as string) ||
+      '',
     isEmbeddable:
       primaryLink?.isEmbeddable ??
       (firstRaw?.isEmbeddable as boolean) ??
@@ -163,7 +165,10 @@ function normalizeChannel(raw: Record<string, unknown>): Channel {
     slug: raw.slug as string,
     name: raw.name as string,
     description: (raw.description ?? '') as string,
-    thumbnail: (raw.artworkUrl ?? raw.bannerUrl ?? raw.thumbnail ?? '') as string,
+    thumbnail: (raw.artworkUrl ??
+      raw.bannerUrl ??
+      raw.thumbnail ??
+      '') as string,
     channelNumber: (raw.channelNumber ?? '') as string,
     sourceName: (raw.sourceName ?? raw.name) as string,
     sourceType: (raw.sourceType ?? 'live') as SourceType,
@@ -211,9 +216,7 @@ export async function listAnime(params: AnimeListParams = {}): Promise<{
   return { ...result, data: result.data.map(normalizeBackendAnime) };
 }
 
-export async function getAnime(
-  slug: string
-): Promise<{ data: Anime }> {
+export async function getAnime(slug: string): Promise<{ data: Anime }> {
   const result = await apiFetch<{ data: Record<string, unknown> }>(
     `/anime/${slug}`
   );
@@ -310,6 +313,12 @@ export async function listChannels(): Promise<{
 
 export async function getChannelNowPlaying(slug: string) {
   return apiFetch<{ data: unknown }>(`/channels/${slug}/now-playing`);
+}
+
+export async function getChannelSchedule(slug: string) {
+  return apiFetch<{ data: unknown[]; total: number; channelSlug: string }>(
+    `/channels/${slug}/schedule`
+  );
 }
 
 // ─── Sources / Providers ─────────────────────────────────────────────────────
