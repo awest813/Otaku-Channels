@@ -298,6 +298,46 @@ export async function searchAnime(params: SearchParams): Promise<{
   return { ...result, data: result.data.map(normalizeBackendAnime) };
 }
 
+// ─── Search suggestions ───────────────────────────────────────────────────────
+
+export interface SearchSuggestion {
+  slug: string;
+  title: string;
+  posterUrl: string | null;
+}
+
+/** GET /api/v1/search/suggest?q=... — instant autocomplete suggestions */
+export async function getSearchSuggestions(q: string): Promise<{
+  data: SearchSuggestion[];
+}> {
+  const qs = new URLSearchParams({ q });
+  return apiFetch<{ data: SearchSuggestion[] }>(`/search/suggest?${qs}`);
+}
+
+// ─── Recommendations ─────────────────────────────────────────────────────────
+
+/** GET /api/v1/recommendations/similar/:animeId */
+export async function getSimilarAnime(animeId: string): Promise<{
+  data: (AnimeSeries | Movie)[];
+}> {
+  const result = await apiFetch<{ data: Record<string, unknown>[] }>(
+    `/recommendations/similar/${encodeURIComponent(animeId)}`
+  );
+  return { data: result.data.map(normalizeBackendAnime) };
+}
+
+/** GET /api/v1/recommendations/because-you-watched/:animeId */
+export async function getBecauseYouWatched(animeId: string): Promise<{
+  data: (AnimeSeries | Movie)[];
+  basedOn: { id: string; title: string } | null;
+}> {
+  const result = await apiFetch<{
+    data: Record<string, unknown>[];
+    basedOn: { id: string; title: string } | null;
+  }>(`/recommendations/because-you-watched/${encodeURIComponent(animeId)}`);
+  return { data: result.data.map(normalizeBackendAnime), basedOn: result.basedOn };
+}
+
 // ─── Channels ─────────────────────────────────────────────────────────────────
 
 export async function listChannels(): Promise<{
