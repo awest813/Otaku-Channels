@@ -113,14 +113,14 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 ---
 
-## Milestone 5 — User Accounts 🚧 (in progress)
+## Milestone 5 — User Accounts ✅ (complete)
 
 - [x] User registration & login UI (forms, validation) — `LoginForm`, `SignupForm` in `src/app/login/` and `src/app/signup/`
 - [x] JWT session management in Next.js (cookie-based) — `AuthProvider` / `useAuth` in `src/context/auth.tsx`
 - [x] Favorites / watchlist persisted to Fastify backend — `useWatchlist` hook with backend sync
 - [x] Watch history tracked in backend — `useRecentlyViewed` hook with backend sync via `/api/user/watch-history`
-- [ ] User preferences: default language (sub/dub), preferred sources
-- [ ] Profile page with watchlist and history (basic profile page exists; full watchlist/history view pending)
+- [x] User preferences: default language (sub/dub), preferred sources — `ProfileContent.tsx` with sub/dub toggle and source multi-select; saved via `PATCH /api/user/profile`
+- [x] Profile page with watchlist and history — inline watchlist preview (up to 6 items) and watch history preview (up to 6 items) with "See all" links
 
 ---
 
