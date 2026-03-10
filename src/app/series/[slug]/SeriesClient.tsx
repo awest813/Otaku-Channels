@@ -101,7 +101,9 @@ export default function SeriesClient({ series, episodes, related }: Props) {
 
   // Derive per-episode language falling back to the series-level language
   function resolveEpLang(ep: Episode): LanguageOption {
-    return ep.language ?? (series.language === 'both' ? 'sub' : series.language);
+    return (
+      ep.language ?? (series.language === 'both' ? 'sub' : series.language)
+    );
   }
 
   const filteredEpisodes =
@@ -220,7 +222,9 @@ export default function SeriesClient({ series, episodes, related }: Props) {
               {watchHref ? (
                 <Link
                   href={watchHref}
-                  onClick={() => trackStartedWatch(series.id, undefined, series.sourceType)}
+                  onClick={() =>
+                    trackStartedWatch(series.id, undefined, series.sourceType)
+                  }
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <Play className='h-4 w-4 fill-slate-950' /> Watch Trailer
@@ -228,7 +232,9 @@ export default function SeriesClient({ series, episodes, related }: Props) {
               ) : series.isEmbeddable ? (
                 <Link
                   href={`/watch/youtube/${series.id}`}
-                  onClick={() => trackStartedWatch(series.id, undefined, series.sourceType)}
+                  onClick={() =>
+                    trackStartedWatch(series.id, undefined, series.sourceType)
+                  }
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <Play className='h-4 w-4 fill-slate-950' /> Watch Now
@@ -238,7 +244,9 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                   href={series.watchUrl}
                   target='_blank'
                   rel='noopener noreferrer'
-                  onClick={() => trackClickedExternal(series.id, series.sourceType)}
+                  onClick={() =>
+                    trackClickedExternal(series.id, series.sourceType)
+                  }
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <ExternalLink className='h-4 w-4' /> Watch on{' '}

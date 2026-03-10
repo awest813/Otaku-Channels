@@ -19,7 +19,7 @@ export default function SectionHeader({ title, href, description }: Props) {
       {href && (
         <Link
           href={href}
-          className='shrink-0 flex items-center gap-0.5 text-sm text-cyan-400 transition-colors hover:text-cyan-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:rounded'
+          className='flex shrink-0 items-center gap-0.5 text-sm text-cyan-400 transition-colors hover:text-cyan-300 focus-visible:rounded focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
         >
           See all <ChevronRight className='h-4 w-4' />
         </Link>

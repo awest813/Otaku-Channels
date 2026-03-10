@@ -22,7 +22,9 @@ export default function EpisodeList({ episodes, seriesSlug }: Props) {
         // Build the internal watch href with series context when available
         const internalHref =
           seriesSlug || ep.seriesSlug
-            ? `/watch/youtube/${ep.id}?series=${seriesSlug ?? ep.seriesSlug}&ep=${ep.episodeNumber ?? index + 1}`
+            ? `/watch/youtube/${ep.id}?series=${
+                seriesSlug ?? ep.seriesSlug
+              }&ep=${ep.episodeNumber ?? index + 1}`
             : `/watch/youtube/${ep.id}`;
 
         return (
@@ -70,7 +72,9 @@ export default function EpisodeList({ episodes, seriesSlug }: Props) {
               <p className='mt-1 text-xs text-slate-500'>
                 {ep.duration}
                 {!ep.isEmbeddable && (
-                  <span className='ml-2 text-slate-600'>· Opens on {ep.sourceName}</span>
+                  <span className='ml-2 text-slate-600'>
+                    · Opens on {ep.sourceName}
+                  </span>
                 )}
               </p>
               {ep.description && (

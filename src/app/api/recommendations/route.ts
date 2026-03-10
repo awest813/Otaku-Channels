@@ -40,7 +40,10 @@ export async function GET(request: Request) {
       }
     } catch (err) {
       if (err instanceof BackendError && err.status < 500) {
-        return NextResponse.json({ error: err.message }, { status: err.status });
+        return NextResponse.json(
+          { error: err.message },
+          { status: err.status }
+        );
       }
       // Backend unavailable — fall through to heuristics
     }
@@ -49,8 +52,7 @@ export async function GET(request: Request) {
   // 2. Heuristic fallback: genre overlap from mock data
   const all = allContent as (AnimeSeries | Movie)[];
   const base =
-    all.find((i) => i.id === animeId) ??
-    all.find((i) => i.slug === slug);
+    all.find((i) => i.id === animeId) ?? all.find((i) => i.slug === slug);
 
   if (!base) {
     return NextResponse.json({ data: [] });

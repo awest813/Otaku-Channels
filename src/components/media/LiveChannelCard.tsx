@@ -43,7 +43,9 @@ export default function LiveChannelCard({ channel }: { channel: LiveChannel }) {
 
       <div className='flex flex-1 flex-col gap-1.5 p-3'>
         <div className='flex items-start justify-between gap-2'>
-          <p className='font-semibold leading-tight text-white'>{channel.name}</p>
+          <p className='font-semibold leading-tight text-white'>
+            {channel.name}
+          </p>
         </div>
         <p className='line-clamp-1 text-xs text-slate-400'>
           <span className='font-medium text-green-400'>▶ Now: </span>
@@ -54,7 +56,9 @@ export default function LiveChannelCard({ channel }: { channel: LiveChannel }) {
             Next: {channel.nextUp}
           </p>
         )}
-        <p className='mt-auto pt-1 text-xs text-slate-600'>{channel.sourceName}</p>
+        <p className='mt-auto pt-1 text-xs text-slate-600'>
+          {channel.sourceName}
+        </p>
       </div>
     </Link>
   );

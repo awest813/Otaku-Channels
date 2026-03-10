@@ -139,17 +139,14 @@ export default async function WatchPage({ params, searchParams }: Props) {
     // Try backend first, then mock data
     try {
       const { data: allEps } = await getAnimeEpisodes(seriesSlugParam);
-      nextEpisode =
-        allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
+      nextEpisode = allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
     } catch {
       const allEps = getEpisodesBySeries(seriesSlugParam);
-      nextEpisode =
-        allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
+      nextEpisode = allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
     }
   } else if (episode && episodeParent) {
     // Fallback: look up next episode from mock data using current episode
-    const currentNum =
-      episode.episodeNumber ?? Number(episodeNumber ?? 0);
+    const currentNum = episode.episodeNumber ?? Number(episodeNumber ?? 0);
     const siblings = getEpisodesBySeries(episode.seriesSlug);
     nextEpisode =
       siblings.find((ep) => ep.episodeNumber === currentNum + 1) ?? null;

@@ -13,8 +13,8 @@ export default function Footer() {
               <span className='font-bold text-white'>Anime TV</span>
             </div>
             <p className='text-xs leading-relaxed text-slate-500'>
-              A discovery guide for officially licensed free anime. We link
-              only to legal, free sources.
+              A discovery guide for officially licensed free anime. We link only
+              to legal, free sources.
             </p>
           </div>
 
@@ -104,8 +104,8 @@ export default function Footer() {
 
         <div className='mt-8 flex flex-col items-start justify-between gap-2 border-t border-slate-800/60 pt-6 sm:flex-row sm:items-center'>
           <p className='text-xs text-slate-600'>
-            © {new Date().getFullYear()} Anime TV — No content is hosted on
-            this site.
+            © {new Date().getFullYear()} Anime TV — No content is hosted on this
+            site.
           </p>
           <p className='text-xs text-slate-700'>
             For entertainment discovery only.

@@ -84,7 +84,9 @@ export default function WatchPlayerShell({
   const [autoplayEnabled, setAutoplayEnabled] = React.useState(true);
   const [showCountdown, setShowCountdown] = React.useState(false);
   const [countdown, setCountdown] = React.useState(AUTOPLAY_COUNTDOWN_SEC);
-  const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(null);
+  const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(
+    null
+  );
   const delayRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const nextEpisodeHref = nextEpisode
@@ -109,7 +111,7 @@ export default function WatchPlayerShell({
     countdownRef.current = setInterval(() => {
       setCountdown((prev) => {
         if (prev <= 1) {
-          clearInterval(countdownRef.current!);
+          if (countdownRef.current) clearInterval(countdownRef.current);
           return 0;
         }
         return prev - 1;
@@ -143,7 +145,7 @@ export default function WatchPlayerShell({
       if (delayRef.current) clearTimeout(delayRef.current);
       if (countdownRef.current) clearInterval(countdownRef.current);
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nextEpisode?.id, autoplayEnabled, isEmbeddable]);
 
   // Priority: trailerEmbedUrl → YouTube embed from watchUrl → fallback
@@ -340,7 +342,10 @@ export default function WatchPlayerShell({
                   href={link.url}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className={cn('inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ring-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400', colorClass)}
+                  className={cn(
+                    'inline-flex items-center gap-1.5 rounded-lg px-3 py-2 text-sm font-semibold ring-1 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                    colorClass
+                  )}
                 >
                   <Star className='h-3.5 w-3.5' />
                   {link.name}

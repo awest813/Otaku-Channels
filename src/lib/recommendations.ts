@@ -101,8 +101,7 @@ export function getProviderRecs(
 ): AnyAnime[] {
   return all
     .filter(
-      (item) =>
-        item.id !== base.id && item.sourceType === base.sourceType
+      (item) => item.id !== base.id && item.sourceType === base.sourceType
     )
     .map((item) => ({
       item,

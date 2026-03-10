@@ -26,7 +26,7 @@ function FilterChip({
       className={cn(
         'rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
         active
-          ? 'border-cyan-500 bg-cyan-500/15 text-cyan-300'
+          ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300'
           : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-white'
       )}
     >

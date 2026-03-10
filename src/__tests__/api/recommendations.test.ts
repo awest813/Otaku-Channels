@@ -33,7 +33,9 @@ describe('GET /api/recommendations', () => {
   });
 
   it('excludes the base item from recommendations', async () => {
-    const res = await GET(makeRequest('?animeId=s1&slug=demon-slayer-highlights'));
+    const res = await GET(
+      makeRequest('?animeId=s1&slug=demon-slayer-highlights')
+    );
     const body = await res.json();
     const hasBaseItem = body.data.some(
       (item: { id: string; slug: string }) =>
@@ -43,7 +45,9 @@ describe('GET /api/recommendations', () => {
   });
 
   it('returns empty array for unknown animeId and slug', async () => {
-    const res = await GET(makeRequest('?animeId=nonexistent-id&slug=nonexistent-slug'));
+    const res = await GET(
+      makeRequest('?animeId=nonexistent-id&slug=nonexistent-slug')
+    );
     expect(res.status).toBe(200);
     const body = await res.json();
     expect(body.data).toEqual([]);
