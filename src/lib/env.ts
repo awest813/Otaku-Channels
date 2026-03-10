@@ -10,6 +10,13 @@ const envVariables = z.object({
   NEXT_PUBLIC_SHOW_LOGGER: z.enum(['true', 'false']).optional(),
   // Server-side only — used by Next.js route handlers to proxy to the Fastify backend
   BACKEND_URL: z.string().url().optional(),
+  /**
+   * Controls the data source used by Next.js API route handlers.
+   *   mock    — always return static mock data; never contact the backend
+   *   backend — always call the Fastify backend; 502 if unavailable
+   *   hybrid  — try backend first, fall back to mock data (default)
+   */
+  DATA_MODE: z.enum(['mock', 'backend', 'hybrid']).optional(),
 });
 
 envVariables.parse(process.env);

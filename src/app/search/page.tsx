@@ -2,6 +2,8 @@
 import { ExternalLink, Loader2, Search } from 'lucide-react';
 import * as React from 'react';
 
+import { searchContent } from '@/lib/api-client';
+
 import { allContent } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
@@ -31,9 +33,9 @@ export default function SearchPage() {
     null
   );
   const [searching, setSearching] = React.useState(false);
-  const [searchSource, setSearchSource] = React.useState<'local' | 'jikan'>(
-    'local'
-  );
+  const [searchSource, setSearchSource] = React.useState<
+    'backend' | 'jikan' | 'mock' | 'local'
+  >('local');
 
   // Debounced search — fires 500 ms after the user stops typing
   React.useEffect(() => {
@@ -46,58 +48,14 @@ export default function SearchPage() {
     const timer = setTimeout(async () => {
       setSearching(true);
       try {
-        // Try Jikan (real anime search) first when there's a text query
-        if (query) {
-          const jikanRes = await fetch(
-            `/api/jikan/search?q=${encodeURIComponent(query)}`
-          );
-          if (jikanRes.ok) {
-            const body = await jikanRes.json();
-            const jikanItems = (body.data ?? []) as SearchResult[];
-
-            // Also search in-memory mock data
-            const q = query.toLowerCase();
-            const localItems = (allContent as SearchResult[]).filter(
-              (item) =>
-                item.title.toLowerCase().includes(q) ||
-                item.description.toLowerCase().includes(q) ||
-                item.genres.some((g) => g.toLowerCase().includes(q))
-            );
-
-            // Deduplicate: if a local item title matches a Jikan item, keep Jikan
-            const jikanTitles = new Set(
-              jikanItems.map((i) => i.title.toLowerCase())
-            );
-            const uniqueLocal = localItems.filter(
-              (i) => !jikanTitles.has(i.title.toLowerCase())
-            );
-
-            // Apply genre filter if set
-            const combined: SearchResult[] = [...jikanItems, ...uniqueLocal];
-            const filtered = genre
-              ? combined.filter((i) => i.genres.includes(genre))
-              : combined;
-
-            setApiResults(filtered);
-            setSearchSource('jikan');
-            return;
-          }
-        }
-
-        // Fallback to backend search API
-        const params = new URLSearchParams();
-        if (query) params.set('q', query);
-        if (genre) params.set('genre', genre);
-        const res = await fetch(`/api/search?${params.toString()}`);
-        if (res.ok) {
-          const body = await res.json();
-          setApiResults(body.data as SearchResult[]);
-          setSearchSource('local');
-        } else {
-          setApiResults(null);
-          setSearchSource('local');
-        }
+        const result = await searchContent({
+          q: query || undefined,
+          genre: genre ?? undefined,
+        });
+        setApiResults(result.data as SearchResult[]);
+        setSearchSource(result.source ?? 'backend');
       } catch {
+        // Fall back to in-memory mock data when the API is completely unavailable
         setApiResults(null);
         setSearchSource('local');
       } finally {
@@ -230,7 +188,7 @@ export default function SearchPage() {
                   href={youtubeAnimeSearchUrl(query)}
                   target='_blank'
                   rel='noopener noreferrer'
-                  className='inline-flex items-center gap-1.5 rounded-lg bg-red-600/15 px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
+                  className='bg-red-600/15 inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold text-red-400 transition-colors hover:bg-red-600/25 hover:text-red-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500'
                 >
                   <ExternalLink className='h-3.5 w-3.5' />
                   Also search YouTube
