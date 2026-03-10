@@ -32,6 +32,12 @@ const AnalyticsEventSchema = z.object({
 });
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+if (!process.env.BACKEND_URL) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[analytics] BACKEND_URL is not set; defaulting to http://localhost:3001'
+  );
+}
 
 export async function POST(request: Request) {
   let body: unknown;
@@ -50,7 +56,8 @@ export async function POST(request: Request) {
   }
 
   const { event, animeId, episodeId, sourceType } = parsed.data;
-  const completed = event === 'completed_episode' ? true : (parsed.data.completed ?? false);
+  const completed =
+    event === 'completed_episode' ? true : parsed.data.completed ?? false;
 
   // Forward to backend watch-history (which records recommendation signals)
   try {

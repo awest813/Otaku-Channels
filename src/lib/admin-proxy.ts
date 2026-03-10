@@ -6,11 +6,17 @@
 import { NextRequest, NextResponse } from 'next/server';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+if (!process.env.BACKEND_URL) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[admin-proxy] BACKEND_URL is not set; defaulting to http://localhost:3001'
+  );
+}
 
 export async function proxyAdmin(
   request: NextRequest,
   backendPath: string,
-  method?: string,
+  method?: string
 ): Promise<NextResponse> {
   try {
     const url = new URL(request.url);
@@ -23,7 +29,10 @@ export async function proxyAdmin(
 
     // Forward Authorization header from the client
     const auth = request.headers.get('authorization');
-    if (auth) headers['Authorization'] = auth;
+    if (!auth) {
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+    headers['Authorization'] = auth;
 
     // Forward cookie (refresh_token) for server-side calls
     const cookie = request.headers.get('cookie');

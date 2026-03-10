@@ -25,6 +25,12 @@ import type {
 } from '@/types';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+if (!process.env.BACKEND_URL) {
+  // eslint-disable-next-line no-console
+  console.warn(
+    '[backend] BACKEND_URL is not set; defaulting to http://localhost:3001'
+  );
+}
 const API_BASE = `${BACKEND_URL}/api/v1`;
 
 export class BackendError extends Error {
@@ -36,8 +42,13 @@ export class BackendError extends Error {
 
 async function apiFetch<T>(path: string, init?: RequestInit): Promise<T> {
   const url = `${API_BASE}${path}`;
+  const timeoutSignal = AbortSignal.timeout(15_000);
+  const signal = init?.signal
+    ? AbortSignal.any([init.signal, timeoutSignal])
+    : timeoutSignal;
   const res = await fetch(url, {
     ...init,
+    signal,
     headers: {
       Accept: 'application/json',
       'Content-Type': 'application/json',
@@ -335,7 +346,10 @@ export async function getBecauseYouWatched(animeId: string): Promise<{
     data: Record<string, unknown>[];
     basedOn: { id: string; title: string } | null;
   }>(`/recommendations/because-you-watched/${encodeURIComponent(animeId)}`);
-  return { data: result.data.map(normalizeBackendAnime), basedOn: result.basedOn };
+  return {
+    data: result.data.map(normalizeBackendAnime),
+    basedOn: result.basedOn,
+  };
 }
 
 // ─── Channels ─────────────────────────────────────────────────────────────────

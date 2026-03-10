@@ -74,6 +74,8 @@ export interface SearchResponse extends PaginatedResponse<AnimeSeries | Movie> {
   query: string;
   /** Indicates where the results came from: backend, jikan, or mock */
   source?: 'backend' | 'jikan' | 'mock';
+  /** True when this response used a fallback path after a provider failure. */
+  fallback?: boolean;
 }
 
 /** GET /api/providers */
@@ -105,6 +107,7 @@ export interface SeriesListParams {
   tag?: string;
   type?: string;
   status?: string;
+  year?: number;
   sort?: string;
   page?: number;
   limit?: number;

@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 
 import { BackendError, listAnime } from '@/lib/backend';
 import { getDataMode } from '@/lib/data-mode';
+import { clampLimit, clampPage, sanitizeQuery } from '@/lib/params';
 
 import { mockMovies } from '@/data/mockData';
 
@@ -21,16 +22,12 @@ export async function GET(request: Request) {
 
   const params: SeriesListParams = {
     type: 'MOVIE',
-    genre: searchParams.get('genre') ?? undefined,
-    source: searchParams.get('source') ?? undefined,
-    language: searchParams.get('language') ?? undefined,
-    sort: searchParams.get('sort') ?? undefined,
-    page: searchParams.get('page')
-      ? Number(searchParams.get('page'))
-      : undefined,
-    limit: searchParams.get('limit')
-      ? Number(searchParams.get('limit'))
-      : undefined,
+    genre: sanitizeQuery(searchParams.get('genre')),
+    source: sanitizeQuery(searchParams.get('source')),
+    language: sanitizeQuery(searchParams.get('language')),
+    sort: sanitizeQuery(searchParams.get('sort')),
+    page: clampPage(searchParams.get('page')),
+    limit: clampLimit(searchParams.get('limit')),
   };
 
   if (mode === 'mock') {
