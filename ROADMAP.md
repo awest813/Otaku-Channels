@@ -4,6 +4,35 @@ This document tracks the planned features and milestones for Otaku Channels.
 
 ---
 
+## Current status snapshot (honest progress)
+
+This snapshot is intentionally blunt so roadmap status matches what is live in the repo right now.
+
+### Debug tooling
+
+- ✅ Admin **Job Status** page exists and supports queue health visibility + manual job triggers.
+- ✅ Backend logging/error utilities exist (`logger`, `serverLogger`, `errorCapture`) and are wired for diagnostics.
+- 🚧 Still missing a dedicated developer debug console/tracing UI in the frontend.
+
+### Audit & moderation
+
+- ✅ Admin **Audit Log** view is implemented with action filters and pagination.
+- ✅ Admin report/user/source moderation pages and API routes are present.
+- 🚧 Needs broader audit event coverage docs (what is and is not logged) and stronger retention policy notes.
+
+### Polish (UX/accessibility/perf)
+
+- ✅ Core UX polish exists (skeletons, empty states, error boundaries, consistent card/button patterns).
+- 🚧 Major polish goals are still open: keyboard/gamepad navigation, sleep timer, theme toggle, offline fallback.
+
+### Testing
+
+- ✅ Strong unit/integration coverage across API routes, components, and key library utilities.
+- ✅ CI checks run lint + typecheck + format + Jest tests.
+- 🚧 No full end-to-end wired smoke suite yet (frontend ↔ backend path still tracked as in-progress).
+
+---
+
 ## Milestone 1 — Foundation ✅ (complete)
 
 - [x] Next.js 15 App Router skeleton
