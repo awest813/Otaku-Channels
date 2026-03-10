@@ -33,8 +33,7 @@ export default async function HomePage() {
     if (seriesResult.data.length > 0)
       allSeries = seriesResult.data as AnimeSeries[];
     if (moviesResult.data.length > 0) allMovies = moviesResult.data as Movie[];
-    if (channelsResult.data.length > 0)
-      allChannels = channelsResult.data as LiveChannel[];
+    if (channelsResult.data.length > 0) allChannels = channelsResult.data;
   } catch {
     // Backend unavailable — mock data used as fallback (already set above)
   }

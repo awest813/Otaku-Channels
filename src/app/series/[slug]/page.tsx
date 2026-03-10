@@ -1,7 +1,7 @@
 import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 
-import { getAnime, getAnimeEpisodes } from '@/lib/backend';
+import { getAnime, getAnimeEpisodes, getRelatedAnime } from '@/lib/backend';
 import { getJikanAnime, getJikanEpisodes, jikanToSeries } from '@/lib/jikan';
 
 import {
@@ -141,8 +141,14 @@ export default async function SeriesPage({ params }: Props) {
       getAnimeEpisodes(slug),
     ]);
     series = seriesResult.data as AnimeSeries;
-    episodes = episodesResult.data as Episode[];
-    related = getRelatedSeries(series);
+    episodes = episodesResult.data;
+    // Fetch related from backend; fall back to local mock if the call fails
+    try {
+      const relatedResult = await getRelatedAnime(slug);
+      related = relatedResult.data;
+    } catch {
+      if (series) related = getRelatedSeries(series);
+    }
   } catch {
     series = getSeriesBySlug(slug);
     if (series) {
