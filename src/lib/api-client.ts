@@ -208,7 +208,9 @@ export async function getProviders(): Promise<ProvidersResponse> {
  * Returns instant search suggestions for the autocomplete dropdown.
  * Returns an empty list on failure — suggestions are best-effort.
  */
-export async function getSearchSuggestions(q: string): Promise<SuggestResponse> {
+export async function getSearchSuggestions(
+  q: string
+): Promise<SuggestResponse> {
   if (!q.trim()) return { data: [] };
   try {
     return await fetchWithRetry<SuggestResponse>(

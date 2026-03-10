@@ -93,9 +93,7 @@ export default function SearchPage() {
     const matchesGenre = !genre || item.genres.includes(genre);
     const matchesSource = !source || item.sourceType === source;
     const matchesLanguage =
-      !language ||
-      item.language === language ||
-      item.language === 'both';
+      !language || item.language === language || item.language === 'both';
     return matchesQuery && matchesGenre && matchesSource && matchesLanguage;
   });
 

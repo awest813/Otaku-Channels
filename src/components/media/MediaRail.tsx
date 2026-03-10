@@ -18,7 +18,12 @@ interface Props {
   seeAllHref?: string;
 }
 
-export default function MediaRail({ title, description, items, seeAllHref }: Props) {
+export default function MediaRail({
+  title,
+  description,
+  items,
+  seeAllHref,
+}: Props) {
   const scrollRef = React.useRef<HTMLDivElement>(null);
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
@@ -58,7 +63,11 @@ export default function MediaRail({ title, description, items, seeAllHref }: Pro
 
   return (
     <section className='space-y-3'>
-      <SectionHeader title={title} href={seeAllHref} description={description} />
+      <SectionHeader
+        title={title}
+        href={seeAllHref}
+        description={description}
+      />
       <div className='relative'>
         {/* Left fade + scroll button */}
         <div

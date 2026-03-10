@@ -64,7 +64,12 @@ export function useAnalytics() {
 
   const trackCompletedEpisode = React.useCallback(
     (animeId: string, episodeId?: string) =>
-      track({ event: 'completed_episode', animeId, episodeId, completed: true }),
+      track({
+        event: 'completed_episode',
+        animeId,
+        episodeId,
+        completed: true,
+      }),
     [track]
   );
 

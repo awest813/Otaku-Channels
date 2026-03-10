@@ -51,10 +51,7 @@ export async function GET(request: Request) {
   } catch (err) {
     // Only swallow connection errors / 5xx — pass 4xx through
     if (err instanceof BackendError && err.status < 500) {
-      return NextResponse.json(
-        { error: err.message },
-        { status: err.status }
-      );
+      return NextResponse.json({ error: err.message }, { status: err.status });
     }
   }
 

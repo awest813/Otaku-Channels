@@ -27,7 +27,9 @@ export default function MediaCard({ item }: Props) {
   const href = `/series/${item.slug}`;
   const isMovie = item.type === 'movie';
   const episodeCount =
-    !isMovie && 'episodeCount' in item ? (item as { episodeCount: number }).episodeCount : null;
+    !isMovie && 'episodeCount' in item
+      ? (item as { episodeCount: number }).episodeCount
+      : null;
 
   const { isInList, toggle } = useWatchlist();
   const { show: showToast } = useToast();

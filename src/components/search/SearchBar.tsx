@@ -101,7 +101,7 @@ export default function SearchBar({
       aria-controls='search-suggestions-list'
       className={cn('relative', className)}
     >
-      <Search className='absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500 pointer-events-none' />
+      <Search className='pointer-events-none absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-500' />
       <input
         ref={inputRef}
         type='search'
@@ -113,7 +113,7 @@ export default function SearchBar({
         autoComplete='off'
         spellCheck={false}
         aria-autocomplete='list'
-        className='w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-10 pr-10 text-sm text-white placeholder-slate-500 outline-none transition-all focus:border-cyan-500 focus:bg-slate-900 focus:ring-1 focus:ring-cyan-500 hover:border-slate-600'
+        className='w-full rounded-xl border border-slate-700 bg-slate-900 py-3 pl-10 pr-10 text-sm text-white placeholder-slate-500 outline-none transition-all hover:border-slate-600 focus:border-cyan-500 focus:bg-slate-900 focus:ring-1 focus:ring-cyan-500'
       />
       {value && (
         <button

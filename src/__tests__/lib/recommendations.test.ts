@@ -33,16 +33,50 @@ const base: AnimeSeries = {
 };
 
 function makeAnime(overrides: Partial<AnimeSeries>): AnimeSeries {
-  return { ...base, id: Math.random().toString(), slug: Math.random().toString(), ...overrides };
+  return {
+    ...base,
+    id: Math.random().toString(),
+    slug: Math.random().toString(),
+    ...overrides,
+  };
 }
 
-const highOverlap = makeAnime({ id: 'high', genres: ['Action', 'Fantasy', 'Adventure'], releaseYear: 2021 });
-const medOverlap = makeAnime({ id: 'med', genres: ['Action', 'Romance'], releaseYear: 2019 });
-const noOverlap = makeAnime({ id: 'none', genres: ['Sports', 'Slice of Life'], releaseYear: 2020 });
-const sameProvider = makeAnime({ id: 'prov', genres: ['Mecha'], sourceType: 'youtube' as const, releaseYear: 2010 });
-const differentProvider = makeAnime({ id: 'diff', genres: ['Action'], sourceType: 'tubi' as const, releaseYear: 2020 });
+const highOverlap = makeAnime({
+  id: 'high',
+  genres: ['Action', 'Fantasy', 'Adventure'],
+  releaseYear: 2021,
+});
+const medOverlap = makeAnime({
+  id: 'med',
+  genres: ['Action', 'Romance'],
+  releaseYear: 2019,
+});
+const noOverlap = makeAnime({
+  id: 'none',
+  genres: ['Sports', 'Slice of Life'],
+  releaseYear: 2020,
+});
+const sameProvider = makeAnime({
+  id: 'prov',
+  genres: ['Mecha'],
+  sourceType: 'youtube' as const,
+  releaseYear: 2010,
+});
+const differentProvider = makeAnime({
+  id: 'diff',
+  genres: ['Action'],
+  sourceType: 'tubi' as const,
+  releaseYear: 2020,
+});
 
-const catalogue = [base, highOverlap, medOverlap, noOverlap, sameProvider, differentProvider];
+const catalogue = [
+  base,
+  highOverlap,
+  medOverlap,
+  noOverlap,
+  sameProvider,
+  differentProvider,
+];
 
 describe('getSharedGenreRecs', () => {
   it('excludes the base item', () => {
@@ -77,7 +111,9 @@ describe('getEraRecs', () => {
   it('only returns items within ±10 years', () => {
     const recs = getEraRecs(base, catalogue);
     recs.forEach((r) => {
-      expect(Math.abs((r.releaseYear || 0) - (base.releaseYear || 0))).toBeLessThanOrEqual(10);
+      expect(
+        Math.abs((r.releaseYear || 0) - (base.releaseYear || 0))
+      ).toBeLessThanOrEqual(10);
     });
   });
 

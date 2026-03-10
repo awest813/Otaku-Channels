@@ -60,9 +60,7 @@ export default async function HomePage() {
   const classicAnime = allSeries.filter(
     (s) => s.releaseYear > 0 && s.releaseYear <= ERA_CLASSIC_MAX
   );
-  const modernAnime = allSeries.filter(
-    (s) => s.releaseYear >= ERA_MODERN_MIN
-  );
+  const modernAnime = allSeries.filter((s) => s.releaseYear >= ERA_MODERN_MIN);
 
   // Free to stream now — titles that are directly embeddable (no redirect needed)
   const freeNow = allSeries.filter((s) => s.isEmbeddable);
@@ -217,4 +215,3 @@ export default async function HomePage() {
     </>
   );
 }
-
