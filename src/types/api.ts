@@ -82,6 +82,20 @@ export interface ProvidersResponse {
   total: number;
 }
 
+/** GET /api/search/suggestions */
+export interface SuggestResponse {
+  data: Array<{
+    slug: string;
+    title: string;
+    posterUrl: string | null;
+  }>;
+}
+
+/** GET /api/recommendations */
+export interface RecommendationsResponse {
+  data: (AnimeSeries | Movie)[];
+}
+
 // ─── API client params ────────────────────────────────────────────────────────
 
 export interface SeriesListParams {
@@ -100,6 +114,7 @@ export interface SearchParams {
   q?: string;
   genre?: string;
   source?: string;
+  language?: string;
   type?: string;
   year?: number;
   season?: string;

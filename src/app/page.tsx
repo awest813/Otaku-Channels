@@ -4,6 +4,7 @@ import { listAnime, listChannels } from '@/lib/backend';
 
 import { mockLiveChannels, mockMovies, mockSeries } from '@/data/mockData';
 
+import BecauseYouWatchedRail from '@/components/media/BecauseYouWatchedRail';
 import HeroBanner from '@/components/media/HeroBanner';
 import LiveChannelCard from '@/components/media/LiveChannelCard';
 import MediaRail from '@/components/media/MediaRail';
@@ -17,6 +18,10 @@ export const metadata: Metadata = {
   description:
     'Discover and watch officially licensed free anime from YouTube, Tubi, Crunchyroll, RetroCrush, and more.',
 };
+
+/** Classify an anime into a broad era by release year. */
+const ERA_CLASSIC_MAX = 2000;
+const ERA_MODERN_MIN = 2010;
 
 export default async function HomePage() {
   // Try backend first; gracefully fall back to mock data if unavailable.
@@ -51,6 +56,29 @@ export default async function HomePage() {
   );
   const movies = allMovies;
 
+  // Era rails
+  const classicAnime = allSeries.filter(
+    (s) => s.releaseYear > 0 && s.releaseYear <= ERA_CLASSIC_MAX
+  );
+  const modernAnime = allSeries.filter(
+    (s) => s.releaseYear >= ERA_MODERN_MIN
+  );
+
+  // Free to stream now — titles that are directly embeddable (no redirect needed)
+  const freeNow = allSeries.filter((s) => s.isEmbeddable);
+
+  // Leaving soon — titles that have an upcoming availability end date
+  const now = Date.now();
+  const soonMs = 30 * 24 * 60 * 60 * 1000; // 30 days
+  const leavingSoon = [...allSeries, ...allMovies].filter((item) => {
+    if (!item.availability?.length) return false;
+    return item.availability.some((w) => {
+      if (!w.endsAt) return false;
+      const endsAt = new Date(w.endsAt).getTime();
+      return endsAt > now && endsAt - now <= soonMs;
+    });
+  });
+
   return (
     <>
       <HeroBanner series={hero} />
@@ -59,12 +87,35 @@ export default async function HomePage() {
         {/* Continue Watching — client-side, renders only if localStorage has data */}
         <RecentlyViewedRail />
 
+        {/* Because You Watched — personalised recommendation rail */}
+        <BecauseYouWatchedRail />
+
         {/* Trending */}
         {trending.length > 0 && (
           <MediaRail
             title='Trending Free Anime'
             description='Most popular officially licensed titles right now'
             items={trending}
+            seeAllHref='/browse'
+          />
+        )}
+
+        {/* Free to Stream Now */}
+        {freeNow.length > 0 && (
+          <MediaRail
+            title='Free to Stream Now'
+            description='Watch instantly — no subscription required'
+            items={freeNow}
+            seeAllHref='/browse'
+          />
+        )}
+
+        {/* Leaving Soon */}
+        {leavingSoon.length > 0 && (
+          <MediaRail
+            title='Leaving Soon'
+            description='Catch these before they go — availability ending in 30 days'
+            items={leavingSoon as AnimeSeries[]}
             seeAllHref='/browse'
           />
         )}
@@ -109,6 +160,26 @@ export default async function HomePage() {
           />
         )}
 
+        {/* Classic era (≤ 2000) */}
+        {classicAnime.length > 0 && (
+          <MediaRail
+            title='Classic Anime'
+            description='Timeless titles from the golden age of anime'
+            items={classicAnime}
+            seeAllHref='/browse'
+          />
+        )}
+
+        {/* Modern era (≥ 2010) */}
+        {modernAnime.length > 0 && (
+          <MediaRail
+            title='Modern Picks'
+            description='Stand-out series from the last decade'
+            items={modernAnime}
+            seeAllHref='/browse'
+          />
+        )}
+
         {/* Dubbed picks */}
         {dubbed.length > 0 && (
           <MediaRail
@@ -146,3 +217,4 @@ export default async function HomePage() {
     </>
   );
 }
+

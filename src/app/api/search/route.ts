@@ -27,10 +27,11 @@ export async function GET(request: Request) {
   const q = searchParams.get('q')?.trim();
   const genre = searchParams.get('genre') ?? undefined;
   const source = searchParams.get('source') ?? undefined;
+  const language = searchParams.get('language') ?? undefined;
   const page = searchParams.get('page') ? Number(searchParams.get('page')) : 1;
   const mode = getDataMode();
 
-  if (!q && !genre && !source) {
+  if (!q && !genre && !source && !language) {
     return NextResponse.json(
       { error: 'Provide at least one search parameter: q, genre, or source' },
       { status: 400 }
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
 
   // mock-only mode — search in-memory
   if (mode === 'mock') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, page));
+    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
   }
 
   // 1. Try backend
@@ -48,6 +49,7 @@ export async function GET(request: Request) {
       q: q ?? '',
       genre,
       source,
+      language,
       type: searchParams.get('type') ?? undefined,
       year: searchParams.get('year')
         ? Number(searchParams.get('year'))
@@ -97,7 +99,7 @@ export async function GET(request: Request) {
 
   // 3. Hybrid mode: fall back to mock data
   if (mode === 'hybrid') {
-    return NextResponse.json(buildMockSearchResponse(q, genre, source, page));
+    return NextResponse.json(buildMockSearchResponse(q, genre, source, language, page));
   }
 
   // 4. Last resort: empty results
@@ -115,6 +117,7 @@ function buildMockSearchResponse(
   q: string | undefined,
   genre: string | undefined,
   source: string | undefined,
+  language: string | undefined,
   page: number
 ) {
   let data = allContent as (AnimeSeries | Movie)[];
@@ -136,6 +139,11 @@ function buildMockSearchResponse(
   }
   if (source) {
     data = data.filter((item) => item.sourceType === source);
+  }
+  if (language) {
+    data = data.filter(
+      (item) => item.language === language || item.language === 'both'
+    );
   }
 
   return {

@@ -4,7 +4,7 @@ import * as React from 'react';
 
 import { searchContent } from '@/lib/api-client';
 
-import { allContent } from '@/data/mockData';
+import { allContent, sourceProviders } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
 import SearchBar from '@/components/search/SearchBar';
@@ -18,6 +18,18 @@ const fallbackGenres = Array.from(
   new Set((allContent as (AnimeSeries | Movie)[]).flatMap((i) => i.genres))
 ).sort();
 
+// Derive source names from source providers
+const sourceOptions = sourceProviders.map((p) => ({
+  id: p.id,
+  name: p.name,
+}));
+
+const languageOptions = [
+  { id: 'sub', label: 'Subtitled' },
+  { id: 'dub', label: 'Dubbed' },
+  { id: 'both', label: 'Sub & Dub' },
+];
+
 /** Build a YouTube search URL for an anime query. */
 function youtubeAnimeSearchUrl(query: string): string {
   const q = encodeURIComponent(`${query} anime official`);
@@ -29,6 +41,8 @@ type SearchResult = AnimeSeries | Movie;
 export default function SearchPage() {
   const [query, setQuery] = React.useState('');
   const [genre, setGenre] = React.useState<string | null>(null);
+  const [source, setSource] = React.useState<string | null>(null);
+  const [language, setLanguage] = React.useState<string | null>(null);
   const [apiResults, setApiResults] = React.useState<SearchResult[] | null>(
     null
   );
@@ -39,7 +53,7 @@ export default function SearchPage() {
 
   // Debounced search — fires 500 ms after the user stops typing
   React.useEffect(() => {
-    if (!query && !genre) {
+    if (!query && !genre && !source && !language) {
       setApiResults(null);
       setSearchSource('local');
       return;
@@ -51,6 +65,8 @@ export default function SearchPage() {
         const result = await searchContent({
           q: query || undefined,
           genre: genre ?? undefined,
+          source: source ?? undefined,
+          language: language ?? undefined,
         });
         setApiResults(result.data as SearchResult[]);
         setSearchSource(result.source ?? 'backend');
@@ -64,7 +80,7 @@ export default function SearchPage() {
     }, 500);
 
     return () => clearTimeout(timer);
-  }, [query, genre]);
+  }, [query, genre, source, language]);
 
   // In-memory fallback when API is unavailable
   const inMemoryResults = (allContent as SearchResult[]).filter((item) => {
@@ -75,15 +91,22 @@ export default function SearchPage() {
       item.description.toLowerCase().includes(q) ||
       item.genres.some((g) => g.toLowerCase().includes(q));
     const matchesGenre = !genre || item.genres.includes(genre);
-    return matchesQuery && matchesGenre;
+    const matchesSource = !source || item.sourceType === source;
+    const matchesLanguage =
+      !language ||
+      item.language === language ||
+      item.language === 'both';
+    return matchesQuery && matchesGenre && matchesSource && matchesLanguage;
   });
 
   const results = apiResults ?? inMemoryResults;
-  const hasFilters = !!(query || genre);
+  const hasFilters = !!(query || genre || source || language);
 
   const clearFilters = () => {
     setQuery('');
     setGenre(null);
+    setSource(null);
+    setLanguage(null);
     setApiResults(null);
   };
 
@@ -99,16 +122,18 @@ export default function SearchPage() {
         </p>
       </div>
 
-      {/* Search input */}
+      {/* Search input with instant suggestions */}
       <SearchBar
         value={query}
         onChange={setQuery}
         className='mb-6'
         placeholder='Search by title, genre, or description…'
+        showSuggestions
       />
 
-      {/* Genre filter */}
+      {/* Filters */}
       <div className='mb-6 space-y-4 rounded-xl border border-slate-800 bg-slate-900/50 p-4'>
+        {/* Genre filter */}
         <div>
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
             Genre
@@ -125,6 +150,50 @@ export default function SearchPage() {
                 genre={g}
                 active={genre === g}
                 onClick={() => setGenre(g === genre ? null : g)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Source filter */}
+        <div>
+          <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
+            Source
+          </p>
+          <div className='flex flex-wrap gap-2'>
+            <GenrePill
+              genre='All Sources'
+              active={!source}
+              onClick={() => setSource(null)}
+            />
+            {sourceOptions.map((s) => (
+              <GenrePill
+                key={s.id}
+                genre={s.name}
+                active={source === s.id}
+                onClick={() => setSource(source === s.id ? null : s.id)}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* Language filter */}
+        <div>
+          <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
+            Language
+          </p>
+          <div className='flex flex-wrap gap-2'>
+            <GenrePill
+              genre='Any'
+              active={!language}
+              onClick={() => setLanguage(null)}
+            />
+            {languageOptions.map((l) => (
+              <GenrePill
+                key={l.id}
+                genre={l.label}
+                active={language === l.id}
+                onClick={() => setLanguage(language === l.id ? null : l.id)}
               />
             ))}
           </div>

@@ -17,6 +17,7 @@ import Link from 'next/link';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
+import { useAnalytics } from '@/hooks/useAnalytics';
 import { useRecentlyViewed } from '@/hooks/useRecentlyViewed';
 import { useWatchlist } from '@/hooks/useWatchlist';
 
@@ -48,6 +49,12 @@ export default function SeriesClient({ series, episodes, related }: Props) {
   const { isInList, toggle } = useWatchlist();
   const { show: showToast } = useToast();
   const { trackView } = useRecentlyViewed();
+  const {
+    trackViewedTitle,
+    trackAddedWatchlist,
+    trackStartedWatch,
+    trackClickedExternal,
+  } = useAnalytics();
   const inList = isInList(series.id);
 
   // Track view on mount
@@ -60,7 +67,8 @@ export default function SeriesClient({ series, episodes, related }: Props) {
       sourceType: series.sourceType,
       releaseYear: series.releaseYear,
     });
-  }, [series, trackView]);
+    trackViewedTitle(series.id);
+  }, [series, trackView, trackViewedTitle]);
 
   const handleWatchlist = () => {
     const added = toggle({
@@ -75,6 +83,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
       added ? `Added "${series.title}" to My List` : `Removed from My List`,
       added ? 'success' : 'info'
     );
+    if (added) trackAddedWatchlist(series.id);
   };
 
   const episodeCount =
@@ -191,6 +200,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
               {watchHref ? (
                 <Link
                   href={watchHref}
+                  onClick={() => trackStartedWatch(series.id, undefined, series.sourceType)}
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <Play className='h-4 w-4 fill-slate-950' /> Watch Trailer
@@ -198,6 +208,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
               ) : series.isEmbeddable ? (
                 <Link
                   href={`/watch/youtube/${series.id}`}
+                  onClick={() => trackStartedWatch(series.id, undefined, series.sourceType)}
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <Play className='h-4 w-4 fill-slate-950' /> Watch Now
@@ -207,6 +218,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                   href={series.watchUrl}
                   target='_blank'
                   rel='noopener noreferrer'
+                  onClick={() => trackClickedExternal(series.id, series.sourceType)}
                   className='flex items-center gap-2 rounded-lg bg-cyan-500 px-6 py-2.5 text-sm font-bold text-slate-950 shadow-lg shadow-cyan-500/20 transition-all hover:bg-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
                 >
                   <ExternalLink className='h-4 w-4' /> Watch on{' '}
@@ -251,6 +263,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                         href={link.url}
                         target='_blank'
                         rel='noopener noreferrer'
+                        onClick={() => trackClickedExternal(series.id)}
                         className={cn(
                           'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-xs font-semibold ring-1 transition-opacity hover:opacity-80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                           colorClass

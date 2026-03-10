@@ -20,11 +20,13 @@ import type {
   LiveResponse,
   MoviesListResponse,
   ProvidersResponse,
+  RecommendationsResponse,
   SearchParams,
   SearchResponse,
   SeriesDetailResponse,
   SeriesListParams,
   SeriesListResponse,
+  SuggestResponse,
 } from '@/types/api';
 import { ApiClientError } from '@/types/api';
 
@@ -198,4 +200,37 @@ export async function searchContent(
  */
 export async function getProviders(): Promise<ProvidersResponse> {
   return fetchWithRetry<ProvidersResponse>('/api/providers');
+}
+
+/**
+ * GET /api/search/suggestions?q=...
+ *
+ * Returns instant search suggestions for the autocomplete dropdown.
+ * Returns an empty list on failure — suggestions are best-effort.
+ */
+export async function getSearchSuggestions(q: string): Promise<SuggestResponse> {
+  if (!q.trim()) return { data: [] };
+  try {
+    return await fetchWithRetry<SuggestResponse>(
+      `/api/search/suggestions${buildQS({ q })}`
+    );
+  } catch {
+    return { data: [] };
+  }
+}
+
+/**
+ * GET /api/recommendations?animeId=...&slug=...
+ *
+ * Returns similar anime for the given item. Accepts animeId or slug.
+ */
+export async function getRecommendations(params: {
+  animeId?: string;
+  slug?: string;
+}): Promise<RecommendationsResponse> {
+  const { animeId, slug } = params;
+  if (!animeId && !slug) return { data: [] };
+  return fetchWithRetry<RecommendationsResponse>(
+    `/api/recommendations${buildQS({ animeId, slug })}`
+  );
 }

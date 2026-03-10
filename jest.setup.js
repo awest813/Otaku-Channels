@@ -4,6 +4,23 @@ import '@testing-library/jest-dom/extend-expect';
 // eslint-disable-next-line no-undef
 jest.mock('next/router', () => require('next-router-mock'));
 
+// Mock next/navigation (App Router) — provides useRouter, usePathname, etc.
+// Individual test files may override specific values as needed.
+// eslint-disable-next-line no-undef
+jest.mock('next/navigation', () => ({
+  useRouter: () => ({
+    push: jest.fn(),
+    replace: jest.fn(),
+    refresh: jest.fn(),
+    back: jest.fn(),
+    forward: jest.fn(),
+    prefetch: jest.fn(),
+  }),
+  usePathname: () => '/',
+  useSearchParams: () => new URLSearchParams(),
+  useParams: () => ({}),
+}));
+
 // Polyfill Web Fetch API (Request / Response / Headers) for environments that
 // don't provide them (Jest 27 node/jsdom environments on Node < 18 globals).
 // Next.js App Router route handlers rely on these globals at class-definition time.
