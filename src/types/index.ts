@@ -1,112 +1,75 @@
-export type LanguageOption = 'sub' | 'dub' | 'both';
-export type ContentType = 'series' | 'movie' | 'live' | 'episode';
-export type SourceType =
-  | 'youtube'
-  | 'retro'
-  | 'freestream'
-  | 'live'
-  | 'tubi'
-  | 'pluto'
-  | 'retrocrush'
-  | 'crunchyroll'
-  | 'consumet'
-  | 'jikan'
-  | 'kitsu'
-  | 'shikimori';
+/**
+ * Public type surface for Otaku Channels.
+ *
+ * Canonical entity types are defined in `./canonical` and re-exported here so
+ * all imports keep using `@/types`.  Backward-compatible aliases (AnimeSeries,
+ * Movie, LiveChannel) map to the new unified Anime / Channel types so existing
+ * components compile without changes.
+ *
+ * Raw provider shapes (JikanAnime, KitsuAnimeResource, ShikimoriAnime) remain
+ * here because they are only consumed by the ingestion pipeline.
+ */
 
-export interface Genre {
-  id: string;
-  name: string;
-}
+// ─── Re-export canonical entities ────────────────────────────────────────────
 
-export interface SourceProvider {
-  id: string;
-  name: string;
-  type: SourceType;
-  logoUrl?: string;
-  baseUrl: string;
-}
+export type {
+  // Primitives
+  LanguageOption,
+  ContentType,
+  SourceType,
+  EmbedType,
+  AvailabilityStatus,
+  // Provenance
+  SourceLink,
+  AvailabilityWindow,
+  // Core content
+  Anime,
+  Episode,
+  Channel,
+  // User interaction
+  WatchProgress,
+  WatchlistEntry,
+  RecommendationEdge,
+  UserPreference,
+  // Helpers
+  Genre,
+} from './canonical';
 
-export interface AnimeSeries {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  heroImage: string;
-  type: 'series';
-  genres: string[];
-  language: LanguageOption;
-  sourceName: string;
-  sourceType: SourceType;
-  isEmbeddable: boolean;
-  watchUrl: string;
-  releaseYear: number;
-  episodeCount: number;
-  tags: string[];
-  /** Optional trailer embed URL (YouTube) from Jikan / external sources */
-  trailerEmbedUrl?: string;
-  /** Optional streaming service links */
-  streamingLinks?: Array<{ name: string; url: string }>;
-  /** MAL ID for Jikan-sourced content */
-  malId?: number;
-}
+export type { SourceProvider } from './canonical';
 
-export interface Movie {
-  id: string;
-  slug: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  heroImage: string;
-  type: 'movie';
-  genres: string[];
-  language: LanguageOption;
-  sourceName: string;
-  sourceType: SourceType;
-  isEmbeddable: boolean;
-  watchUrl: string;
-  releaseYear: number;
-  tags: string[];
-  /** Optional trailer embed URL (YouTube) from Jikan / external sources */
-  trailerEmbedUrl?: string;
-  /** Optional streaming service links */
-  streamingLinks?: Array<{ name: string; url: string }>;
-  /** MAL ID for Jikan-sourced content */
-  malId?: number;
-}
+// ─── Backward-compatible aliases ──────────────────────────────────────────────
 
-export interface Episode {
-  id: string;
-  seriesSlug: string;
-  title: string;
-  description: string;
-  thumbnail: string;
-  episodeNumber: number;
-  seasonNumber: number;
-  duration: string;
-  watchUrl: string;
-  isEmbeddable: boolean;
-  sourceName: string;
-}
+import type { Anime, Channel, SourceType } from './canonical';
 
-export interface LiveChannel {
-  id: string;
-  slug: string;
-  name: string;
-  description: string;
-  thumbnail: string;
-  channelNumber: string;
-  sourceName: string;
-  sourceType: SourceType;
-  isEmbeddable: boolean;
-  watchUrl: string;
-  tags: string[];
-  nowPlaying: string;
-  nextUp?: string;
-}
+/**
+ * TV series subtype of Anime.  All existing code that types variables as
+ * `AnimeSeries` continues to work because AnimeSeries satisfies Anime.
+ *
+ * The only added constraint vs. raw `Anime` is that `type` is narrowed to
+ * `'series'` and `episodeCount` is present and required.
+ */
+export type AnimeSeries = Anime & { type: 'series'; episodeCount: number };
 
-export type ContentCardItem = AnimeSeries | Movie | LiveChannel;
+/**
+ * Film subtype of Anime.  Does not carry `episodeCount`.
+ */
+export type Movie = Anime & { type: 'movie' };
+
+/**
+ * Alias for Channel — live / curated stream entry.
+ * Kept so existing imports of `LiveChannel` continue to resolve.
+ */
+export type LiveChannel = Channel;
+
+/**
+ * Union of displayable card items (series, movies, and live channels).
+ */
+export type ContentCardItem = AnimeSeries | Movie | Channel;
+
+// ─── Raw provider types ───────────────────────────────────────────────────────
+// These shapes mirror the external API responses exactly.  They are only used
+// inside src/lib/ingestion/normalize.ts; nothing outside the ingestion layer
+// should depend on them.
 
 /** Raw Jikan v4 anime object returned by the API */
 export interface JikanAnime {

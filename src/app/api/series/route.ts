@@ -65,7 +65,8 @@ export async function GET(request: Request) {
 
 function buildMockResponse(params: SeriesListParams) {
   const isMovie = params.type === 'MOVIE';
-  let data = isMovie ? [...mockMovies] : [...mockSeries];
+  let data: (typeof mockSeries[number] | typeof mockMovies[number])[] =
+    isMovie ? [...mockMovies] : [...mockSeries];
 
   if (params.genre) {
     const g = params.genre.toLowerCase();

@@ -5,11 +5,13 @@ import Link from 'next/link';
 import GenrePill from '@/components/ui/GenrePill';
 import SourceBadge from '@/components/ui/SourceBadge';
 
-import type { AnimeSeries } from '@/types';
+import type { Anime } from '@/types';
 
-export default function HeroBanner({ series }: { series: AnimeSeries }) {
+export default function HeroBanner({ series }: { series: Anime }) {
   const episodeCount =
-    'episodeCount' in series ? (series.episodeCount as number) : null;
+    series.type === 'series' && 'episodeCount' in series
+      ? (series as { episodeCount: number }).episodeCount
+      : null;
 
   return (
     <div className='relative h-[480px] overflow-hidden md:h-[580px] lg:h-[640px]'>

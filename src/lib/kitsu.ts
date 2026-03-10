@@ -2,9 +2,13 @@
  * Kitsu API client (public REST API with JSON:API format)
  * Free, no auth required.
  * Docs: https://kitsu.docs.apiary.io/
+ *
+ * Normalization logic has been moved to src/lib/ingestion/normalize.ts.
+ * The converter functions below are thin wrappers kept for backward compat.
  */
 
 import type { AnimeSeries, KitsuAnimeResource, Movie } from '@/types';
+import { normalizeKitsuAnime } from '@/lib/ingestion/normalize';
 
 const KITSU_BASE = 'https://kitsu.io/api/edge';
 
@@ -44,76 +48,18 @@ export async function getKitsuAnime(
   return kitsuFetch(`/anime/${kitsuId}`);
 }
 
-/** Extract thumbnail image URL from Kitsu poster images. */
-function getKitsuThumbnail(attrs: KitsuAnimeResource['attributes']): string {
-  return (
-    attrs.posterImage?.large ||
-    attrs.posterImage?.medium ||
-    attrs.posterImage?.original ||
-    ''
-  );
-}
-
-/** Extract hero image URL from Kitsu cover/poster images. */
-function getKitsuHeroImage(
-  attrs: KitsuAnimeResource['attributes'],
-  thumbnail: string
-): string {
-  return attrs.coverImage?.large || attrs.coverImage?.original || thumbnail;
-}
-
-/** Parse release year from Kitsu startDate string. */
-function parseKitsuYear(startDate: string | null): number {
-  if (!startDate) return 0;
-  const year = parseInt(startDate.slice(0, 4), 10);
-  return isNaN(year) ? 0 : year;
-}
-
-/** Convert a raw KitsuAnimeResource to our AnimeSeries type. */
+/**
+ * Convert a raw KitsuAnimeResource to our AnimeSeries type.
+ * Delegates to the centralized ingestion pipeline.
+ */
 export function kitsuToSeries(anime: KitsuAnimeResource): AnimeSeries {
-  const attrs = anime.attributes;
-  const thumbnail = getKitsuThumbnail(attrs);
-
-  return {
-    id: `kitsu-${anime.id}`,
-    slug: `kitsu-${anime.id}`,
-    title: attrs.titles.en || attrs.canonicalTitle,
-    description: attrs.synopsis ?? 'No description available.',
-    thumbnail,
-    heroImage: getKitsuHeroImage(attrs, thumbnail),
-    type: 'series',
-    genres: [],
-    language: 'sub',
-    sourceName: 'Kitsu',
-    sourceType: 'kitsu',
-    isEmbeddable: false,
-    watchUrl: `https://kitsu.io/anime/${attrs.slug}`,
-    releaseYear: parseKitsuYear(attrs.startDate),
-    episodeCount: attrs.episodeCount ?? 0,
-    tags: [],
-  };
+  return normalizeKitsuAnime(anime) as AnimeSeries;
 }
 
-/** Convert a raw KitsuAnimeResource to our Movie type. */
+/**
+ * Convert a raw KitsuAnimeResource to our Movie type.
+ * Delegates to the centralized ingestion pipeline.
+ */
 export function kitsuToMovie(anime: KitsuAnimeResource): Movie {
-  const attrs = anime.attributes;
-  const thumbnail = getKitsuThumbnail(attrs);
-
-  return {
-    id: `kitsu-${anime.id}`,
-    slug: `kitsu-${anime.id}`,
-    title: attrs.titles.en || attrs.canonicalTitle,
-    description: attrs.synopsis ?? 'No description available.',
-    thumbnail,
-    heroImage: getKitsuHeroImage(attrs, thumbnail),
-    type: 'movie',
-    genres: [],
-    language: 'sub',
-    sourceName: 'Kitsu',
-    sourceType: 'kitsu',
-    isEmbeddable: false,
-    watchUrl: `https://kitsu.io/anime/${attrs.slug}`,
-    releaseYear: parseKitsuYear(attrs.startDate),
-    tags: ['Movie'],
-  };
+  return normalizeKitsuAnime(anime) as Movie;
 }

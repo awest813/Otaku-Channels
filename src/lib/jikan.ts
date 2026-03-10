@@ -2,9 +2,13 @@
  * Jikan v4 API client (unofficial MyAnimeList API)
  * Free, no auth, rate-limited to ~3 req/s.
  * Docs: https://docs.api.jikan.moe
+ *
+ * Normalization logic has been moved to src/lib/ingestion/normalize.ts.
+ * The converter functions below are thin wrappers kept for backward compat.
  */
 
-import type { AnimeSeries, JikanAnime, Movie, SourceType } from '@/types';
+import type { AnimeSeries, JikanAnime, Movie } from '@/types';
+import { normalizeJikanAnime } from '@/lib/ingestion/normalize';
 
 const JIKAN_BASE = 'https://api.jikan.moe/v4';
 
@@ -60,130 +64,18 @@ export async function getJikanEpisodes(
   return jikanFetch(`/anime/${malId}/episodes?page=${page}`);
 }
 
-/** Derive a SourceType and streaming info from a JikanAnime. */
-function deriveSource(anime: JikanAnime): {
-  sourceType: SourceType;
-  sourceName: string;
-  watchUrl: string;
-  isEmbeddable: boolean;
-} {
-  const streaming = anime.streaming ?? [];
-
-  // Prefer Crunchyroll
-  const cr = streaming.find((s) => s.name === 'Crunchyroll');
-  if (cr)
-    return {
-      sourceType: 'crunchyroll',
-      sourceName: 'Crunchyroll',
-      watchUrl: cr.url,
-      isEmbeddable: false,
-    };
-
-  const tubi = streaming.find((s) => s.name.toLowerCase().includes('tubi'));
-  if (tubi)
-    return {
-      sourceType: 'tubi',
-      sourceName: 'Tubi',
-      watchUrl: tubi.url,
-      isEmbeddable: false,
-    };
-
-  const funimation = streaming.find((s) =>
-    s.name.toLowerCase().includes('funimation')
-  );
-  if (funimation)
-    return {
-      sourceType: 'crunchyroll',
-      sourceName: 'Funimation',
-      watchUrl: funimation.url,
-      isEmbeddable: false,
-    };
-
-  // Fall back to MAL page
-  return {
-    sourceType: 'jikan',
-    sourceName: 'MyAnimeList',
-    watchUrl: anime.url,
-    isEmbeddable: false,
-  };
-}
-
-/** Convert a raw JikanAnime to our AnimeSeries type. */
+/**
+ * Convert a raw JikanAnime to our AnimeSeries type.
+ * Delegates to the centralized ingestion pipeline.
+ */
 export function jikanToSeries(anime: JikanAnime): AnimeSeries {
-  const source = deriveSource(anime);
-  const genres = [
-    ...(anime.genres ?? []).map((g) => g.name),
-    ...(anime.themes ?? []).map((t) => t.name),
-  ].slice(0, 5);
-
-  const trailerEmbedUrl = anime.trailer?.embed_url
-    ? // Jikan sometimes returns embed_url with autoplay — strip it
-      anime.trailer.embed_url
-        .replace('?autoplay=1', '')
-        .replace('&autoplay=1', '')
-    : undefined;
-
-  const thumbnail =
-    anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
-
-  return {
-    id: `jikan-${anime.mal_id}`,
-    slug: `jikan-${anime.mal_id}`,
-    title: anime.title_english || anime.title,
-    description: anime.synopsis ?? 'No description available.',
-    thumbnail,
-    heroImage: thumbnail,
-    type: anime.type === 'Movie' ? 'series' : 'series', // keep as series for now
-    genres,
-    language: 'sub',
-    sourceName: source.sourceName,
-    sourceType: source.sourceType,
-    isEmbeddable: !!trailerEmbedUrl,
-    watchUrl: source.watchUrl,
-    releaseYear: anime.year ?? 0,
-    episodeCount: anime.episodes ?? 0,
-    tags: [],
-    trailerEmbedUrl,
-    streamingLinks: anime.streaming ?? [],
-    malId: anime.mal_id,
-  };
+  return normalizeJikanAnime(anime) as AnimeSeries;
 }
 
-/** Convert a raw JikanAnime to our Movie type (when type === 'Movie'). */
+/**
+ * Convert a raw JikanAnime to our Movie type (when type === 'Movie').
+ * Delegates to the centralized ingestion pipeline.
+ */
 export function jikanToMovie(anime: JikanAnime): Movie {
-  const source = deriveSource(anime);
-  const genres = [
-    ...(anime.genres ?? []).map((g) => g.name),
-    ...(anime.themes ?? []).map((t) => t.name),
-  ].slice(0, 5);
-
-  const trailerEmbedUrl = anime.trailer?.embed_url
-    ? anime.trailer.embed_url
-        .replace('?autoplay=1', '')
-        .replace('&autoplay=1', '')
-    : undefined;
-
-  const thumbnail =
-    anime.images?.jpg?.large_image_url || anime.images?.jpg?.image_url || '';
-
-  return {
-    id: `jikan-${anime.mal_id}`,
-    slug: `jikan-${anime.mal_id}`,
-    title: anime.title_english || anime.title,
-    description: anime.synopsis ?? 'No description available.',
-    thumbnail,
-    heroImage: thumbnail,
-    type: 'movie',
-    genres,
-    language: 'sub',
-    sourceName: source.sourceName,
-    sourceType: source.sourceType,
-    isEmbeddable: !!trailerEmbedUrl,
-    watchUrl: source.watchUrl,
-    releaseYear: anime.year ?? 0,
-    tags: ['Movie'],
-    trailerEmbedUrl,
-    streamingLinks: anime.streaming ?? [],
-    malId: anime.mal_id,
-  };
+  return normalizeJikanAnime(anime) as Movie;
 }
