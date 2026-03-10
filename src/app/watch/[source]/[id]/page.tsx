@@ -3,11 +3,12 @@ import type { Metadata } from 'next';
 import Image from 'next/image';
 import Link from 'next/link';
 
-import { getAnime } from '@/lib/backend';
+import { getAnime, getAnimeEpisodes } from '@/lib/backend';
 import { getJikanAnime, jikanToSeries } from '@/lib/jikan';
 
 import {
   getEpisodeById,
+  getEpisodesBySeries,
   getRelatedSeries,
   getSeriesBySlug,
   mockSeries,
@@ -16,10 +17,11 @@ import {
 import SourceBadge from '@/components/ui/SourceBadge';
 import WatchPlayerShell from '@/components/watch/WatchPlayerShell';
 
-import type { AnimeSeries } from '@/types';
+import type { AnimeSeries, Episode } from '@/types';
 
 interface Props {
   params: Promise<{ source: string; id: string }>;
+  searchParams: Promise<{ series?: string; ep?: string }>;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -52,8 +54,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   }
 }
 
-export default async function WatchPage({ params }: Props) {
+export default async function WatchPage({ params, searchParams }: Props) {
   const { source, id } = await params;
+  const { series: seriesSlugParam, ep: epNumStr } = await searchParams;
+  const currentEpNum = epNumStr ? Number(epNumStr) : null;
 
   let series: AnimeSeries | null = null;
 
@@ -127,6 +131,30 @@ export default async function WatchPage({ params }: Props) {
   const trailerEmbedUrl = series?.trailerEmbedUrl;
   const streamingLinks = series?.streamingLinks ?? [];
 
+  // ── Next episode resolution (for autoplay) ───────────────────────────────
+  let nextEpisode: Episode | null = null;
+
+  if (currentEpNum !== null && seriesSlugParam) {
+    const nextNum = currentEpNum + 1;
+    // Try backend first, then mock data
+    try {
+      const { data: allEps } = await getAnimeEpisodes(seriesSlugParam);
+      nextEpisode =
+        allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
+    } catch {
+      const allEps = getEpisodesBySeries(seriesSlugParam);
+      nextEpisode =
+        allEps.find((ep) => ep.episodeNumber === nextNum) ?? null;
+    }
+  } else if (episode && episodeParent) {
+    // Fallback: look up next episode from mock data using current episode
+    const currentNum =
+      episode.episodeNumber ?? Number(episodeNumber ?? 0);
+    const siblings = getEpisodesBySeries(episode.seriesSlug);
+    nextEpisode =
+      siblings.find((ep) => ep.episodeNumber === currentNum + 1) ?? null;
+  }
+
   return (
     <div className='mx-auto max-w-screen-xl px-4 py-6'>
       {/* Back navigation */}
@@ -147,6 +175,19 @@ export default async function WatchPage({ params }: Props) {
             sourceName={sourceName}
             trailerEmbedUrl={trailerEmbedUrl}
             streamingLinks={streamingLinks}
+            nextEpisode={
+              nextEpisode
+                ? {
+                    id: nextEpisode.id,
+                    title: nextEpisode.title,
+                    episodeNumber: nextEpisode.episodeNumber,
+                    watchUrl: nextEpisode.watchUrl,
+                    isEmbeddable: nextEpisode.isEmbeddable,
+                    seriesSlug: nextEpisode.seriesSlug,
+                  }
+                : undefined
+            }
+            currentEpisodeNumber={currentEpNum ?? episode?.episodeNumber}
           />
 
           {/* Title + context */}
