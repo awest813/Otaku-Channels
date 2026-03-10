@@ -43,6 +43,10 @@ const SOURCE_OPTIONS = [
   { value: 'tubi', label: 'Tubi' },
   { value: 'retrocrush', label: 'RetroCrush' },
   { value: 'pluto', label: 'Pluto TV' },
+  { value: 'consumet', label: 'Consumet' },
+  { value: 'jikan', label: 'MyAnimeList (Jikan)' },
+  { value: 'kitsu', label: 'Kitsu' },
+  { value: 'shikimori', label: 'Shikimori' },
 ];
 
 export default function ProfileContent() {

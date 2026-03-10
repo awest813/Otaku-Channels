@@ -71,6 +71,42 @@ export const sourceProviders: SourceProvider[] = [
     region: 'global',
     embedType: 'iframe',
   },
+  {
+    id: 'consumet',
+    name: 'Consumet',
+    type: 'consumet',
+    baseUrl: 'https://consumet.org',
+    isOfficial: false,
+    region: 'global',
+    embedType: 'hls',
+  },
+  {
+    id: 'jikan',
+    name: 'MyAnimeList (Jikan API)',
+    type: 'jikan',
+    baseUrl: 'https://myanimelist.net',
+    isOfficial: false,
+    region: 'global',
+    embedType: 'external',
+  },
+  {
+    id: 'kitsu',
+    name: 'Kitsu API',
+    type: 'kitsu',
+    baseUrl: 'https://kitsu.io',
+    isOfficial: false,
+    region: 'global',
+    embedType: 'external',
+  },
+  {
+    id: 'shikimori',
+    name: 'Shikimori API',
+    type: 'shikimori',
+    baseUrl: 'https://shikimori.one',
+    isOfficial: false,
+    region: 'global',
+    embedType: 'external',
+  },
 ];
 
 export const mockSeries: AnimeSeries[] = [
