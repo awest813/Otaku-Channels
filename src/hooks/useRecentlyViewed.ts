@@ -3,6 +3,8 @@
 import * as React from 'react';
 import { z } from 'zod';
 
+import { useAuth } from '@/context/auth';
+
 const STORAGE_KEY = 'anime-tv-recently-viewed';
 const MAX_ITEMS = 12;
 
@@ -50,23 +52,88 @@ function writeStorage(items: RecentItem[]) {
 }
 
 export function useRecentlyViewed() {
+  const { user } = useAuth();
   const [items, setItems] = React.useState<RecentItem[]>([]);
 
   React.useEffect(() => {
-    setItems(readStorage());
-  }, []);
+    if (user) {
+      fetch('/api/user/watch-history', { credentials: 'include' })
+        .then((r) => (r.ok ? r.json() : null))
+        .then(
+          (
+            data: {
+              data?: Array<{
+                animeId: string;
+                watchedAt: string;
+                anime?: {
+                  id: string;
+                  slug: string;
+                  title: string;
+                  posterUrl: string;
+                };
+              }>;
+            } | null
+          ) => {
+            if (data?.data?.length) {
+              const local = readStorage();
+              const localMap = new Map(local.map((i) => [i.id, i]));
 
-  const trackView = React.useCallback((item: Omit<RecentItem, 'viewedAt'>) => {
-    setItems((prev) => {
-      const filtered = prev.filter((i) => i.id !== item.id);
-      const next = [{ ...item, viewedAt: Date.now() }, ...filtered].slice(
-        0,
-        MAX_ITEMS
-      );
-      writeStorage(next);
-      return next;
-    });
-  }, []);
+              const fromBackend: RecentItem[] = data.data
+                .slice(0, MAX_ITEMS)
+                .map((entry) => {
+                  const cached = localMap.get(entry.animeId);
+                  return {
+                    id: entry.animeId,
+                    slug: entry.anime?.slug ?? entry.animeId,
+                    title: entry.anime?.title ?? cached?.title ?? 'Unknown',
+                    thumbnail:
+                      entry.anime?.posterUrl ?? cached?.thumbnail ?? '',
+                    sourceType: cached?.sourceType ?? 'youtube',
+                    releaseYear: cached?.releaseYear ?? 0,
+                    viewedAt: new Date(entry.watchedAt).getTime(),
+                  };
+                });
+
+              setItems(fromBackend);
+            } else {
+              setItems(readStorage());
+            }
+          }
+        )
+        .catch(() => setItems(readStorage()));
+    } else {
+      setItems(readStorage());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user?.id]); // Re-run only when the user's identity changes (login/logout)
+
+  const trackView = React.useCallback(
+    (item: Omit<RecentItem, 'viewedAt'>) => {
+      setItems((prev) => {
+        const filtered = prev.filter((i) => i.id !== item.id);
+        const next = [{ ...item, viewedAt: Date.now() }, ...filtered].slice(
+          0,
+          MAX_ITEMS
+        );
+        writeStorage(next);
+        return next;
+      });
+      // Sync to backend when logged in
+      if (user) {
+        fetch('/api/user/watch-history', {
+          method: 'POST',
+          credentials: 'include',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ animeId: item.id }),
+        }).catch((err) => {
+          // Non-fatal — view already tracked locally
+          // eslint-disable-next-line no-console
+          console.warn('[useRecentlyViewed] backend sync failed:', err);
+        });
+      }
+    },
+    [user]
+  );
 
   return { items, trackView };
 }

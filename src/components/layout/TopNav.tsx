@@ -1,11 +1,23 @@
 'use client';
 
-import { Bookmark, Menu, Search, Settings, Tv, X } from 'lucide-react';
+import {
+  Bookmark,
+  LogIn,
+  LogOut,
+  Menu,
+  Search,
+  Settings,
+  Tv,
+  User,
+  X,
+} from 'lucide-react';
 import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
+
+import { useAuth } from '@/context/auth';
 
 const navLinks = [
   { label: 'Home', href: '/' },
@@ -16,6 +28,8 @@ const navLinks = [
 
 export default function TopNav() {
   const pathname = usePathname();
+  const router = useRouter();
+  const { user, logout } = useAuth();
   const [open, setOpen] = React.useState(false);
 
   // Close mobile menu on route change
@@ -45,6 +59,11 @@ export default function TopNav() {
 
   const isActive = (href: string) =>
     href === '/' ? pathname === '/' : pathname.startsWith(href);
+
+  const handleLogout = async () => {
+    await logout();
+    router.push('/');
+  };
 
   return (
     <>
@@ -108,6 +127,45 @@ export default function TopNav() {
               <Bookmark className='h-4 w-4' />
               <span>My List</span>
             </Link>
+            {user ? (
+              <>
+                <Link
+                  href='/profile'
+                  className={cn(
+                    'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                    isActive('/profile')
+                      ? 'text-cyan-400'
+                      : 'text-slate-400 hover:text-white'
+                  )}
+                  aria-label='Profile'
+                >
+                  <User className='h-4 w-4' />
+                  <span>{user.username}</span>
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className='flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+                  aria-label='Sign out'
+                >
+                  <LogOut className='h-4 w-4' />
+                  <span>Sign out</span>
+                </button>
+              </>
+            ) : (
+              <Link
+                href='/login'
+                className={cn(
+                  'flex items-center gap-1.5 rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+                  isActive('/login')
+                    ? 'text-cyan-400'
+                    : 'text-slate-400 hover:text-white'
+                )}
+                aria-label='Sign in'
+              >
+                <LogIn className='h-4 w-4' />
+                <span>Sign in</span>
+              </Link>
+            )}
           </div>
 
           {/* Mobile actions */}
@@ -225,6 +283,48 @@ export default function TopNav() {
                 <Settings className='h-4 w-4' />
                 Settings
               </Link>
+
+              {user ? (
+                <>
+                  <Link
+                    href='/profile'
+                    onClick={() => setOpen(false)}
+                    className={cn(
+                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                      isActive('/profile')
+                        ? 'bg-slate-800 text-cyan-400'
+                        : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                    )}
+                  >
+                    <User className='h-4 w-4' />
+                    {user.username}
+                  </Link>
+                  <button
+                    onClick={() => {
+                      setOpen(false);
+                      handleLogout();
+                    }}
+                    className='flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-900 hover:text-white'
+                  >
+                    <LogOut className='h-4 w-4' />
+                    Sign out
+                  </button>
+                </>
+              ) : (
+                <Link
+                  href='/login'
+                  onClick={() => setOpen(false)}
+                  className={cn(
+                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                    isActive('/login')
+                      ? 'bg-slate-800 text-cyan-400'
+                      : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                  )}
+                >
+                  <LogIn className='h-4 w-4' />
+                  Sign in
+                </Link>
+              )}
             </div>
           </nav>
         </>
