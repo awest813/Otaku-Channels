@@ -42,7 +42,7 @@ npm run db:seed
 ```
 
 This creates:
-- Approved source domains (YouTube, Tubi, Pluto TV, RetroCrush, Crunchyroll, HIDIVE)
+- Approved source domains (official and grey-vetted providers)
 - 11 anime titles with genres, tags, sources, and episodes
 - 7 themed channels (Retro Mecha, Shonen Power Hour, Cozy Slice of Life, etc.)
 - A dev admin account: `admin@otakuchannels.local` / `Admin1234`
@@ -209,9 +209,9 @@ All routes are prefixed with `/api/v1`.
 
 ---
 
-## Source Allowlist
+## Source Governance (Official + Grey APIs)
 
-Only domains on the approved list can be used as source links. The initial seeded domains are:
+Only domains on the approved list can be used as source links. This includes official providers and vetted grey anime sources. The initial seeded domains are:
 - `www.youtube.com` (embeddable)
 - `youtu.be` (embeddable)
 - `tubitv.com`
@@ -222,7 +222,9 @@ Only domains on the approved list can be used as source links. The initial seede
 
 Admins can add or remove domains via `/api/v1/sources/domains`.
 
-**Non-approved domain submissions are rejected at the API layer — no scraping, DRM bypass, or piracy infrastructure is supported.**
+Grey sources are allowed when explicitly approved by admins and marked as vetted in operations policy.
+
+**Non-approved domain submissions are rejected at the API layer. Content must remain source-attributed; DRM/paywall bypass and first-party rehosting are not supported.**
 
 ---
 
