@@ -3,8 +3,46 @@ import { config } from '../config';
 import { logger } from '../lib/logger';
 import { connectDb, disconnectDb } from '../lib/db';
 import { connectRedis, disconnectRedis } from '../lib/redis';
+import { execFileSync } from 'child_process';
+import path from 'path';
+
+/**
+ * Run pending Prisma migrations before the server accepts traffic.
+ * Uses `prisma migrate deploy` which is safe to run on an already-migrated DB
+ * (it is a no-op when there are no pending migrations).
+ *
+ * This acts as a database migration safety check: the process exits early if
+ * migrations fail rather than starting with a schema mismatch.
+ *
+ * The local `prisma` binary from `node_modules/.bin` is used directly to avoid
+ * relying on `npx` and any associated network lookups.
+ */
+async function runMigrations() {
+  logger.info('Checking database migrations…');
+  try {
+    // Resolve the locally installed Prisma CLI binary — avoids `npx` network calls
+    const prismaBin = path.resolve(
+      __dirname,
+      '..',
+      '..',
+      'node_modules',
+      '.bin',
+      'prisma',
+    );
+    execFileSync(prismaBin, ['migrate', 'deploy'], { stdio: 'inherit' });
+    logger.info('Database migrations are up-to-date');
+  } catch (err) {
+    logger.fatal({ err }, 'Database migration failed — aborting startup');
+    process.exit(1);
+  }
+}
 
 async function main() {
+  // Run migrations before accepting traffic
+  if (config.NODE_ENV !== 'test') {
+    await runMigrations();
+  }
+
   // Bootstrap infra
   await connectDb();
   await connectRedis();
