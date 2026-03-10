@@ -13,33 +13,36 @@
 // ─── Re-export canonical entities ────────────────────────────────────────────
 
 export type {
-  // Primitives
-  LanguageOption,
-  ContentType,
-  SourceType,
-  EmbedType,
-  AvailabilityStatus,
-  // Provenance
-  SourceLink,
-  AvailabilityWindow,
   // Core content
   Anime,
-  Episode,
+  AvailabilityStatus,
+  AvailabilityWindow,
   Channel,
-  // User interaction
-  WatchProgress,
-  WatchlistEntry,
-  RecommendationEdge,
-  UserPreference,
+  ChannelWithSchedule,
+  ContentType,
+  EmbedType,
+  Episode,
   // Helpers
   Genre,
+  // Primitives
+  LanguageOption,
+  NowPlayingResult,
+  RecommendationEdge,
+  // Schedule / pseudo-live channel system
+  ScheduleSlot,
+  // Provenance
+  SourceLink,
+  SourceType,
+  UserPreference,
+  WatchlistEntry,
+  // User interaction
+  WatchProgress,
 } from './canonical';
-
 export type { SourceProvider } from './canonical';
 
 // ─── Backward-compatible aliases ──────────────────────────────────────────────
 
-import type { Anime, Channel, SourceType } from './canonical';
+import type { Anime, Channel } from './canonical';
 
 /**
  * TV series subtype of Anime.  All existing code that types variables as
