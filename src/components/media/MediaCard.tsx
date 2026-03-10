@@ -1,13 +1,21 @@
 'use client';
 
-import { Bookmark, BookmarkCheck, ExternalLink, Film, Play, Tv2 } from 'lucide-react';
+import {
+  Bookmark,
+  BookmarkCheck,
+  ExternalLink,
+  Film,
+  Play,
+  Tv2,
+} from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 import * as React from 'react';
 
+import { useWatchlist } from '@/hooks/useWatchlist';
+
 import SourceBadge from '@/components/ui/SourceBadge';
 import { useToast } from '@/components/ui/Toast';
-import { useWatchlist } from '@/hooks/useWatchlist';
 
 import type { AnimeSeries, Movie } from '@/types';
 
@@ -84,8 +92,12 @@ export default function MediaCard({ item }: Props) {
         {/* Watchlist button */}
         <button
           onClick={handleWatchlistToggle}
-          className='absolute right-2 top-2 rounded-md bg-slate-950/70 p-1.5 text-slate-300 opacity-0 backdrop-blur-sm transition-all hover:text-cyan-400 group-hover:opacity-100 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
-          aria-label={inList ? `Remove ${item.title} from My List` : `Add ${item.title} to My List`}
+          className='absolute right-2 top-2 rounded-md bg-slate-950/70 p-1.5 text-slate-300 opacity-0 backdrop-blur-sm transition-all hover:text-cyan-400 focus-visible:opacity-100 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 group-hover:opacity-100'
+          aria-label={
+            inList
+              ? `Remove ${item.title} from My List`
+              : `Add ${item.title} to My List`
+          }
         >
           {inList ? (
             <BookmarkCheck className='h-4 w-4 text-cyan-400' />
@@ -114,7 +126,7 @@ export default function MediaCard({ item }: Props) {
           {episodeCount ? (
             <span className='flex items-center gap-0.5 text-xs text-slate-500'>
               <Tv2 className='h-3 w-3' />
-              {episodeCount}
+              {episodeCount} eps
             </span>
           ) : null}
           <span className='text-xs text-slate-500'>{item.releaseYear}</span>

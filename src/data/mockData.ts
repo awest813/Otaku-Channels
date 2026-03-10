@@ -616,6 +616,27 @@ export const mockSeries: AnimeSeries[] = [
     episodeCount: 48,
     tags: ['Horror', 'Action', 'Dark'],
   },
+  {
+    id: 's-blade',
+    slug: 'blade-of-eternity',
+    title: 'Blade of Eternity',
+    description:
+      'A young swordsman wields the legendary Blade of Eternity to protect his world from an ancient evil that threatens to consume everything.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400&h=225&fit=crop',
+    heroImage:
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=1200&h=600&fit=crop',
+    type: 'series',
+    genres: ['Action', 'Fantasy', 'Adventure'],
+    language: 'sub',
+    sourceName: 'YouTube Official',
+    sourceType: 'youtube',
+    isEmbeddable: true,
+    watchUrl: 'https://www.youtube.com/watch?v=VQGCKyvzIM4',
+    releaseYear: 2022,
+    episodeCount: 3,
+    tags: ['Action', 'Fantasy'],
+  },
 ];
 
 export const mockMovies: Movie[] = [
@@ -1006,6 +1027,22 @@ export const mockEpisodes: Record<string, Episode[]> = {
     seasonNumber: 1,
     duration: '~12 min',
     watchUrl: 'https://www.youtube.com/watch?v=MGRm4IzK1SQ',
+    isEmbeddable: true,
+    sourceName: 'YouTube Official',
+  })),
+  'blade-of-eternity': Array.from({ length: 3 }, (_, i) => ({
+    id: `blade-ep${i + 1}`,
+    seriesSlug: 'blade-of-eternity',
+    title: `Episode ${i + 1}: ${
+      ['The Awakening', 'Forging Destiny', 'Edge of Darkness'][i]
+    }`,
+    description: 'An episode of Blade of Eternity.',
+    thumbnail:
+      'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=320&h=180&fit=crop',
+    episodeNumber: i + 1,
+    seasonNumber: 1,
+    duration: '~24 min',
+    watchUrl: 'https://www.youtube.com/watch?v=VQGCKyvzIM4',
     isEmbeddable: true,
     sourceName: 'YouTube Official',
   })),

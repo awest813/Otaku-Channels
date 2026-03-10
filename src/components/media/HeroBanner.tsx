@@ -78,7 +78,7 @@ export default function HeroBanner({ series }: { series: AnimeSeries }) {
               <Link
                 href={
                   series.isEmbeddable
-                    ? `/watch/youtube/${series.id}`
+                    ? `/series/${series.slug}`
                     : series.watchUrl
                 }
                 {...(!series.isEmbeddable
