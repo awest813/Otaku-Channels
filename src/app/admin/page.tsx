@@ -1,7 +1,5 @@
 'use client';
 
-import * as React from 'react';
-import Link from 'next/link';
 import {
   AlertTriangle,
   BookOpen,
@@ -12,9 +10,12 @@ import {
   RefreshCw,
   Users,
 } from 'lucide-react';
+import Link from 'next/link';
+import * as React from 'react';
+
+import { cn } from '@/lib/utils';
 
 import { useAuth } from '@/context/auth';
-import { cn } from '@/lib/utils';
 
 interface Stats {
   users: number;
@@ -43,17 +44,21 @@ function StatCard({
     <div
       className={cn(
         'flex items-start justify-between rounded-xl border border-slate-800 bg-slate-900/60 p-4 transition-colors',
-        href && 'hover:border-slate-700 hover:bg-slate-900',
+        href && 'hover:border-slate-700 hover:bg-slate-900'
       )}
     >
       <div>
-        <p className='text-xs font-medium text-slate-500 uppercase tracking-wide'>{label}</p>
-        <p className={cn('mt-1 text-2xl font-bold', accent ?? 'text-white')}>{value}</p>
+        <p className='text-xs font-medium uppercase tracking-wide text-slate-500'>
+          {label}
+        </p>
+        <p className={cn('mt-1 text-2xl font-bold', accent ?? 'text-white')}>
+          {value}
+        </p>
       </div>
       <div
         className={cn(
           'rounded-lg p-2',
-          accent ? 'bg-slate-800' : 'bg-slate-800',
+          accent ? 'bg-slate-800' : 'bg-slate-800'
         )}
       >
         <Icon className={cn('h-5 w-5', accent ?? 'text-slate-400')} />
@@ -182,15 +187,23 @@ export default function AdminDashboardPage() {
 
       {/* Quick actions */}
       <section>
-        <h2 className='mb-3 text-sm font-semibold text-slate-400 uppercase tracking-wide'>
+        <h2 className='mb-3 text-sm font-semibold uppercase tracking-wide text-slate-400'>
           Quick Actions
         </h2>
         <div className='grid grid-cols-2 gap-3 sm:grid-cols-4'>
           {[
-            { label: 'Review Reports', href: '/admin/reports', icon: ClipboardList },
+            {
+              label: 'Review Reports',
+              href: '/admin/reports',
+              icon: ClipboardList,
+            },
             { label: 'Manage Users', href: '/admin/users', icon: Users },
             { label: 'Moderate Anime', href: '/admin/anime', icon: BookOpen },
-            { label: 'Job Status', href: '/admin/jobs', icon: BriefcaseBusiness },
+            {
+              label: 'Job Status',
+              href: '/admin/jobs',
+              icon: BriefcaseBusiness,
+            },
           ].map((action) => (
             <Link
               key={action.href}
@@ -207,7 +220,7 @@ export default function AdminDashboardPage() {
       {/* Attention needed */}
       {stats && (stats.openReports > 0 || stats.pendingSources > 0) && (
         <section>
-          <h2 className='mb-3 text-sm font-semibold text-slate-400 uppercase tracking-wide flex items-center gap-2'>
+          <h2 className='mb-3 flex items-center gap-2 text-sm font-semibold uppercase tracking-wide text-slate-400'>
             <AlertTriangle className='h-4 w-4 text-amber-400' />
             Needs Attention
           </h2>
@@ -218,10 +231,10 @@ export default function AdminDashboardPage() {
                 className='flex items-center justify-between rounded-lg border border-amber-900/40 bg-amber-950/20 px-4 py-3 text-sm transition-colors hover:border-amber-900/60'
               >
                 <span className='text-amber-300'>
-                  {stats.openReports} open user report{stats.openReports !== 1 ? 's' : ''} awaiting
-                  review
+                  {stats.openReports} open user report
+                  {stats.openReports !== 1 ? 's' : ''} awaiting review
                 </span>
-                <span className='text-amber-500 text-xs'>Review →</span>
+                <span className='text-xs text-amber-500'>Review →</span>
               </Link>
             )}
             {stats.pendingSources > 0 && (
@@ -230,10 +243,10 @@ export default function AdminDashboardPage() {
                 className='flex items-center justify-between rounded-lg border border-cyan-900/40 bg-cyan-950/20 px-4 py-3 text-sm transition-colors hover:border-cyan-900/60'
               >
                 <span className='text-cyan-300'>
-                  {stats.pendingSources} content source{stats.pendingSources !== 1 ? 's' : ''}{' '}
-                  pending review
+                  {stats.pendingSources} content source
+                  {stats.pendingSources !== 1 ? 's' : ''} pending review
                 </span>
-                <span className='text-cyan-500 text-xs'>Review →</span>
+                <span className='text-xs text-cyan-500'>Review →</span>
               </Link>
             )}
           </div>

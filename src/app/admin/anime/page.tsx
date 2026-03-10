@@ -1,7 +1,5 @@
 'use client';
 
-import * as React from 'react';
-import { useSearchParams, useRouter } from 'next/navigation';
 import {
   ChevronLeft,
   ChevronRight,
@@ -12,6 +10,8 @@ import {
   Star,
   StarOff,
 } from 'lucide-react';
+import { useRouter, useSearchParams } from 'next/navigation';
+import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -60,9 +60,15 @@ export default function AnimeModerationPage() {
   const isVisible = searchParams.get('isVisible') ?? '';
   const isFeatured = searchParams.get('isFeatured') ?? '';
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = React.useMemo<Record<string, string>>(() => {
+    const tok =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
+    const headers: Record<string, string> = {};
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    return headers;
+  }, []);
 
   const fetchAnime = React.useCallback(async () => {
     setLoading(true);
@@ -86,7 +92,7 @@ export default function AnimeModerationPage() {
     } finally {
       setLoading(false);
     }
-  }, [page, search, isVisible, isFeatured]);
+  }, [page, search, isVisible, isFeatured, authHeader]);
 
   React.useEffect(() => {
     fetchAnime();
@@ -143,7 +149,11 @@ export default function AnimeModerationPage() {
       alert('Both Source ID and Target ID are required');
       return;
     }
-    if (!confirm(`Merge "${mergeSourceId}" into "${mergeTargetId}"? This cannot be undone.`))
+    if (
+      !confirm(
+        `Merge "${mergeSourceId}" into "${mergeTargetId}"? This cannot be undone.`
+      )
+    )
       return;
 
     setMerging(true);
@@ -153,7 +163,10 @@ export default function AnimeModerationPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', ...authHeader },
         credentials: 'include',
-        body: JSON.stringify({ sourceId: mergeSourceId.trim(), targetId: mergeTargetId.trim() }),
+        body: JSON.stringify({
+          sourceId: mergeSourceId.trim(),
+          targetId: mergeTargetId.trim(),
+        }),
       });
       const json = await res.json();
       if (!res.ok) throw new Error(json.error?.message ?? 'Merge failed');
@@ -161,8 +174,10 @@ export default function AnimeModerationPage() {
       setMergeSourceId('');
       setMergeTargetId('');
       await fetchAnime();
-    } catch (e: any) {
-      setMergeResult(`Error: ${e.message}`);
+    } catch (e) {
+      setMergeResult(
+        `Error: ${e instanceof Error ? e.message : 'Merge failed'}`
+      );
     } finally {
       setMerging(false);
     }
@@ -175,7 +190,9 @@ export default function AnimeModerationPage() {
       <div className='flex items-center justify-between'>
         <div>
           <h1 className='text-2xl font-bold text-white'>Anime Moderation</h1>
-          <p className='text-sm text-slate-400'>{total.toLocaleString()} titles</p>
+          <p className='text-sm text-slate-400'>
+            {total.toLocaleString()} titles
+          </p>
         </div>
         <button
           onClick={fetchAnime}
@@ -194,7 +211,9 @@ export default function AnimeModerationPage() {
         </h2>
         <div className='flex flex-wrap items-end gap-3'>
           <div className='flex flex-col gap-1'>
-            <label className='text-xs text-slate-500'>Source ID (will be hidden)</label>
+            <label className='text-xs text-slate-500'>
+              Source ID (will be hidden)
+            </label>
             <input
               value={mergeSourceId}
               onChange={(e) => setMergeSourceId(e.target.value)}
@@ -223,7 +242,9 @@ export default function AnimeModerationPage() {
           <p
             className={cn(
               'mt-2 text-sm',
-              mergeResult.startsWith('Error') ? 'text-red-400' : 'text-green-400',
+              mergeResult.startsWith('Error')
+                ? 'text-red-400'
+                : 'text-green-400'
             )}
           >
             {mergeResult}
@@ -238,7 +259,8 @@ export default function AnimeModerationPage() {
           placeholder='Search title or slug…'
           defaultValue={search}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') updateParam('search', (e.target as HTMLInputElement).value);
+            if (e.key === 'Enter')
+              updateParam('search', (e.target as HTMLInputElement).value);
           }}
           className='rounded-lg border border-slate-700 bg-slate-800 px-3 py-1.5 text-sm text-white placeholder-slate-500 focus:border-cyan-500 focus:outline-none'
         />
@@ -273,19 +295,19 @@ export default function AnimeModerationPage() {
         <table className='w-full text-sm'>
           <thead>
             <tr className='border-b border-slate-800 bg-slate-900/60'>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Title
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden sm:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 sm:table-cell'>
                 Type / Year
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden md:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 md:table-cell'>
                 Sources
               </th>
-              <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden lg:table-cell'>
+              <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 lg:table-cell'>
                 ID
               </th>
-              <th className='px-4 py-3 text-right text-xs font-medium text-slate-400 uppercase tracking-wide'>
+              <th className='px-4 py-3 text-right text-xs font-medium uppercase tracking-wide text-slate-400'>
                 Actions
               </th>
             </tr>
@@ -304,25 +326,33 @@ export default function AnimeModerationPage() {
                     key={a.id}
                     className={cn(
                       'transition-colors hover:bg-slate-900/40',
-                      !a.isVisible && 'opacity-50',
+                      !a.isVisible && 'opacity-50'
                     )}
                   >
                     <td className='px-4 py-3'>
-                      <p className='font-medium text-white'>{a.titleEnglish ?? a.title}</p>
+                      <p className='font-medium text-white'>
+                        {a.titleEnglish ?? a.title}
+                      </p>
                       {a.titleEnglish && (
                         <p className='text-xs text-slate-500'>{a.title}</p>
                       )}
                       <div className='mt-0.5 flex gap-1.5'>
                         {!a.isVisible && (
-                          <span className='text-xs text-slate-500'>[hidden]</span>
+                          <span className='text-xs text-slate-500'>
+                            [hidden]
+                          </span>
                         )}
                         {a.isFeatured && (
-                          <span className='text-xs text-cyan-500'>[featured]</span>
+                          <span className='text-xs text-cyan-500'>
+                            [featured]
+                          </span>
                         )}
                       </div>
                     </td>
                     <td className='hidden px-4 py-3 text-slate-400 sm:table-cell'>
-                      <span className='capitalize'>{a.type?.toLowerCase()}</span>
+                      <span className='capitalize'>
+                        {a.type?.toLowerCase()}
+                      </span>
                       {a.releaseYear && ` · ${a.releaseYear}`}
                     </td>
                     <td className='hidden px-4 py-3 text-slate-400 md:table-cell'>
@@ -347,10 +377,14 @@ export default function AnimeModerationPage() {
                             'rounded p-1.5 transition-colors disabled:opacity-50',
                             a.isVisible
                               ? 'text-slate-400 hover:bg-slate-800 hover:text-white'
-                              : 'text-green-400 hover:bg-green-950/30',
+                              : 'text-green-400 hover:bg-green-950/30'
                           )}
                         >
-                          {a.isVisible ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+                          {a.isVisible ? (
+                            <EyeOff className='h-4 w-4' />
+                          ) : (
+                            <Eye className='h-4 w-4' />
+                          )}
                         </button>
                         <button
                           onClick={() => toggleFeatured(a)}
@@ -360,7 +394,7 @@ export default function AnimeModerationPage() {
                             'rounded p-1.5 transition-colors disabled:opacity-50',
                             a.isFeatured
                               ? 'text-cyan-400 hover:bg-cyan-950/30'
-                              : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+                              : 'text-slate-400 hover:bg-slate-800 hover:text-white'
                           )}
                         >
                           {a.isFeatured ? (

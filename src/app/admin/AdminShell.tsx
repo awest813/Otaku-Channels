@@ -1,24 +1,22 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
-import * as React from 'react';
 import {
   BarChart2,
   BookOpen,
   BriefcaseBusiness,
   ClipboardList,
   FileText,
-  Link2Off,
-  Merge,
-  Settings2,
   Shield,
   Users,
   Wifi,
 } from 'lucide-react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import * as React from 'react';
+
+import { cn } from '@/lib/utils';
 
 import { useAuth } from '@/context/auth';
-import { cn } from '@/lib/utils';
 
 const navItems = [
   { label: 'Overview', href: '/admin', icon: BarChart2, exact: true },
@@ -30,7 +28,11 @@ const navItems = [
   { label: 'Audit Log', href: '/admin/audit', icon: FileText },
 ];
 
-export default function AdminShell({ children }: { children: React.ReactNode }) {
+export default function AdminShell({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   const { user, loading } = useAuth();
   const router = useRouter();
   const pathname = usePathname();
@@ -65,7 +67,10 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
           <span className='text-sm font-semibold text-white'>Admin Panel</span>
         </div>
 
-        <nav className='flex flex-1 flex-col gap-0.5 p-3' aria-label='Admin navigation'>
+        <nav
+          className='flex flex-1 flex-col gap-0.5 p-3'
+          aria-label='Admin navigation'
+        >
           {navItems.map((item) => (
             <Link
               key={item.href}
@@ -74,7 +79,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                 'flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
                 isActive(item.href, item.exact)
                   ? 'bg-cyan-500/10 text-cyan-400'
-                  : 'text-slate-400 hover:bg-slate-800 hover:text-white',
+                  : 'text-slate-400 hover:bg-slate-800 hover:text-white'
               )}
             >
               <item.icon className='h-4 w-4 shrink-0' />
@@ -85,14 +90,16 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
 
         <div className='border-t border-slate-800 p-3'>
           <div className='rounded-lg bg-slate-800/50 px-3 py-2'>
-            <p className='text-xs font-medium text-slate-300'>{user.username}</p>
+            <p className='text-xs font-medium text-slate-300'>
+              {user.username}
+            </p>
             <p className='text-xs text-slate-500'>{user.role}</p>
           </div>
         </div>
       </aside>
 
       {/* Main content */}
-      <div className='flex flex-1 flex-col min-w-0'>
+      <div className='flex min-w-0 flex-1 flex-col'>
         {/* Mobile header */}
         <div className='flex h-14 items-center gap-3 border-b border-slate-800 px-4 lg:hidden'>
           <Shield className='h-4 w-4 text-cyan-400' />
@@ -106,7 +113,7 @@ export default function AdminShell({ children }: { children: React.ReactNode }) 
                   'shrink-0 rounded px-2 py-1 text-xs font-medium transition-colors',
                   isActive(item.href, item.exact)
                     ? 'bg-cyan-500/10 text-cyan-400'
-                    : 'text-slate-400 hover:text-white',
+                    : 'text-slate-400 hover:text-white'
                 )}
               >
                 {item.label}

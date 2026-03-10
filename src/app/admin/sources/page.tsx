@@ -1,7 +1,7 @@
 'use client';
 
-import * as React from 'react';
 import { ExternalLink, RefreshCw, Wifi, WifiOff } from 'lucide-react';
+import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
@@ -49,7 +49,16 @@ function HealthBar({ value }: { value: number }) {
           style={{ width: `${value}%` }}
         />
       </div>
-      <span className={cn('text-xs font-medium', value >= 90 ? 'text-green-400' : value >= 70 ? 'text-amber-400' : 'text-red-400')}>
+      <span
+        className={cn(
+          'text-xs font-medium',
+          value >= 90
+            ? 'text-green-400'
+            : value >= 70
+            ? 'text-amber-400'
+            : 'text-red-400'
+        )}
+      >
         {value}%
       </span>
     </div>
@@ -63,22 +72,37 @@ export default function SourcesPage() {
   const [error, setError] = React.useState<string | null>(null);
   const [tab, setTab] = React.useState<'providers' | 'broken'>('providers');
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = React.useMemo<Record<string, string>>(() => {
+    const tok =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
+    const headers: Record<string, string> = {};
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    return headers;
+  }, []);
 
   const fetchAll = React.useCallback(async () => {
     setLoading(true);
     setError(null);
     try {
       const [provRes, brokenRes] = await Promise.all([
-        fetch('/api/admin/sources/providers', { headers: authHeader, credentials: 'include' }),
-        fetch('/api/admin/sources/broken', { headers: authHeader, credentials: 'include' }),
+        fetch('/api/admin/sources/providers', {
+          headers: authHeader,
+          credentials: 'include',
+        }),
+        fetch('/api/admin/sources/broken', {
+          headers: authHeader,
+          credentials: 'include',
+        }),
       ]);
 
       if (!provRes.ok || !brokenRes.ok) throw new Error('Failed to fetch data');
 
-      const [provJson, brokenJson] = await Promise.all([provRes.json(), brokenRes.json()]);
+      const [provJson, brokenJson] = await Promise.all([
+        provRes.json(),
+        brokenRes.json(),
+      ]);
       setProviders(provJson.data ?? []);
       setBroken(brokenJson.data ?? { titleSources: [], episodeSources: [] });
     } catch {
@@ -86,7 +110,7 @@ export default function SourcesPage() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authHeader]);
 
   React.useEffect(() => {
     fetchAll();
@@ -121,7 +145,7 @@ export default function SourcesPage() {
             'flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
             tab === 'providers'
               ? 'bg-slate-800 text-white'
-              : 'text-slate-500 hover:text-slate-300',
+              : 'text-slate-500 hover:text-slate-300'
           )}
         >
           Provider Health
@@ -129,10 +153,10 @@ export default function SourcesPage() {
         <button
           onClick={() => setTab('broken')}
           className={cn(
-            'flex items-center justify-center gap-2 flex-1 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
+            'flex flex-1 items-center justify-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors',
             tab === 'broken'
               ? 'bg-slate-800 text-white'
-              : 'text-slate-500 hover:text-slate-300',
+              : 'text-slate-500 hover:text-slate-300'
           )}
         >
           Broken Links
@@ -156,19 +180,19 @@ export default function SourcesPage() {
           <table className='w-full text-sm'>
             <thead>
               <tr className='border-b border-slate-800 bg-slate-900/60'>
-                <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+                <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                   Provider
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+                <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                   Health
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden sm:table-cell'>
+                <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 sm:table-cell'>
                   Sources
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide hidden md:table-cell'>
+                <th className='hidden px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400 md:table-cell'>
                   Last Checked
                 </th>
-                <th className='px-4 py-3 text-left text-xs font-medium text-slate-400 uppercase tracking-wide'>
+                <th className='px-4 py-3 text-left text-xs font-medium uppercase tracking-wide text-slate-400'>
                   Status
                 </th>
               </tr>
@@ -183,7 +207,10 @@ export default function SourcesPage() {
                     </tr>
                   ))
                 : providers.map((p) => (
-                    <tr key={p.domain} className='transition-colors hover:bg-slate-900/40'>
+                    <tr
+                      key={p.domain}
+                      className='transition-colors hover:bg-slate-900/40'
+                    >
                       <td className='px-4 py-3'>
                         <div className='flex items-center gap-2'>
                           {p.isActive ? (
@@ -192,7 +219,9 @@ export default function SourcesPage() {
                             <WifiOff className='h-4 w-4 text-slate-500' />
                           )}
                           <div>
-                            <p className='font-medium text-white'>{p.label ?? p.domain}</p>
+                            <p className='font-medium text-white'>
+                              {p.label ?? p.domain}
+                            </p>
                             <p className='text-xs text-slate-500'>{p.domain}</p>
                           </div>
                         </div>
@@ -201,12 +230,29 @@ export default function SourcesPage() {
                         <HealthBar value={p.health} />
                       </td>
                       <td className='hidden px-4 py-3 text-slate-400 sm:table-cell'>
-                        <span className='text-green-400'>{p.sources.active}</span> active
+                        <span className='text-green-400'>
+                          {p.sources.active}
+                        </span>{' '}
+                        active
                         {p.sources.removed > 0 && (
-                          <> · <span className='text-red-400'>{p.sources.removed}</span> dead</>
+                          <>
+                            {' '}
+                            ·{' '}
+                            <span className='text-red-400'>
+                              {p.sources.removed}
+                            </span>{' '}
+                            dead
+                          </>
                         )}
                         {p.sources.pending > 0 && (
-                          <> · <span className='text-amber-400'>{p.sources.pending}</span> pending</>
+                          <>
+                            {' '}
+                            ·{' '}
+                            <span className='text-amber-400'>
+                              {p.sources.pending}
+                            </span>{' '}
+                            pending
+                          </>
                         )}
                       </td>
                       <td className='hidden px-4 py-3 text-xs text-slate-500 md:table-cell'>
@@ -219,8 +265,8 @@ export default function SourcesPage() {
                           className={cn(
                             'rounded border px-1.5 py-0.5 text-xs font-medium',
                             p.isActive
-                              ? 'border-green-800 text-green-400 bg-green-950/20'
-                              : 'border-slate-700 text-slate-500 bg-slate-800',
+                              ? 'border-green-800 bg-green-950/20 text-green-400'
+                              : 'border-slate-700 bg-slate-800 text-slate-500'
                           )}
                         >
                           {p.isActive ? 'Active' : 'Disabled'}
@@ -257,16 +303,22 @@ export default function SourcesPage() {
               {/* Title-level broken sources */}
               {broken && broken.titleSources.length > 0 && (
                 <div>
-                  <h3 className='mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide'>
+                  <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500'>
                     Title Sources ({broken.titleSources.length})
                   </h3>
                   <div className='overflow-x-auto rounded-xl border border-slate-800'>
                     <table className='w-full text-sm'>
                       <thead>
                         <tr className='border-b border-slate-800 bg-slate-900/60'>
-                          <th className='px-4 py-2.5 text-left text-xs font-medium text-slate-400 uppercase'>Anime</th>
-                          <th className='px-4 py-2.5 text-left text-xs font-medium text-slate-400 uppercase'>URL</th>
-                          <th className='px-4 py-2.5 text-left text-xs font-medium text-slate-400 uppercase hidden md:table-cell'>Last Checked</th>
+                          <th className='px-4 py-2.5 text-left text-xs font-medium uppercase text-slate-400'>
+                            Anime
+                          </th>
+                          <th className='px-4 py-2.5 text-left text-xs font-medium uppercase text-slate-400'>
+                            URL
+                          </th>
+                          <th className='hidden px-4 py-2.5 text-left text-xs font-medium uppercase text-slate-400 md:table-cell'>
+                            Last Checked
+                          </th>
                         </tr>
                       </thead>
                       <tbody className='divide-y divide-slate-800'>
@@ -282,7 +334,9 @@ export default function SourcesPage() {
                                 rel='noopener noreferrer'
                                 className='flex items-center gap-1 text-xs text-red-400 hover:text-red-300'
                               >
-                                <span className='max-w-xs truncate'>{s.url}</span>
+                                <span className='max-w-xs truncate'>
+                                  {s.url}
+                                </span>
                                 <ExternalLink className='h-3 w-3 shrink-0' />
                               </a>
                             </td>
@@ -302,15 +356,19 @@ export default function SourcesPage() {
               {/* Episode-level broken sources */}
               {broken && broken.episodeSources.length > 0 && (
                 <div>
-                  <h3 className='mb-2 text-xs font-semibold text-slate-500 uppercase tracking-wide'>
+                  <h3 className='mb-2 text-xs font-semibold uppercase tracking-wide text-slate-500'>
                     Episode Sources ({broken.episodeSources.length})
                   </h3>
                   <div className='overflow-x-auto rounded-xl border border-slate-800'>
                     <table className='w-full text-sm'>
                       <thead>
                         <tr className='border-b border-slate-800 bg-slate-900/60'>
-                          <th className='px-4 py-2.5 text-left text-xs font-medium text-slate-400 uppercase'>Anime · Episode</th>
-                          <th className='px-4 py-2.5 text-left text-xs font-medium text-slate-400 uppercase'>URL</th>
+                          <th className='px-4 py-2.5 text-left text-xs font-medium uppercase text-slate-400'>
+                            Anime · Episode
+                          </th>
+                          <th className='px-4 py-2.5 text-left text-xs font-medium uppercase text-slate-400'>
+                            URL
+                          </th>
                         </tr>
                       </thead>
                       <tbody className='divide-y divide-slate-800'>
@@ -321,7 +379,9 @@ export default function SourcesPage() {
                               {s.episode && (
                                 <p className='text-xs text-slate-500'>
                                   Ep {s.episode.episodeNumber}
-                                  {s.episode.title ? ` — ${s.episode.title}` : ''}
+                                  {s.episode.title
+                                    ? ` — ${s.episode.title}`
+                                    : ''}
                                 </p>
                               )}
                             </td>
@@ -332,7 +392,9 @@ export default function SourcesPage() {
                                 rel='noopener noreferrer'
                                 className='flex items-center gap-1 text-xs text-red-400 hover:text-red-300'
                               >
-                                <span className='max-w-xs truncate'>{s.url}</span>
+                                <span className='max-w-xs truncate'>
+                                  {s.url}
+                                </span>
                                 <ExternalLink className='h-3 w-3 shrink-0' />
                               </a>
                             </td>

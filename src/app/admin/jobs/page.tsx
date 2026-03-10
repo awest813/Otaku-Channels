@@ -1,13 +1,7 @@
 'use client';
 
+import { CheckCircle, Clock, Play, RefreshCw, XCircle } from 'lucide-react';
 import * as React from 'react';
-import {
-  CheckCircle,
-  Clock,
-  Play,
-  RefreshCw,
-  XCircle,
-} from 'lucide-react';
 
 import { cn } from '@/lib/utils';
 
@@ -54,10 +48,20 @@ const QUEUE_DESCRIPTIONS: Record<string, string> = {
   'session-cleanup': 'Removes expired and revoked refresh tokens',
 };
 
-function CountBadge({ label, value, color }: { label: string; value: number; color: string }) {
+function CountBadge({
+  label,
+  value,
+  color,
+}: {
+  label: string;
+  value: number;
+  color: string;
+}) {
   return (
     <div className='flex flex-col items-center'>
-      <span className={cn('text-lg font-bold tabular-nums', color)}>{value}</span>
+      <span className={cn('text-lg font-bold tabular-nums', color)}>
+        {value}
+      </span>
       <span className='text-xs text-slate-500'>{label}</span>
     </div>
   );
@@ -67,12 +71,22 @@ export default function JobsPage() {
   const [queues, setQueues] = React.useState<QueueStat[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
-  const [triggerLoading, setTriggerLoading] = React.useState<string | null>(null);
-  const [triggerResult, setTriggerResult] = React.useState<Record<string, string>>({});
+  const [triggerLoading, setTriggerLoading] = React.useState<string | null>(
+    null
+  );
+  const [triggerResult, setTriggerResult] = React.useState<
+    Record<string, string>
+  >({});
 
-  const token =
-    typeof window !== 'undefined' ? localStorage.getItem('access_token') : null;
-  const authHeader = token ? { Authorization: `Bearer ${token}` } : {};
+  const authHeader = React.useMemo<Record<string, string>>(() => {
+    const tok =
+      typeof window !== 'undefined'
+        ? localStorage.getItem('access_token')
+        : null;
+    const headers: Record<string, string> = {};
+    if (tok) headers['Authorization'] = `Bearer ${tok}`;
+    return headers;
+  }, []);
 
   const fetchJobs = React.useCallback(async () => {
     setLoading(true);
@@ -86,17 +100,22 @@ export default function JobsPage() {
       const json = await res.json();
       setQueues(json.data ?? []);
     } catch {
-      setError('Failed to load job status. Make sure the worker process is running.');
+      setError(
+        'Failed to load job status. Make sure the worker process is running.'
+      );
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [authHeader]);
 
   React.useEffect(() => {
     fetchJobs();
   }, [fetchJobs]);
 
-  const triggerJob = async (queueName: string, payload: Record<string, unknown> = {}) => {
+  const triggerJob = async (
+    queueName: string,
+    payload: Record<string, unknown> = {}
+  ) => {
     if (triggerLoading) return;
     setTriggerLoading(queueName);
     setTriggerResult((prev) => ({ ...prev, [queueName]: '' }));
@@ -114,10 +133,12 @@ export default function JobsPage() {
         [queueName]: `Job queued: ${json.jobId}`,
       }));
       setTimeout(() => fetchJobs(), 2000);
-    } catch (e: any) {
+    } catch (e) {
       setTriggerResult((prev) => ({
         ...prev,
-        [queueName]: `Error: ${e.message}`,
+        [queueName]: `Error: ${
+          e instanceof Error ? e.message : 'Trigger failed'
+        }`,
       }));
     } finally {
       setTriggerLoading(null);
@@ -165,7 +186,7 @@ export default function JobsPage() {
                     <h2 className='font-semibold text-white'>
                       {QUEUE_LABELS[q.name] ?? q.name}
                     </h2>
-                    <p className='text-xs text-slate-500 mt-0.5'>
+                    <p className='mt-0.5 text-xs text-slate-500'>
                       {QUEUE_DESCRIPTIONS[q.name] ?? q.name}
                     </p>
                   </div>
@@ -185,7 +206,7 @@ export default function JobsPage() {
                       'mt-2 text-xs',
                       triggerResult[q.name].startsWith('Error')
                         ? 'text-red-400'
-                        : 'text-green-400',
+                        : 'text-green-400'
                     )}
                   >
                     {triggerResult[q.name]}
@@ -224,7 +245,7 @@ export default function JobsPage() {
                 {/* Schedule */}
                 {q.repeatableJobs.length > 0 && (
                   <div className='mt-4'>
-                    <p className='mb-1.5 text-xs font-medium text-slate-500 uppercase tracking-wide'>
+                    <p className='mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500'>
                       Schedule
                     </p>
                     <div className='space-y-1'>
@@ -235,7 +256,9 @@ export default function JobsPage() {
                         >
                           <div className='flex items-center gap-2'>
                             <Clock className='h-3.5 w-3.5 text-slate-500' />
-                            <code className='text-xs text-slate-300'>{rj.cron}</code>
+                            <code className='text-xs text-slate-300'>
+                              {rj.cron}
+                            </code>
                           </div>
                           {rj.next && (
                             <span className='text-xs text-slate-500'>
@@ -253,7 +276,7 @@ export default function JobsPage() {
                   {/* Completed */}
                   {q.recentCompleted.length > 0 && (
                     <div>
-                      <p className='mb-1.5 text-xs font-medium text-slate-500 uppercase tracking-wide'>
+                      <p className='mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500'>
                         Recent Completed
                       </p>
                       <div className='space-y-1'>
@@ -264,7 +287,9 @@ export default function JobsPage() {
                           >
                             <div className='flex items-center gap-1.5'>
                               <CheckCircle className='h-3 w-3 text-green-500' />
-                              <span className='text-xs text-slate-400'>{j.name}</span>
+                              <span className='text-xs text-slate-400'>
+                                {j.name}
+                              </span>
                             </div>
                             <span className='text-xs text-slate-600'>
                               {j.finishedOn
@@ -280,7 +305,7 @@ export default function JobsPage() {
                   {/* Failed */}
                   {q.recentFailed.length > 0 && (
                     <div>
-                      <p className='mb-1.5 text-xs font-medium text-slate-500 uppercase tracking-wide'>
+                      <p className='mb-1.5 text-xs font-medium uppercase tracking-wide text-slate-500'>
                         Recent Failures
                       </p>
                       <div className='space-y-1'>
@@ -291,10 +316,12 @@ export default function JobsPage() {
                           >
                             <div className='flex items-center gap-1.5'>
                               <XCircle className='h-3 w-3 text-red-500' />
-                              <span className='text-xs text-slate-400'>{j.name}</span>
+                              <span className='text-xs text-slate-400'>
+                                {j.name}
+                              </span>
                             </div>
                             {j.failedReason && (
-                              <p className='mt-0.5 text-xs text-red-400 line-clamp-1'>
+                              <p className='mt-0.5 line-clamp-1 text-xs text-red-400'>
                                 {j.failedReason}
                               </p>
                             )}

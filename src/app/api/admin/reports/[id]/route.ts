@@ -1,6 +1,10 @@
 import { NextRequest } from 'next/server';
+
 import { proxyAdmin } from '@/lib/admin-proxy';
 
-export async function PATCH(request: NextRequest, { params }: { params: { id: string } }) {
+export async function PATCH(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
   return proxyAdmin(request, `/reports/${params.id}`, 'PATCH');
 }
