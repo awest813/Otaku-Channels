@@ -185,10 +185,10 @@ setup_full() {
   docker compose up -d
   info "Waiting for Postgres to be ready…"
   local retries=0
-  until docker compose exec -T db pg_isready -U otaku -q 2>/dev/null; do
+  until docker compose exec -T postgres pg_isready -U otaku -q 2>/dev/null; do
     (( retries++ )) || true
     if (( retries > 20 )); then
-      die "Postgres did not become ready in time. Check 'docker compose logs db'."
+      die "Postgres did not become ready in time. Check 'docker compose logs postgres'."
     fi
     sleep 1
   done

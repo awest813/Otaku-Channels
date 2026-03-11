@@ -210,7 +210,7 @@ export async function watchlistsRoutes(app: FastifyInstance) {
 
       await db.recommendationEvent
         .create({ data: { userId: request.user.sub, animeId, signal: 'FAVORITED', weight: 3.0 } })
-        .catch(() => {});
+        .catch(() => undefined);
 
       return reply.status(201).send({ data: fav });
     } catch (err) {

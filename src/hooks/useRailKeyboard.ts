@@ -29,7 +29,11 @@ export function useRailKeyboard(itemCount: number) {
     const el = items[index];
     if (el) {
       el.focus();
-      el.scrollIntoView({ block: 'nearest', inline: 'nearest', behavior: 'smooth' });
+      el.scrollIntoView({
+        block: 'nearest',
+        inline: 'nearest',
+        behavior: 'smooth',
+      });
     }
   }, []);
 
@@ -77,20 +81,28 @@ export function useRailKeyboard(itemCount: number) {
   );
 
   // When focus leaves the rail entirely, reset active index
-  const handleBlur = React.useCallback((e: React.FocusEvent<HTMLDivElement>) => {
-    if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-      setActiveIndex(null);
-    }
-  }, []);
+  const handleBlur = React.useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
+        setActiveIndex(null);
+      }
+    },
+    []
+  );
 
   // When a card inside the rail gains focus (e.g. via mouse click), sync index
-  const handleFocus = React.useCallback((e: React.FocusEvent<HTMLDivElement>) => {
-    const container = containerRef.current;
-    if (!container) return;
-    const items = Array.from(container.querySelectorAll<HTMLElement>('[data-rail-item]'));
-    const idx = items.indexOf(e.target as HTMLElement);
-    if (idx !== -1) setActiveIndex(idx);
-  }, []);
+  const handleFocus = React.useCallback(
+    (e: React.FocusEvent<HTMLDivElement>) => {
+      const container = containerRef.current;
+      if (!container) return;
+      const items = Array.from(
+        container.querySelectorAll<HTMLElement>('[data-rail-item]')
+      );
+      const idx = items.indexOf(e.target as HTMLElement);
+      if (idx !== -1) setActiveIndex(idx);
+    },
+    []
+  );
 
   const railProps = {
     ref: containerRef,
@@ -103,7 +115,8 @@ export function useRailKeyboard(itemCount: number) {
   const getItemProps = (index: number) => ({
     'data-rail-item': true,
     role: 'listitem' as const,
-    tabIndex: activeIndex === index || (activeIndex === null && index === 0) ? 0 : -1,
+    tabIndex:
+      activeIndex === index || (activeIndex === null && index === 0) ? 0 : -1,
   });
 
   return { railProps, getItemProps };

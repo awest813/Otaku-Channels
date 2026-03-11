@@ -139,15 +139,16 @@ pnpm dev                      # Next.js on http://localhost:3000
 
 Useful links once both servers are running:
 
-| URL | Description |
-| --- | --- |
-| http://localhost:3000 | Frontend (Next.js) |
-| http://localhost:3001/docs | Swagger API docs |
-| http://localhost:3000/api/health | Health check (frontend + backend status) |
-| http://localhost:3000/api/debug | Dev diagnostics — data mode, backend ping, hints |
-| http://localhost:3001/ready | Backend readiness (DB + Redis) |
+| URL                              | Description                                      |
+| -------------------------------- | ------------------------------------------------ |
+| http://localhost:3000            | Frontend (Next.js)                               |
+| http://localhost:3001/docs       | Swagger API docs                                 |
+| http://localhost:3000/api/health | Health check (frontend + backend status)         |
+| http://localhost:3000/api/debug  | Dev diagnostics — data mode, backend ping, hints |
+| http://localhost:3001/ready      | Backend readiness (DB + Redis)                   |
 
 Default admin credentials (seeded):
+
 - Email: `admin@otakuchannels.local`
 - Password: `Admin1234`
 
