@@ -59,6 +59,8 @@ export default function SearchPage() {
       return;
     }
 
+    const controller = new AbortController();
+
     const timer = setTimeout(async () => {
       setSearching(true);
       try {
@@ -68,18 +70,27 @@ export default function SearchPage() {
           source: source ?? undefined,
           language: language ?? undefined,
         });
-        setApiResults(result.data as SearchResult[]);
-        setSearchSource(result.source ?? 'backend');
+        if (!controller.signal.aborted) {
+          setApiResults(result.data as SearchResult[]);
+          setSearchSource(result.source ?? 'backend');
+        }
       } catch {
         // Fall back to in-memory mock data when the API is completely unavailable
-        setApiResults(null);
-        setSearchSource('local');
+        if (!controller.signal.aborted) {
+          setApiResults(null);
+          setSearchSource('local');
+        }
       } finally {
-        setSearching(false);
+        if (!controller.signal.aborted) {
+          setSearching(false);
+        }
       }
     }, 500);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      controller.abort();
+    };
   }, [query, genre, source, language]);
 
   // In-memory fallback when API is unavailable

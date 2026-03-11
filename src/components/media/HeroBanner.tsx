@@ -65,7 +65,7 @@ export default function HeroBanner({ series }: { series: Anime }) {
 
             {/* Genre pills */}
             <div className='flex flex-wrap gap-2'>
-              {series.genres.slice(0, 4).map((g) => (
+              {(series.genres ?? []).slice(0, 4).map((g) => (
                 <GenrePill
                   key={g}
                   genre={g}
