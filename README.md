@@ -12,6 +12,7 @@
 - [Channel lineup](#channel-lineup)
 - [Tech stack](#tech-stack)
 - [Getting started](#getting-started)
+  - [Quick start — one command](#quick-start--one-command)
   - [Frontend only (mock data)](#frontend-only-mock-data)
   - [Full stack with Docker](#full-stack-with-docker)
   - [Manual backend setup](#manual-backend-setup)
@@ -20,6 +21,7 @@
 - [Environment variables](#environment-variables)
 - [Running tests](#running-tests)
 - [Linting & formatting](#linting--formatting)
+- [Troubleshooting](#troubleshooting)
 - [Contributing](#contributing)
 - [Roadmap](#roadmap)
 - [Source policy](#source-policy)
@@ -80,6 +82,20 @@
 
 - **Node.js 20+** — check with `node -v`
 - **pnpm 9+** — install with `npm install -g pnpm`
+- **Docker** (optional, for full-stack mode with a real database)
+
+### Quick start — one command
+
+Run the interactive setup wizard which handles prerequisites, `.env` files, Docker infrastructure, dependencies, and migrations for you:
+
+```bash
+git clone https://github.com/awest813/Otaku-Channels.git
+cd Otaku-Channels
+./scripts/setup.sh          # interactive — choose mock or full-stack
+# or:
+./scripts/setup.sh --mock   # frontend only, no backend needed
+./scripts/setup.sh --full   # full stack (requires Docker)
+```
 
 ### Frontend only (mock data)
 
@@ -101,7 +117,7 @@ Docker Compose spins up PostgreSQL and Redis automatically.
 
 ```bash
 # From the repo root
-docker-compose up -d          # start Postgres + Redis
+docker compose up -d          # start Postgres + Redis
 
 cd backend
 npm install
@@ -121,7 +137,19 @@ cp .env.example .env.local
 pnpm dev                      # Next.js on http://localhost:3000
 ```
 
-Swagger API docs are available at [http://localhost:3001/docs](http://localhost:3001/docs).
+Useful links once both servers are running:
+
+| URL | Description |
+| --- | --- |
+| http://localhost:3000 | Frontend (Next.js) |
+| http://localhost:3001/docs | Swagger API docs |
+| http://localhost:3000/api/health | Health check (frontend + backend status) |
+| http://localhost:3000/api/debug | Dev diagnostics — data mode, backend ping, hints |
+| http://localhost:3001/ready | Backend readiness (DB + Redis) |
+
+Default admin credentials (seeded):
+- Email: `admin@otakuchannels.local`
+- Password: `Admin1234`
 
 ### Manual backend setup
 
@@ -287,6 +315,101 @@ pnpm format
 ```
 
 The CI workflow (`.github/workflows/lint.yml`) runs all four checks on every push and pull request.
+
+---
+
+## Troubleshooting
+
+### Nothing shows on the home page
+
+The app uses mock data by default, so content should always render. If the page is blank:
+
+1. Check the browser console for errors.
+2. Make sure dependencies are installed: `pnpm install`.
+3. Confirm `.env.local` exists (copy from `.env.example`).
+4. Open [http://localhost:3000/api/debug](http://localhost:3000/api/debug) to see the active data mode and any configuration hints.
+
+---
+
+### "Backend unavailable" / 502 errors
+
+The frontend's `hybrid` data mode falls back to mock data when the backend is unreachable, so you won't see 502s unless `DATA_MODE=backend` is set.
+
+If you want the real backend:
+
+```bash
+# 1. Start infrastructure
+docker compose up -d
+
+# 2. Start the backend
+cd backend && npm run dev
+```
+
+Then confirm the backend is up:
+
+```bash
+curl http://localhost:3001/health     # → {"status":"ok"}
+curl http://localhost:3001/ready      # → {"status":"ready"} (DB + Redis OK)
+```
+
+---
+
+### Database migration errors
+
+```bash
+cd backend
+
+# Check Postgres is running
+docker compose ps
+
+# Re-run migrations manually
+npm run db:migrate
+
+# If the schema is out of sync in dev (destructive — dev only!)
+npm run db:push
+```
+
+---
+
+### `pnpm install` fails
+
+Make sure you're using Node.js 20+:
+
+```bash
+node -v     # should be v20.x or higher
+pnpm -v     # should be 9.x or higher
+```
+
+If pnpm is missing: `npm install -g pnpm`
+
+---
+
+### Port already in use
+
+```bash
+# Find what's using port 3000 / 3001
+lsof -i :3000
+lsof -i :3001
+```
+
+Change the port by setting `PORT=3002` in `backend/.env` or `--port 3002` in `pnpm dev`.
+
+---
+
+### Dev diagnostics endpoint
+
+`GET /api/debug` (dev only) returns:
+
+```json
+{
+  "dataMode": "hybrid",
+  "backend": { "status": "ok", "latencyMs": 4, "detail": "HTTP 200 — uptime 42s" },
+  "env": { "BACKEND_URL": "http://localhost:3001", ... },
+  "hints": []
+}
+```
+
+Use this to quickly verify your environment variables are being read correctly.
 
 ---
 

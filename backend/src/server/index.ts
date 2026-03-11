@@ -68,6 +68,40 @@ async function main() {
 
   try {
     await app.listen({ port: config.PORT, host: config.HOST });
+
+    // ── Startup banner ───────────────────────────────────────────────────────
+    const lines = [
+      '',
+      '  ┌─────────────────────────────────────────────────────┐',
+      '  │           Otaku Channels — Backend ready            │',
+      '  ├─────────────────────────────────────────────────────┤',
+      `  │  API        http://localhost:${config.PORT}/api/v1             │`,
+      `  │  Docs       http://localhost:${config.PORT}/docs               │`,
+      `  │  Health     http://localhost:${config.PORT}/health             │`,
+      `  │  Readiness  http://localhost:${config.PORT}/ready              │`,
+      '  ├─────────────────────────────────────────────────────┤',
+      `  │  ENV        ${config.NODE_ENV.padEnd(39)}│`,
+      `  │  Log level  ${config.LOG_LEVEL.padEnd(39)}│`,
+      `  │  Frontend   ${config.FRONTEND_URL.padEnd(39)}│`,
+      '  └─────────────────────────────────────────────────────┘',
+      '',
+    ];
+
+    if (!isProd) {
+      // Dev hints
+      lines.push('  Tip: Run the background worker in a separate terminal:');
+      lines.push('       npm run worker:dev');
+      lines.push('');
+      if (!config.CONSUMET_BASE_URL) {
+        lines.push('  Note: CONSUMET_BASE_URL is not set — streaming source lookup disabled.');
+        lines.push('        See backend/.env.example for self-hosting instructions.');
+        lines.push('');
+      }
+    }
+
+    // Print banner to stdout directly (bypasses pino JSON in dev pretty mode)
+    process.stdout.write(lines.join('\n') + '\n');
+
     logger.info({ port: config.PORT, env: config.NODE_ENV }, 'Server started');
   } catch (err) {
     logger.fatal({ err }, 'Failed to start server');
