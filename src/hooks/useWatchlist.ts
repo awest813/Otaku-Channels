@@ -48,6 +48,17 @@ function writeStorage(items: WatchlistItem[]) {
   }
 }
 
+function getAuthHeaders(contentType?: string): HeadersInit | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const token = localStorage.getItem('access_token');
+  if (!token && !contentType) return undefined;
+
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (contentType) headers['Content-Type'] = contentType;
+  return headers;
+}
+
 export function useWatchlist() {
   const { user } = useAuth();
   const [list, setList] = React.useState<WatchlistItem[]>([]);
@@ -56,7 +67,10 @@ export function useWatchlist() {
   // Hydrate: if logged in, try backend first then merge with localStorage
   React.useEffect(() => {
     if (user) {
-      fetch('/api/user/watchlist', { credentials: 'include' })
+      fetch('/api/user/watchlist', {
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      })
         .then((r) => (r.ok ? r.json() : null))
         .then(
           (
@@ -112,7 +126,7 @@ export function useWatchlist() {
         fetch('/api/user/watchlist', {
           method: 'POST',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders('application/json'),
           body: JSON.stringify({ animeId: item.id }),
         }).catch((err) => {
           // Non-fatal — item already added locally
@@ -136,6 +150,7 @@ export function useWatchlist() {
         fetch(`/api/user/watchlist?animeId=${encodeURIComponent(id)}`, {
           method: 'DELETE',
           credentials: 'include',
+          headers: getAuthHeaders(),
         }).catch((err) => {
           // Non-fatal — item already removed locally
           // eslint-disable-next-line no-console

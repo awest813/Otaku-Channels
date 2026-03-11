@@ -14,6 +14,8 @@
 
 import * as React from 'react';
 
+const ACCESS_TOKEN_KEY = 'access_token';
+
 export interface AuthUser {
   id: string;
   email: string;
@@ -66,14 +68,36 @@ export function useAuth(): AuthContextValue {
   return ctx;
 }
 
-async function fetchMe(): Promise<AuthUser | null> {
+function getStoredAccessToken(): string | null {
+  if (typeof window === 'undefined') return null;
+  return localStorage.getItem(ACCESS_TOKEN_KEY);
+}
+
+function setStoredAccessToken(token?: string): void {
+  if (typeof window === 'undefined' || !token) return;
+  localStorage.setItem(ACCESS_TOKEN_KEY, token);
+}
+
+function clearStoredAccessToken(): void {
+  if (typeof window === 'undefined') return;
+  localStorage.removeItem(ACCESS_TOKEN_KEY);
+}
+
+async function fetchMe(): Promise<{
+  user: AuthUser | null;
+  accessToken?: string;
+}> {
   try {
-    const res = await fetch('/api/auth/me', { credentials: 'include' });
-    if (!res.ok) return null;
-    const data = (await res.json()) as { user: AuthUser };
-    return data.user;
+    const token = getStoredAccessToken();
+    const res = await fetch('/api/auth/me', {
+      credentials: 'include',
+      headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+    });
+    if (!res.ok) return { user: null };
+    const data = (await res.json()) as { user: AuthUser; accessToken?: string };
+    return { user: data.user, accessToken: data.accessToken };
   } catch {
-    return null;
+    return { user: null };
   }
 }
 
@@ -85,7 +109,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // Rehydrate session on mount
   React.useEffect(() => {
     fetchMe()
-      .then((u) => setUser(u))
+      .then(({ user: nextUser, accessToken }) => {
+        setStoredAccessToken(accessToken);
+        setUser(nextUser);
+      })
       .finally(() => setLoading(false));
   }, []);
 
@@ -103,7 +130,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(message);
       throw new Error(message);
     }
-    const data = (await res.json()) as { user: AuthUser };
+    const data = (await res.json()) as {
+      user: AuthUser;
+      accessToken?: string;
+    };
+    setStoredAccessToken(data.accessToken);
     setUser(data.user);
   }, []);
 
@@ -121,7 +152,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setError(message);
       throw new Error(message);
     }
-    const data = (await res.json()) as { user: AuthUser };
+    const data = (await res.json()) as {
+      user: AuthUser;
+      accessToken?: string;
+    };
+    setStoredAccessToken(data.accessToken);
     setUser(data.user);
   }, []);
 
@@ -132,6 +167,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }).catch(() => {
       // best-effort
     });
+    clearStoredAccessToken();
     setUser(null);
   }, []);
 

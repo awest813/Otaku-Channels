@@ -51,13 +51,27 @@ function writeStorage(items: RecentItem[]) {
   }
 }
 
+function getAuthHeaders(contentType?: string): HeadersInit | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const token = localStorage.getItem('access_token');
+  if (!token && !contentType) return undefined;
+
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (contentType) headers['Content-Type'] = contentType;
+  return headers;
+}
+
 export function useRecentlyViewed() {
   const { user } = useAuth();
   const [items, setItems] = React.useState<RecentItem[]>([]);
 
   React.useEffect(() => {
     if (user) {
-      fetch('/api/user/watch-history', { credentials: 'include' })
+      fetch('/api/user/watch-history', {
+        credentials: 'include',
+        headers: getAuthHeaders(),
+      })
         .then((r) => (r.ok ? r.json() : null))
         .then(
           (
@@ -123,7 +137,7 @@ export function useRecentlyViewed() {
         fetch('/api/user/watch-history', {
           method: 'POST',
           credentials: 'include',
-          headers: { 'Content-Type': 'application/json' },
+          headers: getAuthHeaders('application/json'),
           body: JSON.stringify({ animeId: item.id }),
         }).catch((err) => {
           // Non-fatal — view already tracked locally

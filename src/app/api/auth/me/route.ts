@@ -1,6 +1,10 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+import {
+  attachSetCookie,
+  getBackendUrl,
+  resolveAuthHeaders,
+} from '@/lib/auth-proxy';
 
 /**
  * GET /api/auth/me
@@ -8,16 +12,51 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
  * current authenticated user. Returns 401 when not logged in.
  */
 export async function GET(request: NextRequest) {
-  const cookie = request.headers.get('cookie') ?? '';
-
   try {
-    const res = await fetch(`${BACKEND_URL}/api/v1/auth/me`, {
-      headers: { cookie },
+    const initialAuth = await resolveAuthHeaders(request);
+    let auth = initialAuth;
+    let res = await fetch(`${getBackendUrl()}/api/v1/auth/me`, {
+      headers: auth.headers,
       cache: 'no-store',
     });
 
-    const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const cookie = request.headers.get('cookie') ?? '';
+    if (
+      res.status === 401 &&
+      !initialAuth.headers.authorization &&
+      cookie.includes('refresh_token=')
+    ) {
+      const refreshedAuth = await resolveAuthHeaders(request, {
+        refresh: true,
+      });
+      if (refreshedAuth.headers.authorization) {
+        auth = refreshedAuth;
+        res = await fetch(`${getBackendUrl()}/api/v1/auth/me`, {
+          headers: auth.headers,
+          cache: 'no-store',
+        });
+      }
+    }
+
+    const data = (await res.json().catch(() => ({}))) as {
+      user?: unknown;
+      error?: string;
+      accessToken?: string;
+    };
+
+    const response = NextResponse.json(
+      {
+        ...data,
+        ...(auth.refreshedAccessToken
+          ? { accessToken: auth.refreshedAccessToken }
+          : {}),
+      },
+      { status: res.status }
+    );
+
+    attachSetCookie(response, auth.refreshedSetCookie);
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
+    return response;
   } catch {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
