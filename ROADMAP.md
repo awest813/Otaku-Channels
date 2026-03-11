@@ -117,7 +117,7 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 - [x] User registration & login UI (forms, validation) — `LoginForm`, `SignupForm` in `src/app/login/` and `src/app/signup/`
 - [x] JWT session management in Next.js (cookie-based) — `AuthProvider` / `useAuth` in `src/context/auth.tsx`
-- [x] Favorites / watchlist persisted to Fastify backend — `useWatchlist` hook with backend sync
+- [x] Favorites / watchlist persisted to Fastify backend — `useWatchlist` hook with full backend sync (add via POST, remove via DELETE `/api/user/watchlist?animeId=`)
 - [x] Watch history tracked in backend — `useRecentlyViewed` hook with backend sync via `/api/user/watch-history`
 - [x] User preferences: default language (sub/dub), preferred sources — `ProfileContent.tsx` with sub/dub toggle and source multi-select; saved via `PATCH /api/user/profile`
 - [x] Profile page with watchlist and history — inline watchlist preview (up to 6 items) and watch history preview (up to 6 items) with "See all" links
@@ -129,7 +129,7 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 - [ ] Trending anime rail (view count / trending score from backend)
 - [ ] "Recommended for you" rail (genre-based)
 - [ ] "Continue watching" rail on home page
-- [ ] Sub/dub language filter UI
+- [x] Sub/dub language filter UI — filter chips exist in `/browse`; backend `listAnime()` now filters by `language` via `sourceLinksTitleLevel`
 - [ ] Source filter UI (official + grey providers)
 - [ ] Genre browse page with paginated results
 - [ ] Autoplay next episode
@@ -148,7 +148,7 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 ## Milestone 8 — Polish & Accessibility 📅 (planned)
 
-- [ ] Keyboard navigation (10-foot / couch mode)
+- [x] Keyboard navigation (10-foot / couch mode) — `useRailKeyboard` hook; ArrowLeft/Right/Home/End navigate between cards in any `MediaRail`; roving tabindex pattern
 - [ ] Controller / gamepad support
 - [ ] ARIA labels and screen reader support
 - [ ] PWA manifest — installable on mobile/desktop

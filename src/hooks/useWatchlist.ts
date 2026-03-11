@@ -124,13 +124,27 @@ export function useWatchlist() {
     [user]
   );
 
-  const remove = React.useCallback((id: string) => {
-    setList((prev) => {
-      const next = prev.filter((i) => i.id !== id);
-      writeStorage(next);
-      return next;
-    });
-  }, []);
+  const remove = React.useCallback(
+    (id: string) => {
+      setList((prev) => {
+        const next = prev.filter((i) => i.id !== id);
+        writeStorage(next);
+        return next;
+      });
+      // Sync removal to backend when logged in
+      if (user) {
+        fetch(`/api/user/watchlist?animeId=${encodeURIComponent(id)}`, {
+          method: 'DELETE',
+          credentials: 'include',
+        }).catch((err) => {
+          // Non-fatal — item already removed locally
+          // eslint-disable-next-line no-console
+          console.warn('[useWatchlist] backend remove sync failed:', err);
+        });
+      }
+    },
+    [user]
+  );
 
   const toggle = React.useCallback(
     (item: WatchlistItem) => {

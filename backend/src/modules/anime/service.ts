@@ -51,6 +51,18 @@ export async function listAnime(query: AnimeListQuery) {
   if (query.source) {
     where.sourceLinksTitleLevel = { some: { sourceType: query.source, status: 'ACTIVE' } };
   }
+  if (query.language) {
+    if (!where.AND) where.AND = [];
+    if (query.language === 'both') {
+      // Must have at least one sub source AND at least one dub source
+      where.AND.push({ sourceLinksTitleLevel: { some: { language: 'sub', status: 'ACTIVE' } } });
+      where.AND.push({ sourceLinksTitleLevel: { some: { language: 'dub', status: 'ACTIVE' } } });
+    } else {
+      where.AND.push({
+        sourceLinksTitleLevel: { some: { language: query.language, status: 'ACTIVE' } },
+      });
+    }
+  }
 
   const orderByMap: Record<string, any> = {
     trending: { trendingScore: 'desc' },
