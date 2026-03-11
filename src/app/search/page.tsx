@@ -1,5 +1,5 @@
 'use client';
-import { ExternalLink, Loader2, Search } from 'lucide-react';
+import { ExternalLink, Search } from 'lucide-react';
 import * as React from 'react';
 
 import { searchContent } from '@/lib/api-client';
@@ -7,6 +7,7 @@ import { searchContent } from '@/lib/api-client';
 import { allContent, sourceProviders } from '@/data/mockData';
 
 import MediaCard from '@/components/media/MediaCard';
+import MediaCardSkeleton from '@/components/media/MediaCardSkeleton';
 import SearchBar from '@/components/search/SearchBar';
 import EmptyState from '@/components/ui/EmptyState';
 import GenrePill from '@/components/ui/GenrePill';
@@ -147,20 +148,22 @@ export default function SearchPage() {
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
             Genre
           </p>
-          <div className='flex flex-wrap gap-2'>
-            <GenrePill
-              genre='All'
-              active={!genre}
-              onClick={() => setGenre(null)}
-            />
-            {fallbackGenres.map((g) => (
+          <div className='scrollbar-hide max-h-24 overflow-y-auto'>
+            <div className='flex flex-wrap gap-2 pb-1'>
               <GenrePill
-                key={g}
-                genre={g}
-                active={genre === g}
-                onClick={() => setGenre(g === genre ? null : g)}
+                genre='All'
+                active={!genre}
+                onClick={() => setGenre(null)}
               />
-            ))}
+              {fallbackGenres.map((g) => (
+                <GenrePill
+                  key={g}
+                  genre={g}
+                  active={genre === g}
+                  onClick={() => setGenre(g === genre ? null : g)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 
@@ -211,9 +214,13 @@ export default function SearchPage() {
 
       {/* Results */}
       {searching ? (
-        <div className='flex items-center justify-center gap-3 py-16 text-slate-400'>
-          <Loader2 className='h-5 w-5 animate-spin' />
-          <span className='text-sm'>Searching…</span>
+        <div>
+          <p className='mb-4 text-sm text-slate-500'>Searching…</p>
+          <div className='grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6'>
+            {Array.from({ length: 12 }).map((_, i) => (
+              <MediaCardSkeleton key={i} />
+            ))}
+          </div>
         </div>
       ) : hasFilters ? (
         results.length === 0 ? (

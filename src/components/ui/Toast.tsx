@@ -1,11 +1,11 @@
 'use client';
 
-import { CheckCircle, Info, X } from 'lucide-react';
+import { AlertCircle, CheckCircle, Info, X } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
 
-export type ToastVariant = 'success' | 'info';
+export type ToastVariant = 'success' | 'info' | 'error';
 
 export interface ToastMessage {
   id: string;
@@ -59,11 +59,15 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               'animate-in slide-in-from-bottom-2 fade-in duration-200',
               toast.variant === 'info'
                 ? 'border-slate-700 bg-slate-800 text-white'
+                : toast.variant === 'error'
+                ? 'border-red-500/30 bg-slate-900 text-white'
                 : 'border-cyan-500/30 bg-slate-900 text-white'
             )}
           >
             {toast.variant === 'info' ? (
               <Info className='h-4 w-4 shrink-0 text-cyan-400' />
+            ) : toast.variant === 'error' ? (
+              <AlertCircle className='h-4 w-4 shrink-0 text-red-400' />
             ) : (
               <CheckCircle className='h-4 w-4 shrink-0 text-cyan-400' />
             )}
