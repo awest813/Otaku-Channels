@@ -114,7 +114,7 @@ describe('POST /api/user/watch-history', () => {
     mockFetch.mockResolvedValueOnce({
       status: 201,
       json: async () => ({
-        data: { id: 'hist-new', ...MOCK_HISTORY_ITEM },
+        data: { ...MOCK_HISTORY_ITEM, id: 'hist-new' },
       }),
     } as Response);
 

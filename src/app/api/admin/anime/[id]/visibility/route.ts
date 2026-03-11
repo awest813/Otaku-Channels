@@ -4,7 +4,8 @@ import { proxyAdmin } from '@/lib/admin-proxy';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return proxyAdmin(request, `/anime/${params.id}/visibility`, 'PATCH');
+  const { id } = await params;
+  return proxyAdmin(request, `/anime/${id}/visibility`, 'PATCH');
 }

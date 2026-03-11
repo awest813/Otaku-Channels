@@ -4,7 +4,8 @@ import { proxyAdmin } from '@/lib/admin-proxy';
 
 export async function PATCH(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
-  return proxyAdmin(request, `/reports/${params.id}`, 'PATCH');
+  const { id } = await params;
+  return proxyAdmin(request, `/reports/${id}`, 'PATCH');
 }
