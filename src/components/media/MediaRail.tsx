@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
+import { useRailKeyboard } from '@/hooks/useRailKeyboard';
 
 import SectionHeader from '@/components/ui/SectionHeader';
 
@@ -28,6 +29,8 @@ export default function MediaRail({
   const [canScrollLeft, setCanScrollLeft] = React.useState(false);
   const [canScrollRight, setCanScrollRight] = React.useState(true);
   const SCROLL_PERCENTAGE = 0.75;
+
+  const { railProps, getItemProps } = useRailKeyboard(items.length);
 
   const checkScrollability = React.useCallback(() => {
     const el = scrollRef.current;
@@ -87,11 +90,19 @@ export default function MediaRail({
 
         {/* Cards */}
         <div
-          ref={scrollRef}
+          ref={(el: HTMLDivElement | null) => {
+            (scrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            (railProps.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+          }}
           className='scrollbar-hide flex gap-3 overflow-x-auto pb-1'
+          onKeyDown={railProps.onKeyDown}
+          onBlur={railProps.onBlur}
+          onFocus={railProps.onFocus}
+          role={railProps.role}
+          aria-label={title}
         >
-          {items.map((item) => (
-            <div key={item.id} className='w-40 flex-none sm:w-48 lg:w-52'>
+          {items.map((item, i) => (
+            <div key={item.id} className='w-40 flex-none sm:w-48 lg:w-52' {...getItemProps(i)}>
               <MediaCard item={item} />
             </div>
           ))}

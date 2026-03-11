@@ -9,34 +9,25 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
  * POST /api/user/watchlist
  * Adds an item to the user's watchlist.
  *
+ * DELETE /api/user/watchlist?animeId=<id>
+ * Removes an item from the user's watchlist.
+ *
  * The backend uses a full watchlist model (named lists with items).
  * This route uses the first (default) watchlist returned by the backend.
  */
-async function forwardToBackend(
-  request: NextRequest,
-  method: string,
-  body?: unknown
-) {
-  const cookie = request.headers.get('cookie') ?? '';
-
-  // Get the user's watchlists
+async function resolveDefaultListId(cookie: string): Promise<string | Response> {
   const listRes = await fetch(`${BACKEND_URL}/api/v1/watchlists`, {
     headers: { cookie, 'Content-Type': 'application/json' },
     cache: 'no-store',
   });
 
-  if (!listRes.ok) {
-    return listRes;
-  }
+  if (!listRes.ok) return listRes;
 
   const lists = (await listRes.json()) as {
     data: Array<{ id: string; name: string }>;
   };
 
-  let defaultListId: string;
-
   if (lists.data.length === 0) {
-    // Create a default watchlist
     const createRes = await fetch(`${BACKEND_URL}/api/v1/watchlists`, {
       method: 'POST',
       headers: { cookie, 'Content-Type': 'application/json' },
@@ -44,10 +35,23 @@ async function forwardToBackend(
     });
     if (!createRes.ok) return createRes;
     const created = (await createRes.json()) as { data: { id: string } };
-    defaultListId = created.data.id;
-  } else {
-    defaultListId = lists.data[0].id;
+    return created.data.id;
   }
+
+  return lists.data[0].id;
+}
+
+async function forwardToBackend(
+  request: NextRequest,
+  method: string,
+  body?: unknown
+) {
+  const cookie = request.headers.get('cookie') ?? '';
+  const idOrResponse = await resolveDefaultListId(cookie);
+
+  // If it's a Response object, propagate the error
+  if (typeof idOrResponse !== 'string') return idOrResponse;
+  const defaultListId = idOrResponse;
 
   if (method === 'GET') {
     return fetch(`${BACKEND_URL}/api/v1/watchlists/${defaultListId}`, {
@@ -94,6 +98,36 @@ export async function POST(request: NextRequest) {
   } catch {
     return NextResponse.json(
       { error: 'Failed to update watchlist' },
+      { status: 502 }
+    );
+  }
+}
+
+export async function DELETE(request: NextRequest) {
+  const cookie = request.headers.get('cookie') ?? '';
+  if (!cookie.includes('refresh_token') && !cookie.includes('access_token')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+  const { searchParams } = new URL(request.url);
+  const animeId = searchParams.get('animeId');
+  if (!animeId) {
+    return NextResponse.json({ error: 'Missing animeId' }, { status: 400 });
+  }
+  try {
+    const idOrResponse = await resolveDefaultListId(cookie);
+    if (typeof idOrResponse !== 'string') {
+      const data = await idOrResponse.json();
+      return NextResponse.json(data, { status: idOrResponse.status });
+    }
+    const res = await fetch(
+      `${BACKEND_URL}/api/v1/watchlists/${idOrResponse}/items/${animeId}`,
+      { method: 'DELETE', headers: { cookie } }
+    );
+    const data = await res.json();
+    return NextResponse.json(data, { status: res.status });
+  } catch {
+    return NextResponse.json(
+      { error: 'Failed to remove from watchlist' },
       { status: 502 }
     );
   }
