@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+import {
+  attachSetCookie,
+  getBackendUrl,
+  isLikelyAuthenticated,
+  resolveAuthHeaders,
+} from '@/lib/auth-proxy';
 
 /**
  * GET /api/user/watchlist
@@ -15,9 +20,11 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
  * The backend uses a full watchlist model (named lists with items).
  * This route uses the first (default) watchlist returned by the backend.
  */
-async function resolveDefaultListId(cookie: string): Promise<string | Response> {
-  const listRes = await fetch(`${BACKEND_URL}/api/v1/watchlists`, {
-    headers: { cookie, 'Content-Type': 'application/json' },
+async function resolveDefaultListId(
+  authHeaders: Record<string, string>
+): Promise<string | Response> {
+  const listRes = await fetch(`${getBackendUrl()}/api/v1/watchlists`, {
+    headers: { ...authHeaders, 'Content-Type': 'application/json' },
     cache: 'no-store',
   });
 
@@ -28,9 +35,9 @@ async function resolveDefaultListId(cookie: string): Promise<string | Response> 
   };
 
   if (lists.data.length === 0) {
-    const createRes = await fetch(`${BACKEND_URL}/api/v1/watchlists`, {
+    const createRes = await fetch(`${getBackendUrl()}/api/v1/watchlists`, {
       method: 'POST',
-      headers: { cookie, 'Content-Type': 'application/json' },
+      headers: { ...authHeaders, 'Content-Type': 'application/json' },
       body: JSON.stringify({ name: 'My List' }),
     });
     if (!createRes.ok) return createRes;
@@ -42,41 +49,44 @@ async function resolveDefaultListId(cookie: string): Promise<string | Response> 
 }
 
 async function forwardToBackend(
-  request: NextRequest,
   method: string,
+  authHeaders: Record<string, string>,
   body?: unknown
 ) {
-  const cookie = request.headers.get('cookie') ?? '';
-  const idOrResponse = await resolveDefaultListId(cookie);
+  const idOrResponse = await resolveDefaultListId(authHeaders);
 
   // If it's a Response object, propagate the error
   if (typeof idOrResponse !== 'string') return idOrResponse;
   const defaultListId = idOrResponse;
 
   if (method === 'GET') {
-    return fetch(`${BACKEND_URL}/api/v1/watchlists/${defaultListId}`, {
-      headers: { cookie },
+    return fetch(`${getBackendUrl()}/api/v1/watchlists/${defaultListId}`, {
+      headers: authHeaders,
       cache: 'no-store',
     });
   }
 
   // POST — add item
-  return fetch(`${BACKEND_URL}/api/v1/watchlists/${defaultListId}/items`, {
+  return fetch(`${getBackendUrl()}/api/v1/watchlists/${defaultListId}/items`, {
     method: 'POST',
-    headers: { cookie, 'Content-Type': 'application/json' },
+    headers: { ...authHeaders, 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   });
 }
 
 export async function GET(request: NextRequest) {
-  const cookie = request.headers.get('cookie') ?? '';
-  if (!cookie.includes('refresh_token') && !cookie.includes('access_token')) {
+  const auth = await resolveAuthHeaders(request);
+  if (!isLikelyAuthenticated(request, auth)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   try {
-    const res = await forwardToBackend(request, 'GET');
+    const res = await forwardToBackend('GET', auth.headers);
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const response = NextResponse.json(data, { status: res.status });
+    attachSetCookie(response, auth.refreshedSetCookie);
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
+    return response;
   } catch {
     return NextResponse.json(
       { error: 'Failed to fetch watchlist' },
@@ -86,15 +96,19 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
-  const cookie = request.headers.get('cookie') ?? '';
-  if (!cookie.includes('refresh_token') && !cookie.includes('access_token')) {
+  const auth = await resolveAuthHeaders(request);
+  if (!isLikelyAuthenticated(request, auth)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   try {
     const body = await request.json();
-    const res = await forwardToBackend(request, 'POST', body);
+    const res = await forwardToBackend('POST', auth.headers, body);
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const response = NextResponse.json(data, { status: res.status });
+    attachSetCookie(response, auth.refreshedSetCookie);
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
+    return response;
   } catch {
     return NextResponse.json(
       { error: 'Failed to update watchlist' },
@@ -104,27 +118,34 @@ export async function POST(request: NextRequest) {
 }
 
 export async function DELETE(request: NextRequest) {
-  const cookie = request.headers.get('cookie') ?? '';
-  if (!cookie.includes('refresh_token') && !cookie.includes('access_token')) {
+  const auth = await resolveAuthHeaders(request);
+  if (!isLikelyAuthenticated(request, auth)) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
   }
+
   const { searchParams } = new URL(request.url);
   const animeId = searchParams.get('animeId');
   if (!animeId) {
     return NextResponse.json({ error: 'Missing animeId' }, { status: 400 });
   }
   try {
-    const idOrResponse = await resolveDefaultListId(cookie);
+    const idOrResponse = await resolveDefaultListId(auth.headers);
     if (typeof idOrResponse !== 'string') {
       const data = await idOrResponse.json();
-      return NextResponse.json(data, { status: idOrResponse.status });
+      const response = NextResponse.json(data, { status: idOrResponse.status });
+      attachSetCookie(response, auth.refreshedSetCookie);
+      attachSetCookie(response, idOrResponse.headers?.get?.('set-cookie'));
+      return response;
     }
     const res = await fetch(
-      `${BACKEND_URL}/api/v1/watchlists/${idOrResponse}/items/${animeId}`,
-      { method: 'DELETE', headers: { cookie } }
+      `${getBackendUrl()}/api/v1/watchlists/${idOrResponse}/items/${animeId}`,
+      { method: 'DELETE', headers: auth.headers }
     );
     const data = await res.json();
-    return NextResponse.json(data, { status: res.status });
+    const response = NextResponse.json(data, { status: res.status });
+    attachSetCookie(response, auth.refreshedSetCookie);
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
+    return response;
   } catch {
     return NextResponse.json(
       { error: 'Failed to remove from watchlist' },

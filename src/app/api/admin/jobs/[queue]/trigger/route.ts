@@ -4,7 +4,8 @@ import { proxyAdmin } from '@/lib/admin-proxy';
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { queue: string } }
+  { params }: { params: Promise<{ queue: string }> }
 ) {
-  return proxyAdmin(request, `/jobs/${params.queue}/trigger`, 'POST');
+  const { queue } = await params;
+  return proxyAdmin(request, `/jobs/${queue}/trigger`, 'POST');
 }

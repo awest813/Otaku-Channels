@@ -5,13 +5,11 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
-if (!process.env.BACKEND_URL) {
-  // eslint-disable-next-line no-console
-  console.warn(
-    '[admin-proxy] BACKEND_URL is not set; defaulting to http://localhost:3001'
-  );
-}
+import {
+  attachSetCookie,
+  getBackendUrl,
+  resolveAuthHeaders,
+} from '@/lib/auth-proxy';
 
 export async function proxyAdmin(
   request: NextRequest,
@@ -19,24 +17,20 @@ export async function proxyAdmin(
   method?: string
 ): Promise<NextResponse> {
   try {
+    const auth = await resolveAuthHeaders(request);
     const url = new URL(request.url);
-    const targetUrl = `${BACKEND_URL}/api/v1/admin${backendPath}${url.search}`;
+    const targetUrl = `${getBackendUrl()}/api/v1/admin${backendPath}${
+      url.search
+    }`;
 
     const reqMethod = method ?? request.method;
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const headers: Record<string, string> = { ...auth.headers };
+    headers['Content-Type'] = 'application/json';
 
     // Forward Authorization header from the client
-    const auth = request.headers.get('authorization');
-    if (!auth) {
+    if (!headers.authorization) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
-    headers['Authorization'] = auth;
-
-    // Forward cookie (refresh_token) for server-side calls
-    const cookie = request.headers.get('cookie');
-    if (cookie) headers['Cookie'] = cookie;
 
     const init: RequestInit = { method: reqMethod, headers };
 
@@ -51,7 +45,10 @@ export async function proxyAdmin(
 
     const res = await fetch(targetUrl, init);
     const data = await res.json().catch(() => ({}));
-    return NextResponse.json(data, { status: res.status });
+    const response = NextResponse.json(data, { status: res.status });
+    attachSetCookie(response, auth.refreshedSetCookie);
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
+    return response;
   } catch {
     return NextResponse.json({ error: 'Admin proxy error' }, { status: 502 });
   }

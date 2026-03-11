@@ -1,4 +1,5 @@
 import type { FastifyInstance } from 'fastify';
+import type { Prisma } from '@prisma/client';
 import { z } from 'zod';
 import { requireAuth, requireRole } from '../../lib/http/auth-middleware';
 import { sendError } from '../../lib/errors';
@@ -206,13 +207,20 @@ export async function adminRoutes(app: FastifyInstance) {
               anilistId: true,
               createdAt: true,
               updatedAt: true,
-              _count: { select: { contentSources: true, episodes: true } },
+              _count: { select: { sourceLinksTitleLevel: true, episodes: true } },
             },
           }),
           db.animeTitle.count({ where }),
         ]);
+        const normalizedAnime = anime.map((item) => ({
+          ...item,
+          _count: {
+            contentSources: item._count.sourceLinksTitleLevel,
+            episodes: item._count.episodes,
+          },
+        }));
 
-        return reply.send({ data: anime, total, page, limit });
+        return reply.send({ data: normalizedAnime, total, page, limit });
       } catch (err) {
         return sendError(reply, err);
       }
@@ -405,7 +413,7 @@ export async function adminRoutes(app: FastifyInstance) {
       try {
         const domains = await db.allowedDomain.findMany({
           orderBy: { domain: 'asc' },
-          select: { id: true, domain: true, label: true, isActive: true },
+          select: { id: true, domain: true, name: true, isEmbeddable: true },
         });
 
         const stats = await Promise.all(
@@ -427,8 +435,9 @@ export async function adminRoutes(app: FastifyInstance) {
 
             return {
               domain: d.domain,
-              label: d.label,
-              isActive: d.isActive,
+              label: d.name,
+              isActive: true,
+              isEmbeddable: d.isEmbeddable,
               sources: { active, removed, pending, total },
               lastCheckedAt: lastChecked?.lastCheckedAt ?? null,
               health: total > 0 ? Math.round(((total - removed) / total) * 100) : 100,
@@ -517,6 +526,11 @@ export async function adminRoutes(app: FastifyInstance) {
         }
 
         const job = await queue.add('manual-trigger', body, { priority: 1 });
+        const metadata: Prisma.InputJsonObject = {
+          jobId: job.id ? String(job.id) : null,
+          queueName,
+          payload: JSON.parse(JSON.stringify(body)) as Prisma.InputJsonValue,
+        };
 
         await db.auditLog.create({
           data: {
@@ -524,7 +538,7 @@ export async function adminRoutes(app: FastifyInstance) {
             action: 'TRIGGER_JOB',
             targetType: 'SYSTEM',
             targetId: queueName,
-            metadata: { jobId: job.id, queueName, payload: body },
+            metadata,
           },
         });
 

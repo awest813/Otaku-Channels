@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 
-const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
+import { attachSetCookie, getBackendUrl } from '@/lib/auth-proxy';
 
 /**
  * POST /api/auth/login
@@ -9,7 +9,7 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const res = await fetch(`${BACKEND_URL}/api/v1/auth/login`, {
+    const res = await fetch(`${getBackendUrl()}/api/v1/auth/login`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(body),
@@ -18,12 +18,7 @@ export async function POST(request: NextRequest) {
     const data = await res.json();
 
     const response = NextResponse.json(data, { status: res.status });
-
-    // Forward the refresh_token cookie set by the backend
-    const setCookie = res.headers.get('set-cookie');
-    if (setCookie) {
-      response.headers.set('set-cookie', setCookie);
-    }
+    attachSetCookie(response, res.headers?.get?.('set-cookie'));
 
     return response;
   } catch {

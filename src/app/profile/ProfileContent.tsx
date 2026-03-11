@@ -59,6 +59,17 @@ const SOURCE_OPTIONS = [
   { value: 'shikimori', label: 'Shikimori' },
 ];
 
+function getAuthHeaders(contentType?: string): HeadersInit | undefined {
+  if (typeof window === 'undefined') return undefined;
+  const token = localStorage.getItem('access_token');
+  if (!token && !contentType) return undefined;
+
+  const headers: Record<string, string> = {};
+  if (token) headers.Authorization = `Bearer ${token}`;
+  if (contentType) headers['Content-Type'] = contentType;
+  return headers;
+}
+
 export default function ProfileContent() {
   const { user, loading: authLoading } = useAuth();
   const router = useRouter();
@@ -90,7 +101,10 @@ export default function ProfileContent() {
   React.useEffect(() => {
     if (!user) return;
     setLoadingProfile(true);
-    fetch('/api/user/profile', { credentials: 'include' })
+    fetch('/api/user/profile', {
+      credentials: 'include',
+      headers: getAuthHeaders(),
+    })
       .then((r) => {
         if (r.status === 404) return null; // profile not set up yet
         if (!r.ok) throw new Error(`Profile fetch failed: ${r.status}`);
@@ -137,7 +151,7 @@ export default function ProfileContent() {
       const res = await fetch('/api/user/profile', {
         method: 'PATCH',
         credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders('application/json'),
         body: JSON.stringify({
           displayName: displayName || null,
           bio: bio || null,

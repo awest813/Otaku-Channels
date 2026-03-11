@@ -66,7 +66,10 @@ async function pingBackend(): Promise<{
 
 export async function GET() {
   if (process.env.NODE_ENV === 'production') {
-    return NextResponse.json({ error: 'Not available in production' }, { status: 404 });
+    return NextResponse.json(
+      { error: 'Not available in production' },
+      { status: 404 }
+    );
   }
 
   const dataMode = getDataMode();
@@ -74,7 +77,8 @@ export async function GET() {
 
   const env = {
     NODE_ENV: process.env.NODE_ENV ?? '(unset)',
-    DATA_MODE: process.env.DATA_MODE ?? '(unset — resolved to ' + dataMode + ')',
+    DATA_MODE:
+      process.env.DATA_MODE ?? '(unset — resolved to ' + dataMode + ')',
     BACKEND_URL: BACKEND_URL || '(unset)',
     WAIFUPICS_BASE_URL: process.env.WAIFUPICS_BASE_URL ?? '(unset)',
     ANIMECHAN_BASE_URL: process.env.ANIMECHAN_BASE_URL ?? '(unset)',

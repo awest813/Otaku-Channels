@@ -91,8 +91,12 @@ export default function MediaRail({
         {/* Cards */}
         <div
           ref={(el: HTMLDivElement | null) => {
-            (scrollRef as React.MutableRefObject<HTMLDivElement | null>).current = el;
-            (railProps.ref as React.MutableRefObject<HTMLDivElement | null>).current = el;
+            (
+              scrollRef as React.MutableRefObject<HTMLDivElement | null>
+            ).current = el;
+            (
+              railProps.ref as React.MutableRefObject<HTMLDivElement | null>
+            ).current = el;
           }}
           className='scrollbar-hide flex gap-3 overflow-x-auto pb-1'
           onKeyDown={railProps.onKeyDown}
@@ -102,7 +106,11 @@ export default function MediaRail({
           aria-label={title}
         >
           {items.map((item, i) => (
-            <div key={item.id} className='w-40 flex-none sm:w-48 lg:w-52' {...getItemProps(i)}>
+            <div
+              key={item.id}
+              className='w-40 flex-none sm:w-48 lg:w-52'
+              {...getItemProps(i)}
+            >
               <MediaCard item={item} />
             </div>
           ))}

@@ -42,3 +42,37 @@ jobs:
 
       - name: 🃏 Run jest
         run: pnpm run test
+
+  backend:
+    name: 🛠️ Backend lint, typecheck, test, build
+    runs-on: ubuntu-latest
+    steps:
+      - name: ⬇️ Checkout repo
+        uses: actions/checkout@v4
+
+      - name: ⎔ Setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
+
+      - name: 📥 Install backend deps
+        working-directory: backend
+        run: npm ci
+
+      - name: 🔬 Backend lint
+        working-directory: backend
+        run: npm run lint
+
+      - name: 🔎 Backend typecheck
+        working-directory: backend
+        run: npm run typecheck
+
+      - name: 🃏 Backend tests
+        working-directory: backend
+        run: npm test
+
+      - name: 🧱 Backend build
+        working-directory: backend
+        run: npm run build
