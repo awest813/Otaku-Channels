@@ -17,7 +17,8 @@ export default async function LivePage() {
   try {
     const result = await listChannels();
     if (result.data.length > 0) channels = result.data as LiveChannel[];
-  } catch {
+  } catch (error) {
+    console.error('Failed to fetch live channels:', error);
     // Backend unavailable — mock data used as fallback
   }
 
