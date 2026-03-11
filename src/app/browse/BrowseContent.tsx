@@ -148,20 +148,22 @@ export default function BrowseContent({
           <p className='mb-2 text-xs font-semibold uppercase tracking-wider text-slate-500'>
             Genre
           </p>
-          <div className='flex flex-wrap gap-2'>
-            <GenrePill
-              genre='All'
-              active={!genre}
-              onClick={() => setGenre(null)}
-            />
-            {allGenres.map((g) => (
+          <div className='scrollbar-hide max-h-24 overflow-y-auto'>
+            <div className='flex flex-wrap gap-2 pb-1'>
               <GenrePill
-                key={g}
-                genre={g}
-                active={genre === g}
-                onClick={() => setGenre(g === genre ? null : g)}
+                genre='All'
+                active={!genre}
+                onClick={() => setGenre(null)}
               />
-            ))}
+              {allGenres.map((g) => (
+                <GenrePill
+                  key={g}
+                  genre={g}
+                  active={genre === g}
+                  onClick={() => setGenre(g === genre ? null : g)}
+                />
+              ))}
+            </div>
           </div>
         </div>
 

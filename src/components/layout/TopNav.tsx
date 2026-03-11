@@ -191,144 +191,150 @@ export default function TopNav() {
       </header>
 
       {/* Mobile menu — separate overlay */}
-      {open && (
-        <>
-          {/* Backdrop */}
-          <div
-            className='fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm md:hidden'
-            onClick={() => setOpen(false)}
-            aria-hidden='true'
-          />
-          {/* Drawer */}
-          <nav
-            id='mobile-nav'
-            className='fixed right-0 top-0 z-50 flex h-full w-64 flex-col border-l border-slate-800 bg-slate-950 px-4 py-6 shadow-2xl md:hidden'
-            aria-label='Mobile navigation'
-          >
-            <div className='mb-6 flex items-center justify-between'>
+      <>
+        {/* Backdrop */}
+        <div
+          className={cn(
+            'fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-sm transition-opacity duration-200 md:hidden',
+            open ? 'opacity-100' : 'pointer-events-none opacity-0'
+          )}
+          onClick={() => setOpen(false)}
+          aria-hidden='true'
+        />
+        {/* Drawer */}
+        <nav
+          id='mobile-nav'
+          className={cn(
+            'fixed right-0 top-0 z-50 flex h-full w-64 flex-col border-l border-slate-800 bg-slate-950 px-4 py-6 shadow-2xl transition-transform duration-200 md:hidden',
+            open ? 'translate-x-0' : 'translate-x-full'
+          )}
+          aria-label='Mobile navigation'
+          aria-hidden={!open}
+          inert={!open}
+        >
+          <div className='mb-6 flex items-center justify-between'>
+            <Link
+              href='/'
+              className='flex items-center gap-2 font-bold text-white'
+              onClick={() => setOpen(false)}
+            >
+              <Tv className='h-4 w-4 text-cyan-400' />
+              Anime TV
+            </Link>
+            <button
+              onClick={() => setOpen(false)}
+              className='rounded-md p-1.5 text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+              aria-label='Close menu'
+            >
+              <X className='h-5 w-5' />
+            </button>
+          </div>
+
+          <div className='flex flex-col gap-1'>
+            {navLinks.map((link) => (
               <Link
-                href='/'
-                className='flex items-center gap-2 font-bold text-white'
-                onClick={() => setOpen(false)}
-              >
-                <Tv className='h-4 w-4 text-cyan-400' />
-                Anime TV
-              </Link>
-              <button
-                onClick={() => setOpen(false)}
-                className='rounded-md p-1.5 text-slate-400 hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
-                aria-label='Close menu'
-              >
-                <X className='h-5 w-5' />
-              </button>
-            </div>
-
-            <div className='flex flex-col gap-1'>
-              {navLinks.map((link) => (
-                <Link
-                  key={link.href}
-                  href={link.href}
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive(link.href)
-                      ? 'bg-slate-800 text-white'
-                      : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                  )}
-                >
-                  {link.label}
-                </Link>
-              ))}
-
-              <div className='my-2 border-t border-slate-800' />
-
-              <Link
-                href='/search'
+                key={link.href}
+                href={link.href}
                 onClick={() => setOpen(false)}
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive('/search')
+                  isActive(link.href)
                     ? 'bg-slate-800 text-white'
                     : 'text-slate-400 hover:bg-slate-900 hover:text-white'
                 )}
               >
-                <Search className='h-4 w-4' />
-                Search
+                {link.label}
               </Link>
+            ))}
 
-              <Link
-                href='/watchlist'
-                onClick={() => setOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive('/watchlist')
-                    ? 'bg-slate-800 text-cyan-400'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                )}
-              >
-                <Bookmark className='h-4 w-4' />
-                My List
-              </Link>
+            <div className='my-2 border-t border-slate-800' />
 
-              <Link
-                href='/settings'
-                onClick={() => setOpen(false)}
-                className={cn(
-                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                  isActive('/settings')
-                    ? 'bg-slate-800 text-white'
-                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                )}
-              >
-                <Settings className='h-4 w-4' />
-                Settings
-              </Link>
+            <Link
+              href='/search'
+              onClick={() => setOpen(false)}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive('/search')
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+              )}
+            >
+              <Search className='h-4 w-4' />
+              Search
+            </Link>
 
-              {user ? (
-                <>
-                  <Link
-                    href='/profile'
-                    onClick={() => setOpen(false)}
-                    className={cn(
-                      'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                      isActive('/profile')
-                        ? 'bg-slate-800 text-cyan-400'
-                        : 'text-slate-400 hover:bg-slate-900 hover:text-white'
-                    )}
-                  >
-                    <User className='h-4 w-4' />
-                    {user.username}
-                  </Link>
-                  <button
-                    onClick={() => {
-                      setOpen(false);
-                      handleLogout();
-                    }}
-                    className='flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-900 hover:text-white'
-                  >
-                    <LogOut className='h-4 w-4' />
-                    Sign out
-                  </button>
-                </>
-              ) : (
+            <Link
+              href='/watchlist'
+              onClick={() => setOpen(false)}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive('/watchlist')
+                  ? 'bg-slate-800 text-cyan-400'
+                  : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+              )}
+            >
+              <Bookmark className='h-4 w-4' />
+              My List
+            </Link>
+
+            <Link
+              href='/settings'
+              onClick={() => setOpen(false)}
+              className={cn(
+                'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                isActive('/settings')
+                  ? 'bg-slate-800 text-white'
+                  : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+              )}
+            >
+              <Settings className='h-4 w-4' />
+              Settings
+            </Link>
+
+            {user ? (
+              <>
                 <Link
-                  href='/login'
+                  href='/profile'
                   onClick={() => setOpen(false)}
                   className={cn(
                     'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
-                    isActive('/login')
+                    isActive('/profile')
                       ? 'bg-slate-800 text-cyan-400'
                       : 'text-slate-400 hover:bg-slate-900 hover:text-white'
                   )}
                 >
-                  <LogIn className='h-4 w-4' />
-                  Sign in
+                  <User className='h-4 w-4' />
+                  {user.username}
                 </Link>
-              )}
-            </div>
-          </nav>
-        </>
-      )}
+                <button
+                  onClick={() => {
+                    setOpen(false);
+                    handleLogout();
+                  }}
+                  className='flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-slate-400 transition-colors hover:bg-slate-900 hover:text-white'
+                >
+                  <LogOut className='h-4 w-4' />
+                  Sign out
+                </button>
+              </>
+            ) : (
+              <Link
+                href='/login'
+                onClick={() => setOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
+                  isActive('/login')
+                    ? 'bg-slate-800 text-cyan-400'
+                    : 'text-slate-400 hover:bg-slate-900 hover:text-white'
+                )}
+              >
+                <LogIn className='h-4 w-4' />
+                Sign in
+              </Link>
+            )}
+          </div>
+        </nav>
+      </>
     </>
   );
 }

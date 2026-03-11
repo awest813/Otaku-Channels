@@ -14,6 +14,7 @@ import {
 } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import * as React from 'react';
 
 import { cn } from '@/lib/utils';
@@ -51,6 +52,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
   const { isInList, toggle } = useWatchlist();
   const { show: showToast } = useToast();
   const { trackView } = useRecentlyViewed();
+  const router = useRouter();
   const {
     trackViewedTitle,
     trackAddedWatchlist,
@@ -139,13 +141,13 @@ export default function SeriesClient({ series, episodes, related }: Props) {
 
       <div className='mx-auto max-w-screen-xl px-4 py-6'>
         {/* Back navigation */}
-        <Link
-          href='/browse'
+        <button
+          onClick={() => router.back()}
           className='mb-6 inline-flex items-center gap-1.5 rounded text-sm text-slate-400 transition-colors hover:text-cyan-400 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
         >
           <ArrowLeft className='h-4 w-4' />
-          Back to Browse
-        </Link>
+          Back
+        </button>
 
         {/* Main layout */}
         <div className='flex flex-col gap-8 md:flex-row md:items-start md:gap-10'>
