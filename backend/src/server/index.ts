@@ -1,5 +1,5 @@
 import { buildServer } from './server';
-import { config } from '../config';
+import { config, isProd } from '../config';
 import { logger } from '../lib/logger';
 import { connectDb, disconnectDb } from '../lib/db';
 import { connectRedis, disconnectRedis } from '../lib/redis';
