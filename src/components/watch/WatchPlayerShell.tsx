@@ -80,8 +80,12 @@ export default function WatchPlayerShell({
 }: Props) {
   const router = useRouter();
 
-  // ── Autoplay state ────────────────────────────────────────────────────────
-  const [autoplayEnabled, setAutoplayEnabled] = React.useState(true);
+  // ── Autoplay state (persisted to localStorage) ────────────────────────────
+  const [autoplayEnabled, setAutoplayEnabled] = React.useState(() => {
+    if (typeof window === 'undefined') return true;
+    const stored = localStorage.getItem('autoplay-enabled');
+    return stored === null ? true : stored !== 'false';
+  });
   const [showCountdown, setShowCountdown] = React.useState(false);
   const [countdown, setCountdown] = React.useState(AUTOPLAY_COUNTDOWN_SEC);
   const countdownRef = React.useRef<ReturnType<typeof setInterval> | null>(
@@ -286,8 +290,10 @@ export default function WatchPlayerShell({
                 if (autoplayEnabled) {
                   cancelCountdown();
                   setAutoplayEnabled(false);
+                  localStorage.setItem('autoplay-enabled', 'false');
                 } else {
                   setAutoplayEnabled(true);
+                  localStorage.setItem('autoplay-enabled', 'true');
                 }
               }}
               className={cn(

@@ -25,7 +25,7 @@ import type {
 } from '@/types';
 
 const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
-if (!process.env.BACKEND_URL) {
+if (!process.env.BACKEND_URL && process.env.NODE_ENV !== 'production') {
   // eslint-disable-next-line no-console
   console.warn(
     '[backend] BACKEND_URL is not set; defaulting to http://localhost:3001'

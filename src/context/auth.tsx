@@ -99,7 +99,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      throw new Error(body.error ?? 'Login failed');
+      const message = body.error ?? 'Login failed';
+      setError(message);
+      throw new Error(message);
     }
     const data = (await res.json()) as { user: AuthUser };
     setUser(data.user);
@@ -115,7 +117,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     });
     if (!res.ok) {
       const body = (await res.json().catch(() => ({}))) as { error?: string };
-      throw new Error(body.error ?? 'Signup failed');
+      const message = body.error ?? 'Signup failed';
+      setError(message);
+      throw new Error(message);
     }
     const data = (await res.json()) as { user: AuthUser };
     setUser(data.user);
