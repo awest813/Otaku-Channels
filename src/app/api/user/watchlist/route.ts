@@ -82,6 +82,10 @@ export async function GET(request: NextRequest) {
 }
 
 export async function POST(request: NextRequest) {
+  const cookie = request.headers.get('cookie') ?? '';
+  if (!cookie.includes('refresh_token') && !cookie.includes('access_token')) {
+    return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+  }
   try {
     const body = await request.json();
     const res = await forwardToBackend(request, 'POST', body);
