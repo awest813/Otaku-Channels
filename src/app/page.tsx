@@ -5,10 +5,12 @@ import { listAnime, listChannels } from '@/lib/backend';
 import { mockLiveChannels, mockMovies, mockSeries } from '@/data/mockData';
 
 import BecauseYouWatchedRail from '@/components/media/BecauseYouWatchedRail';
+import ForYouRail from '@/components/media/ForYouRail';
 import HeroBanner from '@/components/media/HeroBanner';
 import LiveChannelCard from '@/components/media/LiveChannelCard';
 import MediaRail from '@/components/media/MediaRail';
 import RecentlyViewedRail from '@/components/media/RecentlyViewedRail';
+import TrendingRail from '@/components/media/TrendingRail';
 import SectionHeader from '@/components/ui/SectionHeader';
 
 import type { AnimeSeries, LiveChannel, Movie } from '@/types';
@@ -44,7 +46,6 @@ export default async function HomePage() {
   }
 
   const hero = allSeries[0];
-  const trending = allSeries.filter((s) => s.tags?.includes('Trending'));
   const youtube = allSeries.filter((s) => s.sourceType === 'youtube');
   const retro = allSeries.filter(
     (s) => s.sourceType === 'retro' || s.sourceType === 'retrocrush'
@@ -85,18 +86,14 @@ export default async function HomePage() {
         {/* Continue Watching — client-side, renders only if localStorage has data */}
         <RecentlyViewedRail />
 
+        {/* Recommended for You — genre-based personalisation from watch history */}
+        <ForYouRail />
+
         {/* Because You Watched — personalised recommendation rail */}
         <BecauseYouWatchedRail />
 
-        {/* Trending */}
-        {trending.length > 0 && (
-          <MediaRail
-            title='Trending Free Anime'
-            description='Most popular officially licensed titles right now'
-            items={trending}
-            seeAllHref='/browse'
-          />
-        )}
+        {/* Trending — backend-powered trending scores */}
+        <TrendingRail />
 
         {/* Free to Stream Now */}
         {freeNow.length > 0 && (

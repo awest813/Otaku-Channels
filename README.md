@@ -2,7 +2,7 @@
 
 **Otaku Channels** is a browser-based anime TV guide and launcher that aggregates anime from official providers, community-maintained anime indexes, and vetted grey APIs/sources into a single couch-friendly interface.
 
-> **Status:** Milestone 5 (User Accounts) ✅ complete — now progressing through Milestone 6 (Discovery & Content: trending, recommendations, continue watching).
+> **Status:** Milestone 6 (Discovery & Content) ✅ complete — now progressing to Milestone 7 (Streaming Integration).
 
 ---
 

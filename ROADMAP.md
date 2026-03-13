@@ -126,14 +126,14 @@ This snapshot is intentionally blunt so roadmap status matches what is live in t
 
 ## Milestone 6 — Discovery & Content 🚧 (in progress)
 
-- [ ] Trending anime rail (view count / trending score from backend)
-- [ ] "Recommended for you" rail (genre-based)
-- [ ] "Continue watching" rail on home page
+- [x] Trending anime rail (view count / trending score from backend) — `TrendingRail` server component
+- [x] "Recommended for you" rail (genre-based) — `ForYouRail` client component with `/api/recommendations/for-you` route
+- [x] "Continue watching" rail on home page — `RecentlyViewedRail`
 - [x] Sub/dub language filter UI — filter chips exist in `/browse`; backend `listAnime()` now filters by `language` via `sourceLinksTitleLevel`
-- [ ] Source filter UI (official + grey providers)
-- [ ] Genre browse page with paginated results
-- [ ] Autoplay next episode
-- [ ] Search autocomplete suggestions (`/api/v1/search/suggest`)
+- [x] Source filter UI (official + grey providers) — Official/Grey-vetted shield badges on source chips in `/browse`
+- [x] Genre browse page with paginated results — `/browse/genre/[genre]`; genre pills on hero banner and series pages link here
+- [x] Autoplay next episode — `WatchPlayerShell` countdown overlay + toggle
+- [x] Search autocomplete suggestions (`/api/v1/search/suggest`) — `SearchBar` live dropdown
 
 ---
 

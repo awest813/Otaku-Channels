@@ -43,6 +43,18 @@ jest.mock('@/components/media/MediaRail', () => ({
   default: ({ title }: { title: string }) => <section>{title}</section>,
 }));
 
+// Mock TrendingRail (async server component) to return a deterministic stub
+jest.mock('@/components/media/TrendingRail', () => ({
+  __esModule: true,
+  default: () => <section>Trending Now</section>,
+}));
+
+// Mock ForYouRail (client component using hooks) to avoid hook dependencies
+jest.mock('@/components/media/ForYouRail', () => ({
+  __esModule: true,
+  default: () => null,
+}));
+
 import React from 'react';
 
 import { ToastProvider } from '@/components/ui/Toast';
@@ -54,7 +66,7 @@ describe('Homepage', () => {
     const Page = await HomePage();
     render(<ToastProvider>{Page as React.ReactElement}</ToastProvider>);
 
-    expect(screen.getByText(/Trending Free Anime/i)).toBeInTheDocument();
+    expect(screen.getByText(/Trending Now/i)).toBeInTheDocument();
     expect(screen.getByText(/Official on YouTube/i)).toBeInTheDocument();
     expect(screen.getByText(/Live Channels/i)).toBeInTheDocument();
   });

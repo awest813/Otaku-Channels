@@ -2,14 +2,14 @@ import { Suspense } from 'react';
 
 import { listAnime } from '@/lib/backend';
 
-import { allContent as mockAllContent } from '@/data/mockData';
+import { allContent as mockAllContent, sourceProviders } from '@/data/mockData';
 
 import MediaCardSkeleton from '@/components/media/MediaCardSkeleton';
 import Skeleton from '@/components/Skeleton';
 
 import BrowseContent from './BrowseContent';
 
-import type { AnimeSeries, Movie } from '@/types';
+import type { AnimeSeries, Movie, SourceProvider } from '@/types';
 
 async function getBrowseData(): Promise<{
   items: (AnimeSeries | Movie)[];
@@ -76,12 +76,16 @@ export default async function BrowsePage() {
     new Set(items.map((i) => i.sourceName))
   ).sort();
 
+  // Pass provider metadata so the source filter can show official/grey badges
+  const providers: SourceProvider[] = sourceProviders;
+
   return (
     <Suspense fallback={<BrowsePageSkeleton />}>
       <BrowseContent
         initialItems={items}
         allGenres={allGenres}
         sourceNames={sourceNames}
+        providers={providers}
       />
     </Suspense>
   );

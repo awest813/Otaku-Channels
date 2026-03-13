@@ -210,7 +210,7 @@ export default function SeriesClient({ series, episodes, related }: Props) {
                 <GenrePill
                   key={g}
                   genre={g}
-                  href={`/browse?genre=${encodeURIComponent(g)}`}
+                  href={`/browse/genre/${encodeURIComponent(g)}`}
                 />
               ))}
             </div>
