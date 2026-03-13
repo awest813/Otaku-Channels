@@ -69,7 +69,7 @@ export default function HeroBanner({ series }: { series: Anime }) {
                 <GenrePill
                   key={g}
                   genre={g}
-                  href={`/browse?genre=${encodeURIComponent(g)}`}
+                  href={`/browse/genre/${encodeURIComponent(g)}`}
                 />
               ))}
             </div>

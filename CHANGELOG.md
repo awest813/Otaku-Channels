@@ -6,14 +6,18 @@ All notable changes to this project will be documented here.
 
 ## [Unreleased]
 
+### Added (Milestone 6 — Discovery & Content)
+
+- **TrendingRail** (`src/components/media/TrendingRail.tsx`) — async server component that calls `getTrendingAnime()` (backend view-count scores) with mock-data tag fallback; replaces the inline tag-filter on the home page
+- **ForYouRail** (`src/components/media/ForYouRail.tsx`) — client component that derives genre preferences from watch history, calls `GET /api/recommendations/for-you`, and filters out already-seen titles; renders nothing until the user has history
+- **`/api/recommendations/for-you` route** — new Next.js route that proxies the auth-gated backend for-you endpoint, falls back to genre-heuristic `getSharedGenreRecs`, and finally to mock-catalogue picks when offline
+- **`getForYouRecommendations()`** added to `src/lib/api-client.ts` for browser-side calls
+- **Genre browse page** (`src/app/browse/genre/[genre]/page.tsx`) — server-rendered paginated results page (24 per page); genre pills on hero banner and series detail pages now link here
+- **Source filter badges** — official providers show a green shield icon; grey-vetted providers show an amber shield icon in the `/browse` source filter
+
 ### In progress
 
-- Discovery & Content (Milestone 6)
-  - Trending anime rail powered by backend view counts
-  - "Recommended for you" rail with genre-based personalization
-  - "Continue watching" rail on the home page
-  - Search autocomplete suggestions via `/api/v1/search/suggest`
-  - Sub/dub + source filtering UI refinements
+- Discovery & Content (Milestone 6) — all items complete ✅; planning Milestone 7
 
 ### Documentation
 

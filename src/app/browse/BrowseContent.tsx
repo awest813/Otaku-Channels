@@ -1,5 +1,5 @@
 'use client';
-import { SlidersHorizontal, X } from 'lucide-react';
+import { Shield, ShieldAlert, SlidersHorizontal, X } from 'lucide-react';
 import { useSearchParams } from 'next/navigation';
 import * as React from 'react';
 
@@ -9,27 +9,47 @@ import MediaCard from '@/components/media/MediaCard';
 import EmptyState from '@/components/ui/EmptyState';
 import GenrePill from '@/components/ui/GenrePill';
 
-import type { AnimeSeries, Movie } from '@/types';
+import type { AnimeSeries, Movie, SourceProvider } from '@/types';
 
 function FilterChip({
   label,
   active,
   onClick,
+  badge,
 }: {
   label: string;
   active: boolean;
   onClick: () => void;
+  badge?: 'official' | 'grey';
 }) {
   return (
     <button
       onClick={onClick}
       className={cn(
-        'rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
+        'inline-flex items-center gap-1.5 rounded-full border px-3 py-1 text-xs font-medium transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
         active
           ? 'bg-cyan-500/15 border-cyan-500 text-cyan-300'
           : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-slate-600 hover:text-white'
       )}
     >
+      {badge === 'official' && (
+        <Shield
+          className={cn(
+            'h-3 w-3 shrink-0',
+            active ? 'text-cyan-400' : 'text-emerald-500'
+          )}
+          aria-label='Official source'
+        />
+      )}
+      {badge === 'grey' && (
+        <ShieldAlert
+          className={cn(
+            'h-3 w-3 shrink-0',
+            active ? 'text-cyan-400' : 'text-amber-500'
+          )}
+          aria-label='Grey-vetted source'
+        />
+      )}
       {label}
     </button>
   );
@@ -39,6 +59,8 @@ interface Props {
   initialItems: (AnimeSeries | Movie)[];
   allGenres: string[];
   sourceNames: string[];
+  /** Optional enriched provider metadata for official/grey badges. */
+  providers?: SourceProvider[];
 }
 
 const languages = ['sub', 'dub', 'both'];
@@ -48,12 +70,32 @@ const contentTypes = [
   { label: 'Movies', value: 'movie' },
 ];
 
+/** Derive the shield badge type for a source provider. */
+function getProviderBadge(
+  name: string,
+  providerByName: Map<string, SourceProvider>
+): 'official' | 'grey' | undefined {
+  const provider = providerByName.get(name);
+  if (!provider) return undefined;
+  return provider.isOfficial ? 'official' : 'grey';
+}
+
 export default function BrowseContent({
   initialItems,
   allGenres,
   sourceNames,
+  providers = [],
 }: Props) {
   const searchParams = useSearchParams();
+
+  // Build a map from sourceName → provider for badge lookup
+  const providerByName = React.useMemo(() => {
+    const map = new Map<string, SourceProvider>();
+    for (const p of providers) {
+      map.set(p.name, p);
+    }
+    return map;
+  }, [providers]);
 
   const sourceParam = searchParams.get('source');
   const initialSource = sourceParam
@@ -184,6 +226,7 @@ export default function BrowseContent({
                 label={name}
                 active={source === name}
                 onClick={() => setSource(source === name ? null : name)}
+                badge={getProviderBadge(name, providerByName)}
               />
             ))}
           </div>

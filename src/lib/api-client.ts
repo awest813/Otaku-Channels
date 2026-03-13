@@ -236,3 +236,26 @@ export async function getRecommendations(params: {
     `/api/recommendations${buildQS({ animeId, slug })}`
   );
 }
+
+/**
+ * GET /api/recommendations/for-you?genres=Action,Fantasy&limit=12
+ *
+ * Returns genre-based personalised recommendations. Accepts a comma-separated
+ * list of preferred genre names derived from the user's watch history.
+ * Returns an empty list on failure — recommendations are best-effort.
+ */
+export async function getForYouRecommendations(
+  genres: string[],
+  limit = 12
+): Promise<RecommendationsResponse> {
+  try {
+    return await fetchWithRetry<RecommendationsResponse>(
+      `/api/recommendations/for-you${buildQS({
+        genres: genres.join(','),
+        limit,
+      })}`
+    );
+  } catch {
+    return { data: [] };
+  }
+}
