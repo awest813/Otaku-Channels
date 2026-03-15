@@ -15,7 +15,7 @@ export async function GET(
   const { id } = await params;
   const malId = Number(id);
 
-  if (!id || isNaN(malId)) {
+  if (isNaN(malId) || malId <= 0) {
     return NextResponse.json({ error: 'Invalid MAL ID' }, { status: 400 });
   }
 

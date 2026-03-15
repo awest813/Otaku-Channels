@@ -10,8 +10,11 @@
  * callers never have to deal with `unknown` data or field-name mismatches.
  */
 
-import { deriveEmbedType, isOfficialSource } from '@/lib/ingestion/normalize';
-import { normalizeBackendAnime } from '@/lib/ingestion/normalize';
+import {
+  deriveEmbedType,
+  isOfficialSource,
+  normalizeBackendAnime,
+} from '@/lib/ingestion/normalize';
 
 import type {
   Anime,

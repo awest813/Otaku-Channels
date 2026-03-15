@@ -14,6 +14,7 @@
 import { NextResponse } from 'next/server';
 
 import { BackendError, listAnime } from '@/lib/backend';
+import { clampLimit } from '@/lib/params';
 import { getSharedGenreRecs } from '@/lib/recommendations';
 
 import { allContent } from '@/data/mockData';
@@ -26,8 +27,10 @@ const BACKEND_URL = process.env.BACKEND_URL ?? 'http://localhost:3001';
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const genreParam = searchParams.get('genres')?.trim();
-  const limitParam = parseInt(searchParams.get('limit') ?? '12', 10);
-  const limit = Math.min(Math.max(limitParam, 1), MAX_RESULTS);
+  const limit = Math.min(
+    clampLimit(searchParams.get('limit')) ?? MAX_RESULTS,
+    MAX_RESULTS
+  );
 
   const genres = genreParam
     ? genreParam

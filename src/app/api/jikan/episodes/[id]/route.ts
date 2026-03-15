@@ -22,7 +22,7 @@ export async function GET(
   const { searchParams } = new URL(request.url);
   const page = Number(searchParams.get('page') ?? '1');
 
-  if (!id || isNaN(malId)) {
+  if (isNaN(malId) || malId <= 0) {
     return NextResponse.json({ error: 'Invalid MAL ID' }, { status: 400 });
   }
 
