@@ -55,7 +55,7 @@ export default function MediaCard({ item }: Props) {
   return (
     <Link
       href={href}
-      className='group relative flex flex-col overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-800 transition-all duration-200 hover:shadow-xl hover:shadow-cyan-500/10 hover:ring-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
+      className='group relative flex flex-col overflow-hidden rounded-xl bg-slate-900 ring-1 ring-slate-800 transition-all duration-200 hover:shadow-xl hover:shadow-cyan-500/10 hover:ring-cyan-500/60 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950'
     >
       {/* Thumbnail */}
       <div className='relative aspect-video overflow-hidden bg-slate-800'>

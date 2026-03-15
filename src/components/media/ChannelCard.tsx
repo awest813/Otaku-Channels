@@ -7,7 +7,7 @@
  * plus the "now playing" and "up next" labels.  Designed for the /channels
  * TV-guide page and the home-page rail.
  */
-import { Radio, Tv } from 'lucide-react';
+import { Play, Radio, Tv } from 'lucide-react';
 import Image from 'next/image';
 import Link from 'next/link';
 
@@ -70,7 +70,7 @@ export default function ChannelCard({ channel, nowPlaying }: Props) {
 
         {/* Genre tag (bottom-left of image) */}
         {channel.genre && (
-          <div className='absolute bottom-2 left-2 rounded-full bg-slate-950/70 px-2 py-0.5 text-[10px] font-medium text-slate-300 backdrop-blur-sm'>
+          <div className='absolute bottom-2 left-2 rounded-full bg-slate-950/70 px-2 py-0.5 text-xs font-medium text-slate-300 backdrop-blur-sm'>
             {channel.genre}
           </div>
         )}
@@ -100,7 +100,7 @@ export default function ChannelCard({ channel, nowPlaying }: Props) {
         )}
 
         <p className='line-clamp-1 text-xs text-slate-400'>
-          <span className='font-medium text-green-400'>▶ </span>
+          <Play className='mr-1 inline h-3 w-3 fill-green-400 text-green-400' />
           {currentLabel || 'Loading…'}
         </p>
 
