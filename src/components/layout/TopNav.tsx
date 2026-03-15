@@ -90,7 +90,7 @@ export default function TopNav() {
                 className={cn(
                   'relative rounded-md px-3 py-1.5 text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400',
                   isActive(link.href)
-                    ? 'text-white'
+                    ? 'text-cyan-400'
                     : 'text-slate-400 hover:text-white'
                 )}
               >
@@ -239,7 +239,7 @@ export default function TopNav() {
                 className={cn(
                   'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                   isActive(link.href)
-                    ? 'bg-slate-800 text-white'
+                    ? 'bg-slate-800 text-cyan-400'
                     : 'text-slate-400 hover:bg-slate-900 hover:text-white'
                 )}
               >
@@ -255,7 +255,7 @@ export default function TopNav() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive('/search')
-                  ? 'bg-slate-800 text-white'
+                  ? 'bg-slate-800 text-cyan-400'
                   : 'text-slate-400 hover:bg-slate-900 hover:text-white'
               )}
             >
@@ -283,7 +283,7 @@ export default function TopNav() {
               className={cn(
                 'flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors',
                 isActive('/settings')
-                  ? 'bg-slate-800 text-white'
+                  ? 'bg-slate-800 text-cyan-400'
                   : 'text-slate-400 hover:bg-slate-900 hover:text-white'
               )}
             >

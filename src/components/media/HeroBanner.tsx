@@ -100,7 +100,7 @@ export default function HeroBanner({ series }: { series: Anime }) {
               </Link>
               <Link
                 href={`/series/${series.slug}`}
-                className='flex items-center gap-2 rounded-lg bg-white/10 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50'
+                className='flex items-center gap-2 rounded-lg bg-white/10 px-6 py-2.5 text-sm font-semibold text-white backdrop-blur-sm transition-all hover:bg-white/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2 focus-visible:ring-offset-slate-950'
               >
                 <Info className='h-4 w-4' /> More Info
               </Link>

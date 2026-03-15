@@ -32,9 +32,10 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     (message: string, variant: ToastVariant = 'success') => {
       const id = Math.random().toString(36).slice(2);
       setToasts((prev) => [...prev, { id, message, variant }]);
+      const delay = variant === 'error' ? 5000 : 3000;
       setTimeout(() => {
         setToasts((prev) => prev.filter((t) => t.id !== id));
-      }, 3000);
+      }, delay);
     },
     []
   );
@@ -60,7 +61,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               toast.variant === 'info'
                 ? 'border-slate-700 bg-slate-800 text-white'
                 : toast.variant === 'error'
-                ? 'border-red-500/30 bg-slate-900 text-white'
+                ? 'border-red-500/50 bg-red-950/30 text-white'
                 : 'border-cyan-500/30 bg-slate-900 text-white'
             )}
           >
@@ -74,7 +75,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
             <span>{toast.message}</span>
             <button
               onClick={() => dismiss(toast.id)}
-              className='ml-1 rounded p-0.5 text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-cyan-400'
+              className='ml-1 rounded p-0.5 text-slate-400 transition-colors hover:text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400'
               aria-label='Dismiss notification'
             >
               <X className='h-3.5 w-3.5' />
