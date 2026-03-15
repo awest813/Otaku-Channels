@@ -96,6 +96,7 @@ export function useRecentlyViewed() {
                 .slice(0, MAX_ITEMS)
                 .map((entry) => {
                   const cached = localMap.get(entry.animeId);
+                  const parsedAt = new Date(entry.watchedAt).getTime();
                   return {
                     id: entry.animeId,
                     slug: entry.anime?.slug ?? entry.animeId,
@@ -104,7 +105,7 @@ export function useRecentlyViewed() {
                       entry.anime?.posterUrl ?? cached?.thumbnail ?? '',
                     sourceType: cached?.sourceType ?? 'youtube',
                     releaseYear: cached?.releaseYear ?? 0,
-                    viewedAt: new Date(entry.watchedAt).getTime(),
+                    viewedAt: Number.isNaN(parsedAt) ? Date.now() : parsedAt,
                   };
                 });
 
